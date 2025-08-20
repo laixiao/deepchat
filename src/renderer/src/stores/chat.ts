@@ -38,7 +38,7 @@ export const useChatStore = defineStore('chat', () => {
   >([])
   const messagesMap = ref<Map<number, AssistantMessage[] | UserMessage[]>>(new Map())
   const generatingThreadIds = ref(new Set<string>())
-  const isSidebarOpen = ref(false)
+  const isSidebarOpen = ref(true)
 
   // 使用Map来存储会话工作状态
   const threadsWorkingStatusMap = ref<Map<number, Map<string, WorkingStatus>>>(new Map())

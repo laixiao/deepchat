@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+language: chinese
+
 ## Project Overview
 
 DeepChat is a feature-rich open-source AI chat platform built with Electron + Vue 3 + TypeScript. It supports multiple cloud and local LLM providers, advanced MCP (Model Context Protocol) tool calling, and multi-window/multi-tab architecture.
