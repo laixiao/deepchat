@@ -103,9 +103,10 @@ pnpm run i18n:en
 
 ### Multi-Process Architecture
 
-- **Main Process**: Core business logic, system integration, window management
+- **Main Process**: Core business logic, system integration, window management, MCP server lifecycle
 - **Renderer Process**: UI components, user interactions, frontend state management
 - **Preload Scripts**: Secure IPC bridge between main and renderer processes
+- **Independent Processes**: Shell (tab management) and Content (application) run in separate renderer processes
 
 ### Key Architectural Patterns
 
@@ -113,46 +114,62 @@ pnpm run i18n:en
 
 Each functional domain has a dedicated Presenter class in `src/main/presenter/`:
 
-- **WindowPresenter**: BrowserWindow lifecycle management
-- **TabPresenter**: WebContentsView management with cross-window tab dragging
-- **ThreadPresenter**: Conversation session management and LLM coordination
-- **McpPresenter**: MCP server connections and tool execution
-- **ConfigPresenter**: Unified configuration management
-- **LLMProviderPresenter**: LLM provider abstraction with Agent Loop architecture
+- **WindowPresenter**: BrowserWindow lifecycle management, window state persistence
+- **TabPresenter**: WebContentsView management with cross-window tab dragging, tab state synchronization
+- **ThreadPresenter**: Conversation session management, LLM coordination, message streaming
+- **McpPresenter**: MCP server connections, tool execution, format conversion between LLM providers
+- **ConfigPresenter**: Unified configuration management with encryption interfaces
+- **LLMProviderPresenter**: LLM provider abstraction with Agent Loop architecture for multi-turn tool calling
+- **FilePresenter**: File system operations with adapter pattern for different file types
+- **KnowledgePresenter**: Built-in knowledge base with DuckDB integration
+- **SyncPresenter**: Data synchronization and backup management
 
 #### Multi-Window Multi-Tab Architecture
 
-- **Window Shell** (`src/renderer/shell/`): Lightweight tab bar UI management
-- **Tab Content** (`src/renderer/src/`): Complete application functionality
-- **Independent Vue Instances**: Separation of concerns for better performance
+- **Window Shell** (`src/renderer/shell/`): Lightweight tab bar UI management, independent Vue instance
+- **Tab Content** (`src/renderer/src/`): Complete application functionality, separate Vue instance per tab
+- **Cross-Window Tab Dragging**: Seamless tab movement between windows with state preservation
+- **Independent Processes**: Each window and tab runs in isolated processes for stability
 
 #### Event-Driven Communication
 
-- **EventBus** (`src/main/eventbus.ts`): Decoupled inter-process communication
-- **Standard Event Patterns**: Consistent naming and responsibility separation
-- **IPC Integration**: EventBus bridges main process events to renderer via IPC
+- **EventBus** (`src/main/eventbus.ts`): Centralized event coordination system with typed events
+- **Standard Event Patterns**: Namespaced events (`config:`, `conversation:`, `sync:`, `update:`) with clear responsibility separation
+- **IPC Integration**: EventBus bridges main process events to renderer via `mainWindow.webContents.send()`
+- **Renderer to Main**: Direct presenter method calls via `usePresenter.ts` composable
 
 ### LLM Provider Architecture
 
-The LLM system follows a two-layer architecture:
+The LLM system follows a sophisticated two-layer architecture:
 
 1. **Agent Loop Layer** (`llmProviderPresenter/index.ts`):
-   - Manages conversation flow with multi-turn tool calling
-   - Handles tool execution via McpPresenter
-   - Standardizes events sent to frontend
+   - Manages conversation flow with multi-turn tool calling and state tracking
+   - Coordinates tool execution via McpPresenter with permission checking
+   - Standardizes streaming events sent to frontend with error recovery
+   - Handles tool call batching and parallel execution
 
 2. **Provider Layer** (`llmProviderPresenter/providers/*.ts`):
-   - Each provider handles specific LLM API interactions
-   - Converts MCP tools to provider-specific formats
-   - Normalizes streaming responses to standard events
-   - Supports both native and prompt-wrapped tool calling
+   - 30+ provider implementations (OpenAI, Anthropic, Gemini, Ollama, etc.)
+   - Converts MCP tools to provider-specific formats (OpenAI tools, Anthropic tool use, Gemini function calling)
+   - Normalizes streaming responses to standard event interface
+   - Supports both native tool calling and prompt-wrapped fallbacks
+   - Handles provider-specific authentication and rate limiting
 
-### MCP Integration
+### MCP Integration Architecture
 
-- **Server Management**: Lifecycle management of MCP servers
-- **Tool Execution**: Seamless integration with LLM providers
-- **Format Conversion**: Bridges MCP tools with various LLM provider formats
-- **Built-in Services**: In-memory servers for code execution, web access, file operations
+- **Server Management**: Lifecycle management of MCP servers with automatic npm registry optimization
+- **Tool Execution**: Seamless integration with LLM providers via format conversion layer
+- **Transport Support**: Stdio, SSE, HTTP, and InMemory transport protocols
+- **Built-in Services**: 15+ in-memory servers for code execution, web search, file operations, meeting analysis
+- **Permission System**: Granular tool permission management with user prompts
+- **Tool Conflict Resolution**: Automatic name deduplication and namespacing
+
+### Data Persistence Architecture
+
+- **SQLite Database**: Structured data storage for conversations, messages, attachments
+- **Electron Store**: Configuration and user settings with encryption support
+- **File System**: User file storage with type-specific adapters (PDF, DOCX, CSV, images, audio)
+- **DuckDB Integration**: High-performance vector storage for built-in knowledge base
 
 ## Code Structure
 
