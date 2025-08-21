@@ -33,8 +33,17 @@ const router = createRouter({
         titleKey: 'routes.settings',
         icon: 'lucide:settings'
       },
-      redirect: { name: 'settings-common' },
+      redirect: { name: 'settings-provider' },
       children: [
+        {
+          path: 'provider/:providerId?',
+          name: 'settings-provider',
+          component: () => import('@/components/settings/ModelProviderSettings.vue'),
+          meta: {
+            titleKey: 'routes.settings-provider',
+            icon: 'lucide:cloud-cog'
+          }
+        },
         {
           path: 'common',
           name: 'settings-common',
@@ -51,15 +60,6 @@ const router = createRouter({
           meta: {
             titleKey: 'routes.settings-display',
             icon: 'lucide:monitor'
-          }
-        },
-        {
-          path: 'provider/:providerId?',
-          name: 'settings-provider',
-          component: () => import('@/components/settings/ModelProviderSettings.vue'),
-          meta: {
-            titleKey: 'routes.settings-provider',
-            icon: 'lucide:cloud-cog'
           }
         },
         {
