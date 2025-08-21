@@ -214,7 +214,7 @@ const flattenedThreads = computed<VirtualScrollItem[]>(() => {
 const createNewThread = async () => {
   try {
     await chatStore.createNewEmptyThread()
-    chatStore.isSidebarOpen = false
+    // 保持侧边栏状态不变，让用户手动控制
   } catch (error) {
     console.error(t('common.error.createChatFailed'), error)
   }

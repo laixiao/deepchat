@@ -374,6 +374,9 @@ export interface IConfigPresenter {
   // 关闭行为设置
   getCloseToQuit(): boolean
   setCloseToQuit(value: boolean): void
+  // 侧边栏状态设置
+  getSidebarOpen(): boolean
+  setSidebarOpen(value: boolean): void
   getModelStatus(providerId: string, modelId: string): boolean
   setModelStatus(providerId: string, modelId: string, enabled: boolean): void
   // 批量获取模型状态

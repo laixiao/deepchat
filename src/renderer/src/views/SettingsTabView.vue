@@ -1,17 +1,19 @@
 <template>
-  <div class="w-full h-full flex flex-row bg-white/80 dark:bg-black/80 mx-auto xl:max-w-6xl">
-    <div class="w-52 h-full border-r border-border p-2 space-y-2 flex-shrink-0 overflow-y-auto">
-      <div
-        v-for="setting in settings"
-        :key="setting.name"
-        :class="[
-          'flex flex-row items-center hover:bg-accent gap-2 rounded-lg p-2 cursor-pointer',
-          route.name === setting.name ? 'bg-secondary' : ''
-        ]"
-        @click="handleClick(setting.path)"
-      >
-        <Icon :icon="setting.icon" class="w-4 h-4 text-muted-foreground" />
-        <span class="text-sm font-medium">{{ t(setting.title) }}</span>
+  <div class="w-full h-full flex flex-col bg-white/80 dark:bg-black/80 mx-auto xl:max-w-6xl">
+    <div class="w-full h-16 border-b border-border p-2 flex-shrink-0 overflow-x-auto">
+      <div class="flex flex-row gap-2 h-full">
+        <div
+          v-for="setting in settings"
+          :key="setting.name"
+          :class="[
+            'flex flex-row items-center hover:bg-accent gap-2 rounded-lg p-2 cursor-pointer whitespace-nowrap',
+            route.name === setting.name ? 'bg-secondary' : ''
+          ]"
+          @click="handleClick(setting.path)"
+        >
+          <Icon :icon="setting.icon" class="w-4 h-4 text-muted-foreground" />
+          <span class="text-sm font-medium">{{ t(setting.title) }}</span>
+        </div>
       </div>
     </div>
     <RouterView />

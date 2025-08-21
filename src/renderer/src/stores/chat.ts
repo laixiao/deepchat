@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import type {
   UserMessageContent,
   AssistantMessageBlock,
@@ -24,6 +24,7 @@ export const useChatStore = defineStore('chat', () => {
   const windowP = usePresenter('windowPresenter')
   const notificationP = usePresenter('notificationPresenter')
   const tabP = usePresenter('tabPresenter')
+  const configP = usePresenter('configPresenter')
   const { t } = useI18n()
 
   const soundStore = useSoundStore()
@@ -38,6 +39,7 @@ export const useChatStore = defineStore('chat', () => {
   >([])
   const messagesMap = ref<Map<number, AssistantMessage[] | UserMessage[]>>(new Map())
   const generatingThreadIds = ref(new Set<string>())
+  // 侧边栏状态，初始化时从配置中加载
   const isSidebarOpen = ref(true)
 
   // 使用Map来存储会话工作状态
@@ -1107,6 +1109,14 @@ export const useChatStore = defineStore('chat', () => {
   onMounted(() => {
     console.log(`[Chat Store] Tab ${getTabId()} is mounted. Setting up event listeners.`)
 
+    // 初始化加载侧边栏状态
+    loadSidebarState().then(() => {
+      // 在加载完成后再设置监听器，避免初始化时触发不必要的保存
+      watch(isSidebarOpen, (newValue) => {
+        saveSidebarState(newValue)
+      })
+    })
+
     // store现在是被动的，等待主进程推送数据
     setupEventListeners()
 
@@ -1172,6 +1182,31 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   /**
+   * 加载侧边栏状态
+   */
+  const loadSidebarState = async () => {
+    try {
+      const savedState = await configP.getSidebarOpen()
+      isSidebarOpen.value = savedState
+    } catch (error) {
+      console.error('加载侧边栏状态失败:', error)
+      // 如果加载失败，使用默认值
+      isSidebarOpen.value = true
+    }
+  }
+
+  /**
+   * 保存侧边栏状态
+   */
+  const saveSidebarState = async (state: boolean) => {
+    try {
+      await configP.setSidebarOpen(state)
+    } catch (error) {
+      console.error('保存侧边栏状态失败:', error)
+    }
+  }
+
+  /**
    * 显示 provider 选择器（触发事件让界面显示选择器）
    */
   const showProviderSelector = () => {
@@ -1219,6 +1254,9 @@ export const useChatStore = defineStore('chat', () => {
     getGeneratingMessagesCache,
     getMessages,
     exportThread,
-    showProviderSelector
+    showProviderSelector,
+    // 侧边栏状态相关方法
+    loadSidebarState,
+    saveSidebarState
   }
 })

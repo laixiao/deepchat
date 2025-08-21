@@ -47,6 +47,7 @@ interface IAppSettings {
   loggingEnabled?: boolean // 日志记录是否启用
   floatingButtonEnabled?: boolean // 悬浮按钮是否启用
   default_system_prompt?: string // 默认系统提示词
+  sidebarOpen?: boolean // 侧边栏展开状态
   [key: string]: unknown // 允许任意键，使用unknown类型替代any
 }
 
@@ -109,6 +110,7 @@ export class ConfigPresenter implements IConfigPresenter {
         loggingEnabled: false,
         floatingButtonEnabled: false,
         default_system_prompt: '',
+        sidebarOpen: true,
         appVersion: this.currentAppVersion
       }
     })
@@ -579,6 +581,14 @@ export class ConfigPresenter implements IConfigPresenter {
 
   setCloseToQuit(value: boolean): void {
     this.setSetting('closeToQuit', value)
+  }
+
+  getSidebarOpen(): boolean {
+    return this.getSetting<boolean>('sidebarOpen') ?? true
+  }
+
+  setSidebarOpen(value: boolean): void {
+    this.setSetting('sidebarOpen', value)
   }
 
   // 获取应用当前语言，考虑系统语言设置
