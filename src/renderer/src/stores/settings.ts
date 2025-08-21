@@ -654,25 +654,13 @@ export const useSettingsStore = defineStore('settings', () => {
   const setupProviderListener = () => {
     // 监听配置变更事件
     window.electron.ipcRenderer.on(CONFIG_EVENTS.PROVIDER_CHANGED, async () => {
-      console.log('changed')
+      console.log('Provider changed - updating providers and order')
       providers.value = await configP.getProviders()
+      await loadSavedOrder()
       await refreshAllModels()
     })
 
     // 监听模型列表更新事件
-    window.electron.ipcRenderer.on(
-      CONFIG_EVENTS.MODEL_LIST_CHANGED,
-      async (_event, providerId: string) => {
-        // 只刷新指定的provider模型，而不是所有模型
-        if (providerId) {
-          await refreshProviderModels(providerId)
-        } else {
-          // 兼容旧代码，如果没有提供providerId，则刷新所有模型
-          await refreshAllModels()
-        }
-      }
-    )
-    // 监听配置中的模型列表变更事件
     window.electron.ipcRenderer.on(
       CONFIG_EVENTS.MODEL_LIST_CHANGED,
       async (_event, providerId: string) => {
@@ -757,6 +745,10 @@ export const useSettingsStore = defineStore('settings', () => {
         models[modelIndex].enabled = enabled
       }
     }
+
+    // 强制触发响应式更新
+    enabledModels.value = [...enabledModels.value]
+    console.log('enabledModels updated:', enabledModels.value)
   }
 
   // 更新模型状态
@@ -1523,6 +1515,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
       // 强制更新 providers 以触发视图更新
       providers.value = [...providers.value]
+      await configP.setProviders(providers.value)
     } catch (error) {
       console.error('Failed to update provider order:', error)
     }
