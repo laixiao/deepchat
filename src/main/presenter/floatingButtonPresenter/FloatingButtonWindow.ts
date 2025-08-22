@@ -80,7 +80,7 @@ export class FloatingButtonWindow {
       if (isDev) {
         await this.window.loadURL('http://localhost:5173/floating/')
         // 开发模式下可选择性打开开发者工具（暂时禁用，避免影响拖拽）
-        this.window.webContents.openDevTools({ mode: 'detach' })
+        // this.window.webContents.openDevTools({ mode: 'detach' })
       } else {
         await this.window.loadFile(path.join(__dirname, '../renderer/floating/index.html'))
       }

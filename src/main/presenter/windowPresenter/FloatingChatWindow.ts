@@ -91,7 +91,7 @@ export class FloatingChatWindow {
           contextIsolation: true,
           preload: path.join(__dirname, '../preload/index.mjs'),
           webSecurity: false,
-          devTools: isDev,
+          devTools: isDev, // 开发模式下允许但不自动打开开发者工具
           sandbox: false
         }
       })

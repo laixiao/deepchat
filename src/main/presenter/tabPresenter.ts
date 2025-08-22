@@ -140,7 +140,7 @@ export class TabPresenter implements ITabPresenter {
     }
 
     if (is.dev) {
-      view.webContents.openDevTools({ mode: 'detach' })
+      // view.webContents.openDevTools({ mode: 'detach' })
     }
 
     // 存储标签信息
