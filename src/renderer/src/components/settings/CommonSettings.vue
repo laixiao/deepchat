@@ -10,105 +10,120 @@
         
         <!-- 搜索引擎选择 -->
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
-          <div class="flex flex-row items-center gap-2">
-            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-              <span class="text-sm font-medium">{{ t('settings.common.searchEngine') }}</span>
-            </span>
-            <div class="flex-shrink-0 flex gap-2">
-              <div class="min-w-52 max-w-96">
-                <Select v-model="selectedSearchEngine" class="">
-                  <SelectTrigger>
-                    <SelectValue :placeholder="t('settings.common.searchEngineSelect')" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="engine in settingsStore.searchEngines"
-                      :key="engine.id"
-                      :value="engine.id"
-                    >
-                      {{ engine.name }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <span class="text-sm font-medium">{{ t('settings.common.searchEngine') }}</span>
+              </span>
+              <div class="flex-shrink-0 flex gap-2">
+                <div class="min-w-52 max-w-96">
+                  <Select v-model="selectedSearchEngine" class="">
+                    <SelectTrigger>
+                      <SelectValue :placeholder="t('settings.common.searchEngineSelect')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="engine in settingsStore.searchEngines"
+                        :key="engine.id"
+                        :value="engine.id"
+                      >
+                        {{ engine.name }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  :title="t('settings.common.addCustomSearchEngine')"
+                  @click="openAddSearchEngineDialog"
+                >
+                  <Icon icon="lucide:plus" class="w-4 h-4" />
+                </Button>
+                <Button
+                  v-if="isCurrentEngineCustom"
+                  variant="outline"
+                  size="icon"
+                  :title="t('settings.common.deleteCustomSearchEngine')"
+                  @click="currentEngine && openDeleteSearchEngineDialog(currentEngine)"
+                >
+                  <Icon icon="lucide:trash-2" class="w-4 h-4 text-destructive" />
+                </Button>
+                <Button
+                  v-if="isCurrentEngineCustom"
+                  variant="outline"
+                  size="icon"
+                  :title="t('settings.common.testSearchEngine')"
+                  @click="openTestSearchEngineDialog"
+                >
+                  <Icon icon="lucide:flask-conical" class="w-4 h-4" />
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                size="icon"
-                :title="t('settings.common.addCustomSearchEngine')"
-                @click="openAddSearchEngineDialog"
-              >
-                <Icon icon="lucide:plus" class="w-4 h-4" />
-              </Button>
-              <Button
-                v-if="isCurrentEngineCustom"
-                variant="outline"
-                size="icon"
-                :title="t('settings.common.deleteCustomSearchEngine')"
-                @click="currentEngine && openDeleteSearchEngineDialog(currentEngine)"
-              >
-                <Icon icon="lucide:trash-2" class="w-4 h-4 text-destructive" />
-              </Button>
-              <Button
-                v-if="isCurrentEngineCustom"
-                variant="outline"
-                size="icon"
-                :title="t('settings.common.testSearchEngine')"
-                @click="openTestSearchEngineDialog"
-              >
-                <Icon icon="lucide:flask-conical" class="w-4 h-4" />
-              </Button>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.searchEngineDesc') }}
             </div>
           </div>
         </div>
 
         <!-- 搜索助手模型选择 -->
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
-          <div class="flex flex-row items-center gap-2">
-            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-              <Icon icon="lucide:bot" class="w-4 h-4 text-muted-foreground" />
-              <span class="text-sm font-medium">{{ t('settings.common.searchAssistantModel') }}</span>
-            </span>
-            <div class="flex-shrink-0 min-w-64 max-w-96">
-              <Popover v-model:open="modelSelectOpen">
-                <PopoverTrigger as-child>
-                  <Button variant="outline" class="w-full justify-between">
-                    <div class="flex items-center gap-2">
-                      <ModelIcon
-                        :model-id="selectedSearchModel?.id || ''"
-                        class="h-4 w-4"
-                        :is-dark="themeStore.isDark"
-                      />
-                      <span class="truncate">{{
-                        selectedSearchModel?.name || t('settings.common.selectModel')
-                      }}</span>
-                    </div>
-                    <ChevronDown class="h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent class="w-80 p-0">
-                  <ModelSelect
-                    :type="[ModelType.Chat, ModelType.ImageGeneration]"
-                    @update:model="handleSearchModelSelect"
-                  />
-                </PopoverContent>
-              </Popover>
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:bot" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.searchAssistantModel') }}</span>
+              </span>
+              <div class="flex-shrink-0 min-w-64 max-w-96">
+                <Popover v-model:open="modelSelectOpen">
+                  <PopoverTrigger as-child>
+                    <Button variant="outline" class="w-full justify-between">
+                      <div class="flex items-center gap-2">
+                        <ModelIcon
+                          :model-id="selectedSearchModel?.id || ''"
+                          class="h-4 w-4"
+                          :is-dark="themeStore.isDark"
+                        />
+                        <span class="truncate">{{
+                          selectedSearchModel?.name || t('settings.common.selectModel')
+                        }}</span>
+                      </div>
+                      <ChevronDown class="h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent class="w-80 p-0">
+                    <ModelSelect
+                      :type="[ModelType.Chat, ModelType.ImageGeneration]"
+                      @update:model="handleSearchModelSelect"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.searchAssistantModelDesc') }}
             </div>
           </div>
         </div>
         
         <!-- 搜索预览开关 -->
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
-          <div class="flex flex-row items-center gap-2">
-            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-              <Icon icon="lucide:eye" class="w-4 h-4 text-muted-foreground" />
-              <span class="text-sm font-medium">{{ t('settings.common.searchPreview') }}</span>
-            </span>
-            <div class="flex-shrink-0">
-              <Switch
-                id="search-preview-switch"
-                :checked="searchPreviewEnabled"
-                @update:checked="handleSearchPreviewChange"
-              />
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:eye" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.searchPreview') }}</span>
+              </span>
+              <div class="flex-shrink-0">
+                <Switch
+                  id="search-preview-switch"
+                  :checked="searchPreviewEnabled"
+                  @update:checked="handleSearchPreviewChange"
+                />
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.searchPreviewDesc') }}
             </div>
           </div>
         </div>
@@ -122,21 +137,26 @@
         
         <!-- 代理模式选择 -->
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
-          <div class="flex flex-row items-center gap-2">
-            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-              <span class="text-sm font-medium">{{ t('settings.common.proxyMode') }}</span>
-            </span>
-            <div class="flex-shrink-0 min-w-64 max-w-96">
-              <Select v-model="selectedProxyMode" class="">
-                <SelectTrigger>
-                  <SelectValue :placeholder="t('settings.common.proxyModeSelect')" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem v-for="mode in proxyModes" :key="mode.value" :value="mode.value">
-                    {{ mode.label }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <span class="text-sm font-medium">{{ t('settings.common.proxyMode') }}</span>
+              </span>
+              <div class="flex-shrink-0 min-w-64 max-w-96">
+                <Select v-model="selectedProxyMode" class="">
+                  <SelectTrigger>
+                    <SelectValue :placeholder="t('settings.common.proxyModeSelect')" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem v-for="mode in proxyModes" :key="mode.value" :value="mode.value">
+                      {{ mode.label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.proxyModeDesc') }}
             </div>
           </div>
         </div>
@@ -173,47 +193,62 @@
 
         <!-- 日志开关 -->
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
-          <div class="flex flex-row items-center gap-2">
-            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-              <Icon icon="lucide:file-text" class="w-4 h-4 text-muted-foreground" />
-              <span class="text-sm font-medium">{{ t('settings.common.loggingEnabled') }}</span>
-            </span>
-            <div class="flex-shrink-0">
-              <Switch
-                id="logging-switch"
-                :checked="loggingEnabled"
-                @update:checked="handleLoggingChange"
-              />
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:file-text" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.loggingEnabled') }}</span>
+              </span>
+              <div class="flex-shrink-0">
+                <Switch
+                  id="logging-switch"
+                  :checked="loggingEnabled"
+                  @update:checked="handleLoggingChange"
+                />
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.loggingEnabledDesc') }}
             </div>
           </div>
         </div>
 
         <!-- 音效开关 -->
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
-          <div class="flex flex-row items-center gap-2">
-            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-              <Icon icon="lucide:volume-2" class="w-4 h-4 text-muted-foreground" />
-              <span class="text-sm font-medium">{{ t('settings.common.soundEnabled') }}</span>
-            </span>
-            <div class="flex-shrink-0">
-              <Switch id="sound-switch" :checked="soundEnabled" @update:checked="handleSoundChange" />
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:volume-2" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.soundEnabled') }}</span>
+              </span>
+              <div class="flex-shrink-0">
+                <Switch id="sound-switch" :checked="soundEnabled" @update:checked="handleSoundChange" />
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.soundEnabledDesc') }}
             </div>
           </div>
         </div>
 
         <!-- 复制全部（含COT）开关 -->
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
-          <div class="flex flex-row items-center gap-2">
-            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-              <Icon icon="lucide:copy" class="w-4 h-4 text-muted-foreground" />
-              <span class="text-sm font-medium">{{ t('settings.common.copyWithCotEnabled') }}</span>
-            </span>
-            <div class="flex-shrink-0">
-              <Switch
-                id="copy-with-cot-switch"
-                :checked="copyWithCotEnabled"
-                @update:checked="handleCopyWithCotChange"
-              />
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:copy" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.copyWithCotEnabled') }}</span>
+              </span>
+              <div class="flex-shrink-0">
+                <Switch
+                  id="copy-with-cot-switch"
+                  :checked="copyWithCotEnabled"
+                  @update:checked="handleCopyWithCotChange"
+                />
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.copyWithCotEnabledDesc') }}
             </div>
           </div>
         </div>
@@ -228,27 +263,32 @@
 
         <!-- 语言选择 -->
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
-          <div class="flex flex-row items-center gap-2">
-            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-              <Icon icon="lucide:languages" class="w-4 h-4 text-muted-foreground" />
-              <span class="text-sm font-medium">{{ t('settings.common.language') }}</span>
-            </span>
-            <div class="flex-shrink-0 min-w-64 max-w-96">
-              <Select v-model="selectedLanguage" class="">
-                <SelectTrigger>
-                  <SelectValue :placeholder="t('settings.common.languageSelect')" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    v-for="lang in languageOptions"
-                    :key="lang.value"
-                    :value="lang.value"
-                    :dir="langStore.dir"
-                  >
-                    {{ lang.label }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:languages" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.language') }}</span>
+              </span>
+              <div class="flex-shrink-0 min-w-64 max-w-96">
+                <Select v-model="selectedLanguage" class="">
+                  <SelectTrigger>
+                    <SelectValue :placeholder="t('settings.common.languageSelect')" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="lang in languageOptions"
+                      :key="lang.value"
+                      :value="lang.value"
+                      :dir="langStore.dir"
+                    >
+                      {{ lang.label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.languageDesc') }}
             </div>
           </div>
         </div>
@@ -277,17 +317,22 @@
 
         <!-- 关闭应用行为设置 -->
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
-          <div class="flex flex-row items-center gap-2">
-            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-              <Icon icon="lucide:x-circle" class="w-4 h-4 text-muted-foreground" />
-              <span class="text-sm font-medium">{{ t('settings.common.closeToQuit') }}</span>
-            </span>
-            <div class="flex-shrink-0">
-              <Switch
-                id="close-to-quit-switch"
-                :checked="closeToQuitEnabled"
-                @update:checked="handleCloseToQuitChange"
-              />
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:x-circle" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.closeToQuit') }}</span>
+              </span>
+              <div class="flex-shrink-0">
+                <Switch
+                  id="close-to-quit-switch"
+                  :checked="closeToQuitEnabled"
+                  @update:checked="handleCloseToQuitChange"
+                />
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.closeToQuitDesc') }}
             </div>
           </div>
         </div>
@@ -324,7 +369,10 @@
               <Icon icon="lucide:a-large-small" class="w-4 h-4 text-muted-foreground" />
               <span class="text-sm font-medium">{{ t('settings.display.fontSize') }}</span>
             </span>
-            <div class="flex flex-row items-center gap-2 pl-6">
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.display.fontSizeDesc') }}
+            </div>
+            <div class="flex flex-row items-center gap-2 pl-0">
               <Slider
                 :default-value="[fontSizeLevel]"
                 :model-value="[fontSizeLevel]"
@@ -351,19 +399,24 @@
 
         <!-- 投屏保护开关 -->
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
-          <div class="flex flex-row items-center gap-2">
-            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-              <Icon icon="lucide:shield-check" class="w-4 h-4 text-muted-foreground" />
-              <span class="text-sm font-medium">{{
-                t('settings.common.contentProtection') || '投屏保护'
-              }}</span>
-            </span>
-            <div class="flex-shrink-0">
-              <Switch
-                id="content-protection-switch"
-                :checked="contentProtectionEnabled"
-                @update:checked="handleContentProtectionChange"
-              />
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:shield-check" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{
+                  t('settings.common.contentProtection') || '投屏保护'
+                }}</span>
+              </span>
+              <div class="flex-shrink-0">
+                <Switch
+                  id="content-protection-switch"
+                  :checked="contentProtectionEnabled"
+                  @update:checked="handleContentProtectionChange"
+                />
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.contentProtectionDesc') }}
             </div>
           </div>
         </div>
