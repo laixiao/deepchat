@@ -73,5 +73,6 @@
   "delete": "삭제",
   "save": "저장",
   "clear": "지우기",
-  "saved": "저장"
+  "saved": "저장",
+  "closeToQuit": "창을 닫을 때 앱 종료"
 }

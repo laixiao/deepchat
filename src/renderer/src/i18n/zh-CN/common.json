@@ -73,5 +73,6 @@
   "delete": "删除",
   "save": "保存",
   "clear": "清除",
-  "saved": "已保存"
+  "saved": "已保存",
+  "closeToQuit": "关闭应用时退出程序"
 }

@@ -73,5 +73,6 @@
   "delete": "Supprimer",
   "save": "Enregistrer",
   "clear": "Effacer",
-  "saved": "Sauvé"
+  "saved": "Sauvé",
+  "closeToQuit": "Quitter l'application lors de la fermeture de la fenêtre"
 }

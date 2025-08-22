@@ -205,6 +205,21 @@
         </div>
       </div>
 
+      <!-- 关闭应用行为设置 -->
+      <div class="flex flex-row p-2 items-center gap-2 px-2">
+        <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+          <Icon icon="lucide:x-circle" class="w-4 h-4 text-muted-foreground" />
+          <span class="text-sm font-medium">{{ t('settings.common.closeToQuit') }}</span>
+        </span>
+        <div class="flex-shrink-0">
+          <Switch
+            id="close-to-quit-switch"
+            :checked="closeToQuitEnabled"
+            @update:checked="handleCloseToQuitChange"
+          />
+        </div>
+      </div>
+
       <!-- 系统通知设置 -->
       <div class="flex flex-col p-2 gap-2 px-2">
         <div class="flex flex-row items-center gap-2">
@@ -925,5 +940,15 @@ const handleNotificationsChange = (value: boolean) => {
 
 const handleFloatingButtonChange = (value: boolean) => {
   floatingButtonStore.setFloatingButtonEnabled(value)
+}
+
+// --- Close To Quit Settings ---
+const closeToQuitEnabled = computed({
+  get: () => settingsStore.closeToQuitEnabled,
+  set: (value) => settingsStore.setCloseToQuitEnabled(value)
+})
+
+const handleCloseToQuitChange = (value: boolean) => {
+  settingsStore.setCloseToQuitEnabled(value)
 }
 </script>

@@ -73,5 +73,6 @@
   "delete": "削除",
   "save": "保存",
   "clear": "クリア",
-  "saved": "保存"
+  "saved": "保存",
+  "closeToQuit": "ウィンドウを閉じたときにアプリを終了"
 }

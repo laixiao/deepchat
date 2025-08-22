@@ -32,6 +32,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const searchPreviewEnabled = ref<boolean>(true) // 搜索预览是否启用，默认启用
   const contentProtectionEnabled = ref<boolean>(true) // 投屏保护是否启用，默认启用
   const copyWithCotEnabled = ref<boolean>(true)
+  const closeToQuitEnabled = ref<boolean>(false) // 关闭应用行为设置，默认隐藏到托盘
   const notificationsEnabled = ref<boolean>(true) // 系统通知是否启用，默认启用
   const fontSizeLevel = ref<number>(DEFAULT_FONT_SIZE_LEVEL) // 字体大小级别，默认为 1
   // Ollama 相关状态
@@ -320,6 +321,9 @@ export const useSettingsStore = defineStore('settings', () => {
       // 获取系统通知设置
       notificationsEnabled.value =
         (await configP.getSetting<boolean>('notificationsEnabled')) ?? true
+
+      // 获取关闭应用行为设置
+      closeToQuitEnabled.value = await configP.getCloseToQuit()
 
       // 获取搜索引擎
       searchEngines.value = await threadP.getSearchEngines()
@@ -1425,6 +1429,15 @@ export const useSettingsStore = defineStore('settings', () => {
     return await configP.getCopyWithCotEnabled()
   }
 
+  // Close To Quit Settings
+  const setCloseToQuitEnabled = async (enabled: boolean) => {
+    // 更新本地状态
+    closeToQuitEnabled.value = Boolean(enabled)
+
+    // 调用ConfigPresenter设置值
+    await configP.setCloseToQuit(enabled)
+  }
+
   const setupCopyWithCotEnabledListener = () => {
     window.electron.ipcRenderer.on(
       CONFIG_EVENTS.COPY_WITH_COT_CHANGED,
@@ -1599,6 +1612,7 @@ export const useSettingsStore = defineStore('settings', () => {
     searchPreviewEnabled,
     contentProtectionEnabled,
     copyWithCotEnabled,
+    closeToQuitEnabled,
     notificationsEnabled, // 暴露系统通知状态
     loggingEnabled,
     updateProvider,
@@ -1648,6 +1662,7 @@ export const useSettingsStore = defineStore('settings', () => {
     setLoggingEnabled,
     getCopyWithCotEnabled,
     setCopyWithCotEnabled,
+    setCloseToQuitEnabled,
     setupCopyWithCotEnabledListener,
     testSearchEngine,
     refreshSearchEngines,
