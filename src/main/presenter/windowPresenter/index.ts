@@ -586,8 +586,22 @@ export class WindowPresenter implements IWindowPresenter {
 
     // 使用窗口状态管理器恢复位置和尺寸
     const shellWindowState = windowStateManager({
+      file: 'shell-window-state.json', // 明确指定状态文件名
       defaultWidth: 1080,
-      defaultHeight: 720
+      defaultHeight: 720,
+      // 添加调试信息
+      maximize: false, // 禁用默认最大化
+      fullScreen: false // 禁用默认全屏
+    })
+
+    // 调试输出当前状态
+    console.log('Window state manager initialized:', {
+      x: shellWindowState.x,
+      y: shellWindowState.y,
+      width: shellWindowState.width,
+      height: shellWindowState.height,
+      isMaximized: shellWindowState.isMaximized,
+      isFullScreen: shellWindowState.isFullScreen
     })
 
     // 计算初始位置，确保 Y 坐标不为负数
@@ -634,7 +648,18 @@ export class WindowPresenter implements IWindowPresenter {
       hasInitialFocus: false
     })
 
-    shellWindowState.manage(shellWindow) // 管理窗口状态
+    // 重要：必须在窗口创建后立即管理窗口状态
+    shellWindowState.manage(shellWindow)
+
+    // 恢复保存的最大化和全屏状态
+    if (shellWindowState.isMaximized) {
+      console.log('Restoring maximized state for window', windowId)
+      shellWindow.maximize()
+    }
+    if (shellWindowState.isFullScreen) {
+      console.log('Restoring fullscreen state for window', windowId)
+      shellWindow.setFullScreen(true)
+    }
 
     // 应用内容保护设置
     const contentProtectionEnabled = this.configPresenter.getContentProtectionEnabled()
