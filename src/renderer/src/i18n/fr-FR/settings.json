@@ -2,6 +2,12 @@
   "title": "Paramètres",
   "common": {
     "title": "Paramètres généraux",
+    "searchSettings": "Paramètres de recherche",
+    "networkSettings": "Paramètres réseau",
+    "interfaceSettings": "Interface et interaction",
+    "personalizationSettings": "Paramètres de personnalisation",
+    "securitySettings": "Sécurité et confidentialité",
+    "operationSettings": "Paramètres d'opération",
     "resetData": "Réinitialiser les données",
     "language": "Langue",
     "languageSelect": "Sélectionner la langue",

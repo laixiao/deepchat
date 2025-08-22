@@ -2,6 +2,12 @@
   "title": "設置",
   "common": {
     "title": "通用設置",
+    "searchSettings": "搜索設置",
+    "networkSettings": "網絡設置",
+    "interfaceSettings": "界面與互動",
+    "personalizationSettings": "個人化設置",
+    "securitySettings": "安全與隱私",
+    "operationSettings": "操作設置",
     "resetData": "重置數據",
     "language": "語言",
     "languageSelect": "選擇語言",

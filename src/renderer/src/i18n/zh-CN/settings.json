@@ -2,6 +2,12 @@
   "title": "设置",
   "common": {
     "title": "通用设置",
+    "searchSettings": "搜索设置",
+    "networkSettings": "网络设置",
+    "interfaceSettings": "界面与交互",
+    "personalizationSettings": "个性化设置",
+    "securitySettings": "安全与隐私",
+    "operationSettings": "操作设置",
     "resetData": "重置数据",
     "language": "语言",
     "languageSelect": "选择语言",

@@ -2,6 +2,12 @@
   "title": "설정",
   "common": {
     "title": "일반 설정",
+    "searchSettings": "검색 설정",
+    "networkSettings": "네트워크 설정",
+    "interfaceSettings": "인터페이스 및 상호작용",
+    "personalizationSettings": "개인화 설정",
+    "securitySettings": "보안 및 개인정보",
+    "operationSettings": "작동 설정",
     "resetData": "데이터 초기화",
     "language": "언어",
     "languageSelect": "언어 선택",

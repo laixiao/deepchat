@@ -2,6 +2,12 @@
   "title": "تنظیمات",
   "common": {
     "title": "تنظیمات عمومی",
+    "searchSettings": "تنظیمات جستجو",
+    "networkSettings": "تنظیمات شبکه",
+    "interfaceSettings": "رابط و تعامل",
+    "personalizationSettings": "تنظیمات شخصی‌سازی",
+    "securitySettings": "امنیت و حریم خصوصی",
+    "operationSettings": "تنظیمات عملیات",
     "resetData": "بازنشانی داده‌ها",
     "language": "زبان",
     "languageSelect": "انتخاب زبان",

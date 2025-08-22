@@ -2,6 +2,12 @@
   "title": "Settings",
   "common": {
     "title": "Common Settings",
+    "searchSettings": "Search Settings",
+    "networkSettings": "Network Settings",
+    "interfaceSettings": "Interface & Interaction",
+    "personalizationSettings": "Personalization Settings",
+    "securitySettings": "Security & Privacy",
+    "operationSettings": "Operation Settings",
     "resetData": "Reset Data",
     "language": "Language",
     "languageSelect": "Select language",

@@ -29,7 +29,7 @@
         <!-- 启用的服务商区域 -->
         <div v-if="enabledProviders.length > 0">
           <div class="text-xs font-medium text-muted-foreground mb-2 px-2">
-            {{ t('settings.provider.enabled') }} ({{ enabledProviders.length }})
+            {{ t('settings.provider.enabled') }} ({{ enabledProviders.length }}/{{ enabledProviders.length + disabledProviders.length }})
           </div>
           <draggable
             v-model="enabledProviders"
@@ -71,9 +71,6 @@
 
         <!-- 禁用的服务商区域 -->
         <div v-if="disabledProviders.length > 0">
-          <div class="text-xs font-medium text-muted-foreground mb-2 px-2">
-            {{ t('settings.provider.disabled') }} ({{ disabledProviders.length }})
-          </div>
           <draggable
             v-model="disabledProviders"
             item-key="id"

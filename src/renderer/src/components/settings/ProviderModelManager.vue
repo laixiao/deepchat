@@ -26,8 +26,7 @@
         }}
       </Button>
       <span class="text-xs text-muted-foreground">
-        {{ enabledModels.length }}/{{ totalModelsCount }}
-        {{ t('settings.provider.modelsEnabled') }}
+        {{ t('settings.provider.enabled') }} ({{ enabledModels.length }}/{{ totalModelsCount }})
       </span>
     </div>
     <div

@@ -1,308 +1,391 @@
 <template>
-  <ScrollArea class="w-full h-full p-2">
-    <div class="w-full h-full flex flex-col gap-1.5">
-      <!-- 搜索引擎选择 -->
-      <div class="flex flex-row p-2 items-center gap-2 px-2">
-        <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-          <Icon icon="lucide:search" class="w-4 h-4 text-muted-foreground" />
-          <span class="text-sm font-medium">{{ t('settings.common.searchEngine') }}</span>
-        </span>
-        <div class="flex-shrink-0 flex gap-2">
-          <div class="min-w-52 max-w-96">
-            <Select v-model="selectedSearchEngine" class="">
-              <SelectTrigger>
-                <SelectValue :placeholder="t('settings.common.searchEngineSelect')" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="engine in settingsStore.searchEngines"
-                  :key="engine.id"
-                  :value="engine.id"
-                >
-                  {{ engine.name }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Button
-            variant="outline"
-            size="icon"
-            :title="t('settings.common.addCustomSearchEngine')"
-            @click="openAddSearchEngineDialog"
-          >
-            <Icon icon="lucide:plus" class="w-4 h-4" />
-          </Button>
-          <Button
-            v-if="isCurrentEngineCustom"
-            variant="outline"
-            size="icon"
-            :title="t('settings.common.deleteCustomSearchEngine')"
-            @click="currentEngine && openDeleteSearchEngineDialog(currentEngine)"
-          >
-            <Icon icon="lucide:trash-2" class="w-4 h-4 text-destructive" />
-          </Button>
-          <Button
-            v-if="isCurrentEngineCustom"
-            variant="outline"
-            size="icon"
-            :title="t('settings.common.testSearchEngine')"
-            @click="openTestSearchEngineDialog"
-          >
-            <Icon icon="lucide:flask-conical" class="w-4 h-4" />
-          </Button>
+  <ScrollArea class="w-full h-full p-4">
+    <div class="w-full h-full flex flex-col gap-6">
+      <!-- 搜索设置组 -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-2 text-sm font-semibold text-foreground border-b border-border pb-2">
+          <Icon icon="lucide:search" class="w-4 h-4" />
+          <span>{{ t('settings.common.searchSettings') || '搜索设置' }}</span>
         </div>
-      </div>
-
-      <!-- 搜索助手模型选择 -->
-      <div class="flex flex-row p-2 items-center gap-2 px-2">
-        <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-          <Icon icon="lucide:bot" class="w-4 h-4 text-muted-foreground" />
-          <span class="text-sm font-medium">{{ t('settings.common.searchAssistantModel') }}</span>
-        </span>
-        <div class="flex-shrink-0 min-w-64 max-w-96">
-          <Popover v-model:open="modelSelectOpen">
-            <PopoverTrigger as-child>
-              <Button variant="outline" class="w-full justify-between">
-                <div class="flex items-center gap-2">
-                  <ModelIcon
-                    :model-id="selectedSearchModel?.id || ''"
-                    class="h-4 w-4"
-                    :is-dark="themeStore.isDark"
-                  />
-                  <span class="truncate">{{
-                    selectedSearchModel?.name || t('settings.common.selectModel')
-                  }}</span>
-                </div>
-                <ChevronDown class="h-4 w-4 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent class="w-80 p-0">
-              <ModelSelect
-                :type="[ModelType.Chat, ModelType.ImageGeneration]"
-                @update:model="handleSearchModelSelect"
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
-      <!-- 代理模式选择 -->
-      <div class="flex flex-row p-2 items-center gap-2 px-2">
-        <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-          <Icon icon="lucide:globe" class="w-4 h-4 text-muted-foreground" />
-          <span class="text-sm font-medium">{{ t('settings.common.proxyMode') }}</span>
-        </span>
-        <div class="flex-shrink-0 min-w-64 max-w-96">
-          <Select v-model="selectedProxyMode" class="">
-            <SelectTrigger>
-              <SelectValue :placeholder="t('settings.common.proxyModeSelect')" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem v-for="mode in proxyModes" :key="mode.value" :value="mode.value">
-                {{ mode.label }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <div v-if="selectedProxyMode === 'custom'" class="flex flex-col p-2 gap-2 px-2">
-        <div class="flex flex-row items-center gap-2">
-          <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-            <Icon icon="lucide:link" class="w-4 h-4 text-muted-foreground" />
-            <span class="text-sm font-medium">{{ t('settings.common.customProxyUrl') }}</span>
-          </span>
-          <div class="flex-shrink-0 min-w-64 max-w-96">
-            <Input
-              v-model="customProxyUrl"
-              :placeholder="t('settings.common.customProxyUrlPlaceholder')"
-              :class="{ 'border-red-500': showUrlError }"
-              @input="validateProxyUrl"
-              @blur="validateProxyUrl"
-            />
-          </div>
-        </div>
-        <div v-if="showUrlError" class="text-xs text-red-500 ml-6">
-          {{ t('settings.common.invalidProxyUrl') }}
-        </div>
-      </div>
-      <!-- 搜索预览开关 -->
-      <div class="flex flex-row p-2 items-center gap-2 px-2">
-        <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-          <Icon icon="lucide:eye" class="w-4 h-4 text-muted-foreground" />
-          <span class="text-sm font-medium">{{ t('settings.common.searchPreview') }}</span>
-        </span>
-        <div class="flex-shrink-0">
-          <Switch
-            id="search-preview-switch"
-            :checked="searchPreviewEnabled"
-            @update:checked="handleSearchPreviewChange"
-          />
-        </div>
-      </div>
-
-      <!-- 日志开关 -->
-      <div class="flex flex-row p-2 items-center gap-2 px-2">
-        <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-          <Icon icon="lucide:file-text" class="w-4 h-4 text-muted-foreground" />
-          <span class="text-sm font-medium">{{ t('settings.common.loggingEnabled') }}</span>
-        </span>
-        <div class="flex-shrink-0">
-          <Switch
-            id="logging-switch"
-            :checked="loggingEnabled"
-            @update:checked="handleLoggingChange"
-          />
-        </div>
-      </div>
-
-      <!-- 音效开关 -->
-      <div class="flex flex-row p-2 items-center gap-2 px-2">
-        <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-          <Icon icon="lucide:volume-2" class="w-4 h-4 text-muted-foreground" />
-          <span class="text-sm font-medium">{{ t('settings.common.soundEnabled') }}</span>
-        </span>
-        <div class="flex-shrink-0">
-          <Switch id="sound-switch" :checked="soundEnabled" @update:checked="handleSoundChange" />
-        </div>
-      </div>
-
-      <!-- 复制全部（含COT）开关 -->
-      <div class="flex flex-row p-2 items-center gap-2 px-2">
-        <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-          <Icon icon="lucide:file-text" class="w-4 h-4 text-muted-foreground" />
-          <span class="text-sm font-medium">{{ t('settings.common.copyWithCotEnabled') }}</span>
-        </span>
-        <div class="flex-shrink-0">
-          <Switch
-            id="copy-with-cot-switch"
-            :checked="copyWithCotEnabled"
-            @update:checked="handleCopyWithCotChange"
-          />
-        </div>
-      </div>
-
-      <!-- 语言选择 -->
-      <div class="flex flex-row p-2 items-center gap-2 px-2">
-        <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-          <Icon icon="lucide:languages" class="w-4 h-4 text-muted-foreground" />
-          <span class="text-sm font-medium">{{ t('settings.common.language') }}</span>
-        </span>
-        <div class="flex-shrink-0 min-w-64 max-w-96">
-          <Select v-model="selectedLanguage" class="">
-            <SelectTrigger>
-              <SelectValue :placeholder="t('settings.common.languageSelect')" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                v-for="lang in languageOptions"
-                :key="lang.value"
-                :value="lang.value"
-                :dir="langStore.dir"
+        
+        <!-- 搜索引擎选择 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-row items-center gap-2">
+            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+              <span class="text-sm font-medium">{{ t('settings.common.searchEngine') }}</span>
+            </span>
+            <div class="flex-shrink-0 flex gap-2">
+              <div class="min-w-52 max-w-96">
+                <Select v-model="selectedSearchEngine" class="">
+                  <SelectTrigger>
+                    <SelectValue :placeholder="t('settings.common.searchEngineSelect')" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="engine in settingsStore.searchEngines"
+                      :key="engine.id"
+                      :value="engine.id"
+                    >
+                      {{ engine.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                :title="t('settings.common.addCustomSearchEngine')"
+                @click="openAddSearchEngineDialog"
               >
-                {{ lang.label }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <!-- 关闭应用行为设置 -->
-      <div class="flex flex-row p-2 items-center gap-2 px-2">
-        <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-          <Icon icon="lucide:x-circle" class="w-4 h-4 text-muted-foreground" />
-          <span class="text-sm font-medium">{{ t('settings.common.closeToQuit') }}</span>
-        </span>
-        <div class="flex-shrink-0">
-          <Switch
-            id="close-to-quit-switch"
-            :checked="closeToQuitEnabled"
-            @update:checked="handleCloseToQuitChange"
-          />
-        </div>
-      </div>
-
-      <!-- 系统通知设置 -->
-      <div class="flex flex-col p-2 gap-2 px-2">
-        <div class="flex flex-row items-center gap-2">
-          <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-            <Icon icon="lucide:bell" class="w-4 h-4 text-muted-foreground" />
-            <span class="text-sm font-medium">{{
-              t('settings.common.notifications') || '系统通知'
-            }}</span>
-          </span>
-          <div class="flex-shrink-0">
-            <Switch
-              id="notifications-switch"
-              :checked="notificationsEnabled"
-              @update:checked="handleNotificationsChange"
-            />
+                <Icon icon="lucide:plus" class="w-4 h-4" />
+              </Button>
+              <Button
+                v-if="isCurrentEngineCustom"
+                variant="outline"
+                size="icon"
+                :title="t('settings.common.deleteCustomSearchEngine')"
+                @click="currentEngine && openDeleteSearchEngineDialog(currentEngine)"
+              >
+                <Icon icon="lucide:trash-2" class="w-4 h-4 text-destructive" />
+              </Button>
+              <Button
+                v-if="isCurrentEngineCustom"
+                variant="outline"
+                size="icon"
+                :title="t('settings.common.testSearchEngine')"
+                @click="openTestSearchEngineDialog"
+              >
+                <Icon icon="lucide:flask-conical" class="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
-        <div class="pl-6 text-xs text-muted-foreground">
-          {{ t('settings.common.notificationsDesc') }}
+
+        <!-- 搜索助手模型选择 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-row items-center gap-2">
+            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+              <Icon icon="lucide:bot" class="w-4 h-4 text-muted-foreground" />
+              <span class="text-sm font-medium">{{ t('settings.common.searchAssistantModel') }}</span>
+            </span>
+            <div class="flex-shrink-0 min-w-64 max-w-96">
+              <Popover v-model:open="modelSelectOpen">
+                <PopoverTrigger as-child>
+                  <Button variant="outline" class="w-full justify-between">
+                    <div class="flex items-center gap-2">
+                      <ModelIcon
+                        :model-id="selectedSearchModel?.id || ''"
+                        class="h-4 w-4"
+                        :is-dark="themeStore.isDark"
+                      />
+                      <span class="truncate">{{
+                        selectedSearchModel?.name || t('settings.common.selectModel')
+                      }}</span>
+                    </div>
+                    <ChevronDown class="h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent class="w-80 p-0">
+                  <ModelSelect
+                    :type="[ModelType.Chat, ModelType.ImageGeneration]"
+                    @update:model="handleSearchModelSelect"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 搜索预览开关 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-row items-center gap-2">
+            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+              <Icon icon="lucide:eye" class="w-4 h-4 text-muted-foreground" />
+              <span class="text-sm font-medium">{{ t('settings.common.searchPreview') }}</span>
+            </span>
+            <div class="flex-shrink-0">
+              <Switch
+                id="search-preview-switch"
+                :checked="searchPreviewEnabled"
+                @update:checked="handleSearchPreviewChange"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 网络设置组 -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-2 text-sm font-semibold text-foreground border-b border-border pb-2">
+          <Icon icon="lucide:globe" class="w-4 h-4" />
+          <span>{{ t('settings.common.networkSettings') || '网络设置' }}</span>
+        </div>
+        
+        <!-- 代理模式选择 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-row items-center gap-2">
+            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+              <span class="text-sm font-medium">{{ t('settings.common.proxyMode') }}</span>
+            </span>
+            <div class="flex-shrink-0 min-w-64 max-w-96">
+              <Select v-model="selectedProxyMode" class="">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('settings.common.proxyModeSelect')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="mode in proxyModes" :key="mode.value" :value="mode.value">
+                    {{ mode.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+        <!-- 自定义代理配置 -->
+        <div v-if="selectedProxyMode === 'custom'" class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:link" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.customProxyUrl') }}</span>
+              </span>
+              <div class="flex-shrink-0 min-w-64 max-w-96">
+                <Input
+                  v-model="customProxyUrl"
+                  :placeholder="t('settings.common.customProxyUrlPlaceholder')"
+                  :class="{ 'border-red-500': showUrlError }"
+                  @input="validateProxyUrl"
+                  @blur="validateProxyUrl"
+                />
+              </div>
+            </div>
+            <div v-if="showUrlError" class="text-xs text-red-500 ml-6">
+              {{ t('settings.common.invalidProxyUrl') }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 界面与交互设置 -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-2 text-sm font-semibold text-foreground border-b border-border pb-2">
+          <Icon icon="lucide:settings" class="w-4 h-4" />
+          <span>{{ t('settings.common.interfaceSettings') || '界面与交互' }}</span>
+        </div>
+
+        <!-- 日志开关 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-row items-center gap-2">
+            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+              <Icon icon="lucide:file-text" class="w-4 h-4 text-muted-foreground" />
+              <span class="text-sm font-medium">{{ t('settings.common.loggingEnabled') }}</span>
+            </span>
+            <div class="flex-shrink-0">
+              <Switch
+                id="logging-switch"
+                :checked="loggingEnabled"
+                @update:checked="handleLoggingChange"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- 音效开关 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-row items-center gap-2">
+            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+              <Icon icon="lucide:volume-2" class="w-4 h-4 text-muted-foreground" />
+              <span class="text-sm font-medium">{{ t('settings.common.soundEnabled') }}</span>
+            </span>
+            <div class="flex-shrink-0">
+              <Switch id="sound-switch" :checked="soundEnabled" @update:checked="handleSoundChange" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 复制全部（含COT）开关 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-row items-center gap-2">
+            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+              <Icon icon="lucide:copy" class="w-4 h-4 text-muted-foreground" />
+              <span class="text-sm font-medium">{{ t('settings.common.copyWithCotEnabled') }}</span>
+            </span>
+            <div class="flex-shrink-0">
+              <Switch
+                id="copy-with-cot-switch"
+                :checked="copyWithCotEnabled"
+                @update:checked="handleCopyWithCotChange"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- 字体大小设置 -->
-      <div class="flex flex-col p-2 gap-2 px-2">
-        <span
-          class="flex flex-row items-center gap-2 flex-grow w-full mb-1"
+      <!-- 个性化设置 -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-2 text-sm font-semibold text-foreground border-b border-border pb-2">
+          <Icon icon="lucide:palette" class="w-4 h-4" />
+          <span>{{ t('settings.common.personalizationSettings') || '个性化设置' }}</span>
+        </div>
+
+        <!-- 语言选择 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-row items-center gap-2">
+            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+              <Icon icon="lucide:languages" class="w-4 h-4 text-muted-foreground" />
+              <span class="text-sm font-medium">{{ t('settings.common.language') }}</span>
+            </span>
+            <div class="flex-shrink-0 min-w-64 max-w-96">
+              <Select v-model="selectedLanguage" class="">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('settings.common.languageSelect')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="lang in languageOptions"
+                    :key="lang.value"
+                    :value="lang.value"
+                    :dir="langStore.dir"
+                  >
+                    {{ lang.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 悬浮按钮开关 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:mouse-pointer-click" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.display.floatingButton') }}</span>
+              </span>
+              <div class="flex-shrink-0">
+                <Switch
+                  id="floating-button-switch"
+                  :checked="floatingButtonStore.enabled"
+                  @update:checked="handleFloatingButtonChange"
+                />
+              </div>
+            </div>
+            <div class="pl-6 text-xs text-muted-foreground">
+              {{ t('settings.display.floatingButtonDesc') }}
+            </div>
+          </div>
+        </div>
+
+        <!-- 关闭应用行为设置 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-row items-center gap-2">
+            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+              <Icon icon="lucide:x-circle" class="w-4 h-4 text-muted-foreground" />
+              <span class="text-sm font-medium">{{ t('settings.common.closeToQuit') }}</span>
+            </span>
+            <div class="flex-shrink-0">
+              <Switch
+                id="close-to-quit-switch"
+                :checked="closeToQuitEnabled"
+                @update:checked="handleCloseToQuitChange"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+        <!-- 系统通知设置 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:bell" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{
+                  t('settings.common.notifications') || '系统通知'
+                }}</span>
+              </span>
+              <div class="flex-shrink-0">
+                <Switch
+                  id="notifications-switch"
+                  :checked="notificationsEnabled"
+                  @update:checked="handleNotificationsChange"
+                />
+              </div>
+            </div>
+            <div class="pl-6 text-xs text-muted-foreground">
+              {{ t('settings.common.notificationsDesc') }}
+            </div>
+          </div>
+        </div>
+
+        <!-- 字体大小设置 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-col gap-3">
+            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+              <Icon icon="lucide:a-large-small" class="w-4 h-4 text-muted-foreground" />
+              <span class="text-sm font-medium">{{ t('settings.display.fontSize') }}</span>
+            </span>
+            <div class="flex flex-row items-center gap-2 pl-6">
+              <Slider
+                :default-value="[fontSizeLevel]"
+                :model-value="[fontSizeLevel]"
+                :min="0"
+                :max="4"
+                :step="1"
+                class="w-full max-w-sm"
+                @update:model-value="(val) => (fontSizeLevel = val?.[0] ?? 1)"
+              />
+              <span class="text-xs w-16 text-center">{{
+                t('settings.display.' + fontSizeClass.toLowerCase())
+              }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 安全与隐私设置 -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-2 text-sm font-semibold text-foreground border-b border-border pb-2 pt-6">
+          <Icon icon="lucide:shield" class="w-4 h-4" />
+          <span>{{ t('settings.common.securitySettings') || '安全与隐私' }}</span>
+        </div>
+
+        <!-- 投屏保护开关 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-row items-center gap-2">
+            <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+              <Icon icon="lucide:shield-check" class="w-4 h-4 text-muted-foreground" />
+              <span class="text-sm font-medium">{{
+                t('settings.common.contentProtection') || '投屏保护'
+              }}</span>
+            </span>
+            <div class="flex-shrink-0">
+              <Switch
+                id="content-protection-switch"
+                :checked="contentProtectionEnabled"
+                @update:checked="handleContentProtectionChange"
+              />
+            </div>
+          </div>
+        </div>
+
+      <!-- 操作设置 -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-2 text-sm font-semibold text-foreground border-b border-border pb-2 pt-2">
+          <Icon icon="lucide:sliders-horizontal" class="w-4 h-4" />
+          <span>{{ t('settings.common.operationSettings') || '操作设置' }}</span>
+        </div>
+
+        <!-- 打开日志文件夹 -->
+        <div
+          class="bg-muted/30 rounded-lg p-4 border border-border/50 hover:bg-muted/50 cursor-pointer transition-colors"
+          @click="openLogFolder"
           :dir="langStore.dir"
         >
-          <Icon icon="lucide:a-large-small" class="w-4 h-4 text-muted-foreground" />
-          <span class="text-sm font-medium">{{ t('settings.display.fontSize') }}</span>
-        </span>
-        <div class="flex flex-row items-center gap-2 pl-6">
-          <Slider
-            :default-value="[fontSizeLevel]"
-            :model-value="[fontSizeLevel]"
-            :min="0"
-            :max="4"
-            :step="1"
-            class="w-full max-w-sm"
-            @update:model-value="(val) => (fontSizeLevel = val?.[0] ?? 1)"
-          />
-          <span class="text-xs w-16 text-center">{{
-            t('settings.display.' + fontSizeClass.toLowerCase())
-          }}</span>
-        </div>
-      </div>
-
-      <!-- 投屏保护开关 -->
-      <div class="flex flex-row p-2 items-center gap-2 px-2">
-        <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-          <Icon icon="lucide:monitor" class="w-4 h-4 text-muted-foreground" />
-          <span class="text-sm font-medium">{{
-            t('settings.common.contentProtection') || '投屏保护'
-          }}</span>
-        </span>
-        <div class="flex-shrink-0">
-          <Switch
-            id="content-protection-switch"
-            :checked="contentProtectionEnabled"
-            @update:checked="handleContentProtectionChange"
-          />
-        </div>
-      </div>
-
-      <!-- 悬浮按钮开关 -->
-      <div class="flex flex-col p-2 gap-2 px-2">
-        <div class="flex flex-row items-center gap-2">
-          <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
-            <Icon icon="lucide:mouse-pointer-click" class="w-4 h-4 text-muted-foreground" />
-            <span class="text-sm font-medium">{{ t('settings.display.floatingButton') }}</span>
-          </span>
-          <div class="flex-shrink-0">
-            <Switch
-              id="floating-button-switch"
-              :checked="floatingButtonStore.enabled"
-              @update:checked="handleFloatingButtonChange"
-            />
+          <div class="flex items-center gap-2">
+            <Icon icon="lucide:external-link" class="w-4 h-4 text-muted-foreground" />
+            <span class="text-sm font-medium">{{ t('settings.common.openLogFolder') }}</span>
           </div>
         </div>
-        <div class="pl-6 text-xs text-muted-foreground">
-          {{ t('settings.display.floatingButtonDesc') }}
-        </div>
-      </div>
 
       <!-- 日志开关确认对话框 -->
       <Dialog :open="isLoggingDialogOpen" @update:open="cancelLoggingChange">
@@ -328,42 +411,37 @@
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <div
-        class="p-2 flex flex-row items-center gap-2 hover:bg-accent rounded-lg cursor-pointer"
-        @click="openLogFolder"
-        :dir="langStore.dir"
-      >
-        <Icon icon="lucide:external-link" class="w-4 h-4 text-muted-foreground" />
-        <span class="text-sm font-medium">{{ t('settings.common.openLogFolder') }}</span>
+        <!-- 重置数据 -->
+        <Dialog v-model:open="isDialogOpen">
+          <DialogTrigger as-child>
+            <div
+              class="bg-muted/30 rounded-lg p-4 border border-border/50 hover:bg-destructive/10 cursor-pointer transition-colors"
+              :dir="langStore.dir"
+            >
+              <div class="flex items-center gap-2">
+                <Icon icon="lucide:trash" class="w-4 h-4 text-destructive" />
+                <span class="text-sm font-medium text-destructive">{{ t('settings.common.resetData') }}</span>
+              </div>
+            </div>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{{ t('common.resetDataConfirmTitle') }}</DialogTitle>
+              <DialogDescription>
+                {{ t('common.resetDataConfirmDescription') }}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" @click="closeDialog">
+                {{ t('dialog.cancel') }}
+              </Button>
+              <Button variant="destructive" @click="handleResetData">
+                {{ t('dialog.confirm') }}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-      <!-- 重置数据 -->
-      <Dialog v-model:open="isDialogOpen">
-        <DialogTrigger as-child>
-          <div
-            class="p-2 flex flex-row items-center gap-2 hover:bg-accent rounded-lg cursor-pointer"
-            :dir="langStore.dir"
-          >
-            <Icon icon="lucide:trash" class="w-4 h-4 text-muted-foreground" />
-            <span class="text-sm font-medium">{{ t('settings.common.resetData') }}</span>
-          </div>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{{ t('common.resetDataConfirmTitle') }}</DialogTitle>
-            <DialogDescription>
-              {{ t('common.resetDataConfirmDescription') }}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" @click="closeDialog">
-              {{ t('dialog.cancel') }}
-            </Button>
-            <Button variant="destructive" @click="handleResetData">
-              {{ t('dialog.confirm') }}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   </ScrollArea>
 

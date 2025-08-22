@@ -2,6 +2,12 @@
   "title": "Настройки",
   "common": {
     "title": "Общие настройки",
+    "searchSettings": "Настройки поиска",
+    "networkSettings": "Настройки сети",
+    "interfaceSettings": "Интерфейс и взаимодействие",
+    "personalizationSettings": "Настройки персонализации",
+    "securitySettings": "Безопасность и конфиденциальность",
+    "operationSettings": "Настройки операций",
     "resetData": "Сбросить данные",
     "language": "Язык",
     "languageSelect": "Выбрать язык",
