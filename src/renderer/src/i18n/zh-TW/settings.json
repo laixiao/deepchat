@@ -2,6 +2,7 @@
   "title": "設定",
   "common": {
     "title": "一般設定",
+    "modelSettings": "模型設定",
     "searchSettings": "搜尋設定",
     "networkSettings": "網路設定",
     "interfaceSettings": "介面與互動",
@@ -565,7 +566,11 @@
     "separatorsHelper": "文檔切分分隔符，單個分隔符用半角符號雙引號(\"\")包裹，分隔符之間用半角符號逗號(,)分割",
     "invalidSeparators": "無效的分隔符",
     "selectLanguage": "選擇預設",
-    "separatorsPreset": "加載預設"
+    "separatorsPreset": "加載預設",
+    "promptManagement": {
+      "title": "Prompt管理",
+      "description": "管理和使用自定義Prompt範本，幫助您更好地與AI互動"
+    }
   },
   "mcp": {
     "title": "MCP設定",

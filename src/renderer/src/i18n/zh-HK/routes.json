@@ -4,11 +4,9 @@
   "settings": "設置",
   "settings-common": "通用設置",
   "settings-provider": "模型API",
-  "settings-about": "關於",
-  "settings-database": "數據設置",
-  "settings-shortcut": "快捷鍵",
   "settings-mcp": "MCP設置",
+  "settings-about": "關於",
+  "settings-shortcut": "快捷鍵",
   "settings-knowledge-base": "知識庫",
-  "settings-prompt": "Prompt管理",
   "settings-mcp-market": "MCP市場"
 }

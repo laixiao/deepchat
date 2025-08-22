@@ -20,6 +20,17 @@
         </div>
       </div>
 
+      <!-- Prompt管理分组 -->
+      <div class="space-y-4 px-2 pb-4">
+        <div class="border rounded-lg p-4 bg-card">
+          <div class="flex items-center gap-2 mb-4">
+            <Icon icon="lucide:book-open-text" class="w-4 h-4 text-primary" />
+            <span class="text-sm font-medium">{{ t('promptSetting.title') }}</span>
+          </div>
+          <PromptManagement ref="promptManagementRef" />
+        </div>
+      </div>
+
       <!-- 知识库列表 -->
       <div class="space-y-4 px-2 pb-4">
         <!-- RAGFlow知识库 -->
@@ -140,6 +151,7 @@ import DifyKnowledgeSettings from './DifyKnowledgeSettings.vue'
 import FastGptKnowledgeSettings from './FastGptKnowledgeSettings.vue'
 import BuiltinKnowledgeSettings from './BuiltinKnowledgeSettings.vue'
 import KnowledgeFile from './KnowledgeFile.vue'
+import PromptManagement from './PromptManagement.vue'
 import { BuiltinKnowledgeConfig } from '@shared/presenter'
 import { usePresenter } from '@/composables/usePresenter'
 

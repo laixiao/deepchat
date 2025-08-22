@@ -2,6 +2,7 @@
   "title": "설정",
   "common": {
     "title": "일반 설정",
+    "modelSettings": "모델 설정",
     "searchSettings": "검색 설정",
     "networkSettings": "네트워크 설정",
     "interfaceSettings": "인터페이스 및 상호작용",
@@ -562,7 +563,11 @@
     "separatorsHelper": "문서 분할 구분 기호, 단일 구분 기호는 큰따옴표(\"\")로 묶고, 구분 기호는 쉼표(,)로 구분합니다",
     "invalidSeparators": "잘못된 분리기",
     "selectLanguage": "사전 설정을 선택하십시오",
-    "separatorsPreset": "사전 설정을로드합니다"
+    "separatorsPreset": "사전 설정을로드합니다",
+    "promptManagement": {
+      "title": "프롬프트 관리",
+      "description": "사용자 정의 프롬프트 템플릿을 관리하고 사용하여 AI와 더 나은 상호작용을 도와줍니다"
+    }
   },
   "mcp": {
     "title": "MCP 설정",

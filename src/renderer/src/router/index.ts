@@ -33,7 +33,7 @@ const router = createRouter({
         titleKey: 'routes.settings',
         icon: 'lucide:settings'
       },
-      redirect: { name: 'settings-provider' },
+      redirect: { name: 'settings-common' },
       children: [
         {
           path: 'provider/:providerId?',
@@ -72,15 +72,6 @@ const router = createRouter({
           }
         },
         {
-          path: 'prompt',
-          name: 'settings-prompt',
-          component: () => import('@/components/settings/PromptSetting.vue'),
-          meta: {
-            titleKey: 'routes.settings-prompt',
-            icon: 'lucide:book-open-text'
-          }
-        },
-        {
           path: 'knowledge-base',
           name: 'settings-knowledge-base',
           component: () => import('@/components/settings/KnowledgeBaseSettings.vue'),
@@ -89,15 +80,7 @@ const router = createRouter({
             icon: 'lucide:book-marked'
           }
         },
-        {
-          path: 'database',
-          name: 'settings-database',
-          component: () => import('@/components/settings/DataSettings.vue'),
-          meta: {
-            titleKey: 'routes.settings-database',
-            icon: 'lucide:database'
-          }
-        },
+
         {
           path: 'shortcut',
           name: 'settings-shortcut',

@@ -64,5 +64,7 @@
   "typing": "输入中",
   "saving": "保存中",
   "saved": "已保存",
-  "saveDefaultPromptFailed": "保存默认系统提示词失败"
+  "saveDefaultPromptFailed": "保存默认系统提示词失败",
+  "addSuccess": "添加成功",
+  "addFailed": "添加失败"
 }

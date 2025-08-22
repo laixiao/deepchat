@@ -5,10 +5,8 @@
   "settings-common": "通用设置",
   "settings-provider": "模型API",
   "settings-mcp": "MCP设置",
-  "settings-database": "数据设置",
   "settings-about": "关于",
   "settings-shortcut": "快捷键",
   "settings-knowledge-base": "知识库",
-  "settings-prompt": "Prompt管理",
   "settings-mcp-market": "MCP市场"
 }

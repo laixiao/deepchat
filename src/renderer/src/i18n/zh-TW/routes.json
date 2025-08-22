@@ -1,14 +1,12 @@
 {
   "chat": "聊天",
   "welcome": "歡迎",
-  "settings": "設定",
-  "settings-common": "一般設定",
-  "settings-database": "資料設定",
+  "settings": "設置",
+  "settings-common": "通用設置",
   "settings-provider": "模型API",
-  "settings-mcp": "MCP設定",
+  "settings-mcp": "MCP設置",
   "settings-about": "關於",
   "settings-shortcut": "快捷鍵",
   "settings-knowledge-base": "知識庫",
-  "settings-prompt": "Prompt管理",
   "settings-mcp-market": "MCP市場"
 }

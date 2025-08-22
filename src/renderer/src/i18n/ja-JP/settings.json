@@ -2,6 +2,7 @@
   "title": "設定",
   "common": {
     "title": "一般設定",
+    "modelSettings": "モデル設定",
     "searchSettings": "検索設定",
     "networkSettings": "ネットワーク設定",
     "interfaceSettings": "インターフェースと操作",
@@ -562,7 +563,11 @@
     "separatorsHelper": "ドキュメントのセグメンテーション区切り文字。単一の区切り文字は二重引用符 (\"\") で囲まれ、区切り文字はコンマ (,) で区切られます",
     "invalidSeparators": "無効な分離器",
     "selectLanguage": "プリセットを選択します",
-    "separatorsPreset": "プリセットの読み込み"
+    "separatorsPreset": "プリセットの読み込み",
+    "promptManagement": {
+      "title": "プロンプト管理",
+      "description": "カスタムプロンプトテンプレートを管理・使用して、AIとのより良いインタラクションを実現"
+    }
   },
   "mcp": {
     "title": "MCP設定",

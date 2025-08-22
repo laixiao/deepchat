@@ -4,11 +4,9 @@
   "settings": "설정",
   "settings-common": "일반 설정",
   "settings-provider": "모델 API",
-  "settings-about": "정보",
-  "settings-database": "데이터 설정",
   "settings-mcp": "MCP 설정",
+  "settings-about": "정보",
   "settings-shortcut": "단축키",
   "settings-knowledge-base": "지식 기반",
-  "settings-prompt": "프롬프트 관리",
   "settings-mcp-market": "MCP 시장"
 }

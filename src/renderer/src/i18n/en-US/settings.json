@@ -2,6 +2,7 @@
   "title": "Settings",
   "common": {
     "title": "Common Settings",
+    "modelSettings": "Model Settings",
     "searchSettings": "Search Settings",
     "networkSettings": "Network Settings",
     "interfaceSettings": "Interface & Interaction",
@@ -565,7 +566,11 @@
     "separatorsHelper": "Document segmentation delimiter, a single delimiter is enclosed in double quotes (\"\"), and delimiters are separated by commas (,)",
     "invalidSeparators": "Invalid separator",
     "selectLanguage": "Select a preset",
-    "separatorsPreset": "Loading presets"
+    "separatorsPreset": "Loading presets",
+    "promptManagement": {
+      "title": "Prompt Management",
+      "description": "Manage and use custom prompt templates to better interact with AI"
+    }
   },
   "mcp": {
     "title": "MCP Settings",

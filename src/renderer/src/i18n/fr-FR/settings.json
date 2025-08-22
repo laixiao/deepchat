@@ -2,6 +2,7 @@
   "title": "Paramètres",
   "common": {
     "title": "Paramètres généraux",
+    "modelSettings": "Paramètres du modèle",
     "searchSettings": "Paramètres de recherche",
     "networkSettings": "Paramètres réseau",
     "interfaceSettings": "Interface et interaction",
@@ -562,7 +563,11 @@
     "separatorsHelper": "Document Séliquant séparateur, le séparateur unique est enveloppé dans des citations doubles à demi-largeur (\"\"), et le séparateur est divisé par une virgule à demi-largeur (,)",
     "invalidSeparators": "Séparateur non valide",
     "selectLanguage": "Sélectionnez un préréglage",
-    "separatorsPreset": "Chargement des préréglages"
+    "separatorsPreset": "Chargement des préréglages",
+    "promptManagement": {
+      "title": "Gestion des prompts",
+      "description": "Gérer et utiliser des modèles de prompt personnalisés pour améliorer l'interaction avec l'IA"
+    }
   },
   "mcp": {
     "title": "Paramètres MCP",

@@ -93,13 +93,7 @@
                     @update:open="handleSelectOpen"
                   >
                     <SelectTrigger
-                      class="h-full rounded-none border-none shadow-none hover:bg-accent text-muted-foreground dark:hover:text-primary-foreground transition-all duration-300"
-                      :class="{
-                        'w-0 opacity-0 p-0 overflow-hidden':
-                          !showSearchSettingsButton && !isSearchHovering && !isSelectOpen,
-                        'w-24 max-w-28 px-2 opacity-100':
-                          showSearchSettingsButton || isSearchHovering || isSelectOpen
-                      }"
+                      class="h-full rounded-none border-none shadow-none hover:bg-accent text-muted-foreground dark:hover:text-primary-foreground transition-all duration-300 w-24 max-w-28 px-2 opacity-100"
                     >
                       <div class="flex items-center gap-1">
                         <SelectValue class="text-xs font-bold truncate" />
@@ -215,7 +209,6 @@ import { usePresenter } from '@/composables/usePresenter'
 import { approximateTokenSize } from 'tokenx'
 import { useSettingsStore } from '@/stores/settings'
 import McpToolsList from './mcpToolsList.vue'
-import { useEventListener } from '@vueuse/core'
 import { calculateImageTokens, getClipboardImageInfo, imageFileToBase64 } from '@/lib/image'
 import { Editor, EditorContent, JSONContent } from '@tiptap/vue-3'
 import Document from '@tiptap/extension-document'
@@ -929,22 +922,11 @@ const handleDrop = async (e: DragEvent) => {
 }
 
 // Search engine selector variables
-const showSearchSettingsButton = ref(false)
-const isSearchHovering = ref(false)
 const isSelectOpen = ref(false)
 
 // Handle select open state
 const handleSelectOpen = (isOpen: boolean) => {
   isSelectOpen.value = isOpen
-}
-
-// Mouse hover handlers for search engine selector
-const handleSearchMouseEnter = () => {
-  isSearchHovering.value = true
-}
-
-const handleSearchMouseLeave = () => {
-  isSearchHovering.value = false
 }
 
 const loadRateLimitStatus = async () => {
@@ -973,12 +955,6 @@ onMounted(() => {
   setPromptFilesHandler(handlePromptFiles)
 
   loadRateLimitStatus()
-
-  const searchElement = document.querySelector('.search-engine-select')
-  if (searchElement) {
-    useEventListener(searchElement, 'mouseenter', handleSearchMouseEnter)
-    useEventListener(searchElement, 'mouseleave', handleSearchMouseLeave)
-  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   window.addEventListener('context-menu-ask-ai', (e: any) => {
