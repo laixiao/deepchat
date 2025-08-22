@@ -54,15 +54,6 @@ const router = createRouter({
           }
         },
         {
-          path: 'display',
-          name: 'settings-display',
-          component: () => import('@/components/settings/DisplaySettings.vue'),
-          meta: {
-            titleKey: 'routes.settings-display',
-            icon: 'lucide:monitor'
-          }
-        },
-        {
           path: 'mcp',
           name: 'settings-mcp',
           component: () => import('@/components/settings/McpSettings.vue'),
