@@ -205,23 +205,12 @@ export const useSettingsStore = defineStore('settings', () => {
     if (!mcpStore.mcpEnabled) {
       await mcpStore.setMcpEnabled(true)
     }
-    // 检查当前路由，如果不在MCP设置页面，则跳转
+    // 检查当前路由，如果不在MCP管理页面，则跳转
     const currentRoute = router.currentRoute.value
-    if (currentRoute.name !== 'settings') {
+    if (currentRoute.name !== 'mcp') {
       await router.push({
-        name: 'settings'
+        name: 'mcp'
       })
-      await router.push({
-        name: 'settings-mcp'
-      })
-    } else {
-      await router.replace({
-        name: 'settings-mcp',
-        query: {
-          ...currentRoute.query
-        }
-      })
-      // 如果已经在MCP设置页面，只更新子标签页
     }
 
     // 存储 MCP 配置数据到缓存

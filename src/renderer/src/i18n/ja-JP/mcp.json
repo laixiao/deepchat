@@ -1,4 +1,10 @@
 {
+  "title": "MCP設定",
+  "description": "MCP（Model Context Protocol）サーバーとツールの管理と設定",
+  "capability": {
+    "title": "MCP機能",
+    "description": "MCP（Model Context Protocol）サーバー、ツール、設定の管理と設定"
+  },
   "tools": {
     "searchPlaceholder": "ツールを検索...",
     "noToolsAvailable": "利用可能なツールがありません",

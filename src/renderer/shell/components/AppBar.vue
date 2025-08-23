@@ -69,6 +69,13 @@
       <Button
         variant="ghost"
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        @click="openMcp"
+      >
+        <Icon icon="lucide:cpu" class="w-4 h-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="onThemeClick"
       >
         <Icon v-if="themeStore.themeMode === 'dark'" icon="lucide:moon" class="w-4 h-4" />
@@ -128,8 +135,10 @@ import { useTabStore } from '@shell/stores/tab'
 import { useThemeStore } from '@/stores/theme'
 import { useElementSize } from '@vueuse/core'
 import { useLanguageStore } from '@/stores/language'
+import { useI18n } from 'vue-i18n'
 const tabStore = useTabStore()
 const langStore = useLanguageStore()
+const { t } = useI18n()
 const windowPresenter = usePresenter('windowPresenter')
 const devicePresenter = usePresenter('devicePresenter')
 const tabPresenter = usePresenter('tabPresenter')
@@ -512,6 +521,23 @@ const closeWindow = () => {
   const id = window.api.getWindowId()
   if (id != null) {
     windowPresenter.close(id)
+  }
+}
+
+const openMcp = () => {
+  // 检查是否已经存在MCP标签页
+  const existingMcpTab = tabStore.tabs.find((tab) => tab.url.includes('#/mcp'))
+
+  if (existingMcpTab) {
+    // 如果已经存在MCP标签页，切换到该标签页
+    tabStore.setCurrentTabId(existingMcpTab.id)
+  } else {
+    // 如果不存在MCP标签页，创建新的
+    tabStore.addTab({
+      name: t('routes.mcp'),
+      icon: 'lucide:cpu',
+      viewType: 'mcp'
+    })
   }
 }
 

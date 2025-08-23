@@ -37,6 +37,142 @@
       {{ t('mcp.market.keyHelpEnd') }}
     </div>
 
+    <!-- MCP全局开关 -->
+    <div class="p-4 border-b bg-card">
+      <div class="flex items-center justify-between">
+        <div :dir="languageStore.dir">
+          <h3 class="text-sm font-medium">{{ t('settings.mcp.enabledTitle') }}</h3>
+          <p class="text-xs text-muted-foreground mt-1">
+            {{ t('settings.mcp.enabledDescription') }}
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <Badge v-if="mcpEnabled" variant="default" class="text-xs">
+            {{ t('mcp.status.enabled') }}
+          </Badge>
+          <Badge v-else variant="secondary" class="text-xs">
+            {{ t('mcp.status.disabled') }}
+          </Badge>
+          <Switch dir="ltr" :checked="mcpEnabled" @update:checked="handleMcpEnabledChange" />
+        </div>
+      </div>
+    </div>
+
+    <!-- NPM源配置区域 -->
+    <div class="border-b bg-card">
+      <div class="p-4">
+        <h4 class="text-sm font-medium mb-3">{{ t('settings.mcp.npmRegistry.title') }}</h4>
+        <div class="space-y-3">
+          <!-- 当前源状态 -->
+          <div class="flex items-center justify-between bg-muted/30 rounded p-3">
+            <div class="flex items-center gap-2">
+              <Icon icon="lucide:globe" class="w-4 h-4 text-muted-foreground" />
+              <div>
+                <div class="text-xs text-muted-foreground">{{ t('settings.mcp.npmRegistry.currentRegistry') }}</div>
+                <div class="text-sm font-mono truncate max-w-[300px]" :title="npmRegistryStatus.currentRegistry || undefined">
+                  {{ npmRegistryStatus.currentRegistry || t('settings.mcp.npmRegistry.detecting') }}
+                </div>
+                <div v-if="npmRegistryStatus.lastChecked" class="text-xs text-muted-foreground mt-0.5">
+                  {{ t('settings.mcp.npmRegistry.lastChecked') }}: {{ formatLastChecked(npmRegistryStatus.lastChecked) }}
+                  <Badge v-if="npmRegistryStatus.isFromCache" variant="outline" class="ml-1 text-xs">
+                    {{ t('settings.mcp.npmRegistry.cached') }}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            <Button size="sm" @click="refreshNpmRegistry" :disabled="refreshing">
+              <Icon v-if="refreshing" icon="lucide:loader-2" class="w-3.5 h-3.5 mr-1 animate-spin" />
+              <Icon v-else icon="lucide:refresh-cw" class="w-3.5 h-3.5 mr-1" />
+              {{ t('settings.mcp.npmRegistry.refresh') }}
+            </Button>
+          </div>
+
+          <!-- 自动检测开关 -->
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">{{ t('settings.mcp.npmRegistry.autoDetect') }}</div>
+              <div class="text-xs text-muted-foreground">{{ t('settings.mcp.npmRegistry.autoDetectDesc') }}</div>
+            </div>
+            <Switch
+              :checked="npmRegistryStatus.autoDetectEnabled"
+              @update:checked="setAutoDetectNpmRegistry"
+            />
+          </div>
+
+          <!-- 高级设置按钮 -->
+          <div class="pt-1">
+            <Dialog v-model:open="advancedDialogOpen">
+              <DialogTrigger as-child>
+                <Button variant="outline" size="sm" class="w-full">
+                  <Icon icon="lucide:settings" class="w-3.5 h-3.5 mr-1" />
+                  {{ t('settings.mcp.npmRegistry.advancedSettings') }}
+                </Button>
+              </DialogTrigger>
+              <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>{{ t('settings.mcp.npmRegistry.advancedSettings') }}</DialogTitle>
+                  <DialogDescription>
+                    {{ t('settings.mcp.npmRegistry.advancedSettingsDesc') }}
+                  </DialogDescription>
+                </DialogHeader>
+                <div class="space-y-4">
+                  <div class="space-y-2">
+                    <label class="text-sm font-medium">{{ t('settings.mcp.npmRegistry.customRegistry') }}</label>
+                    <div class="flex gap-2">
+                      <Input
+                        v-model="customRegistryInput"
+                        :placeholder="t('settings.mcp.npmRegistry.registryUrlPlaceholder')"
+                        class="flex-1"
+                      />
+                      <Button size="sm" @click="saveCustomNpmRegistry">
+                        {{ t('common.save') }}
+                      </Button>
+                    </div>
+                    <div class="text-xs text-muted-foreground">
+                      {{ t('settings.mcp.npmRegistry.customRegistryDesc') }}
+                    </div>
+                  </div>
+                  <div v-if="npmRegistryStatus.customRegistry" class="space-y-2">
+                    <div class="text-xs text-muted-foreground">
+                      {{ t('settings.mcp.npmRegistry.currentCustom') }}: {{ npmRegistryStatus.customRegistry }}
+                    </div>
+                    <Button variant="outline" size="sm" @click="clearCustomNpmRegistry" class="w-full">
+                      <Icon icon="lucide:trash-2" class="w-3.5 h-3.5 mr-1" />
+                      {{ t('settings.mcp.npmRegistry.clearCustom') }}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 外部MCP市场入口 -->
+    <div class="p-4 border-b bg-card">
+      <h4 class="text-sm font-medium mb-3">{{ t('mcp.market.externalMarkets') }}</h4>
+      <div class="space-y-2">
+        <div class="flex gap-2">
+          <Button v-if="false" variant="outline" class="flex-1 flex items-center justify-center gap-2" @click="openMcpMarketplace">
+            <Icon icon="lucide:shopping-bag" class="w-4 h-4" />
+            <span>{{ t('settings.mcp.marketplace') }}</span>
+            <Icon icon="lucide:external-link" class="w-3.5 h-3.5 text-muted-foreground" />
+          </Button>
+
+          <!-- Higress MCP Marketplace 入口 -->
+          <Button variant="outline" class="flex-1 flex items-center justify-center gap-2" @click="openHigressMcpMarketplace">
+            <img src="@/assets/mcp-icons/higress.avif" class="w-4 h-4" />
+            <span>{{ t('settings.mcp.higressMarket') }}</span>
+            <Icon icon="lucide:external-link" class="w-3.5 h-3.5 text-muted-foreground" />
+          </Button>
+        </div>
+        <div class="text-xs text-muted-foreground">
+          {{ t('mcp.market.externalMarketsDesc') }}
+        </div>
+      </div>
+    </div>
+
     <div class="flex-1 overflow-auto" ref="scrollContainer" @scroll="onScroll">
       <div
         class="p-4 grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
@@ -101,17 +237,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog'
 import { usePresenter } from '@/composables/usePresenter'
 import { useToast } from '@/components/ui/toast'
+import { useMcpStore } from '@/stores/mcp'
+import { useLanguageStore } from '@/stores/language'
+import { MCP_MARKETPLACE_URL, HIGRESS_MCP_MARKETPLACE_URL } from '@/components/mcp-config/const'
 
 const { t } = useI18n()
 const { toast } = useToast()
 const mcpP = usePresenter('mcpPresenter')
+const mcpStore = useMcpStore()
+const languageStore = useLanguageStore()
 
 type MarketItem = {
   uuid: string
@@ -138,6 +289,42 @@ const canPullMore = ref(false)
 const installedServers = ref<Set<string>>(new Set())
 
 const apiKeyInput = ref('')
+
+// NPM Registry 相关状态
+const npmRegistryStatus = ref<{
+  currentRegistry: string | null
+  isFromCache: boolean
+  lastChecked?: number
+  autoDetectEnabled: boolean
+  customRegistry?: string
+}>({
+  currentRegistry: null,
+  isFromCache: false,
+  lastChecked: undefined,
+  autoDetectEnabled: true,
+  customRegistry: undefined
+})
+
+const refreshing = ref(false)
+const customRegistryInput = ref('')
+const advancedDialogOpen = ref(false)
+
+// MCP全局开关相关
+const mcpEnabled = computed(() => mcpStore.mcpEnabled)
+
+// 处理MCP开关状态变化
+const handleMcpEnabledChange = async (enabled: boolean) => {
+  await mcpStore.setMcpEnabled(enabled)
+}
+
+// 外部市场相关方法
+const openMcpMarketplace = () => {
+  window.open(MCP_MARKETPLACE_URL, '_blank')
+}
+
+const openHigressMcpMarketplace = () => {
+  window.open(HIGRESS_MCP_MARKETPLACE_URL, '_blank')
+}
 
 const loadApiKey = async () => {
   try {
@@ -279,8 +466,195 @@ const install = async (item: MarketItem) => {
   }
 }
 
+// NPM Registry 相关方法
+const loadNpmRegistryStatus = async () => {
+  try {
+    const status = await mcpStore.getNpmRegistryStatus()
+    npmRegistryStatus.value = status
+    customRegistryInput.value = status.customRegistry || ''
+  } catch (error) {
+    console.error('Failed to load npm registry status:', error)
+  }
+}
+
+const refreshNpmRegistry = async () => {
+  try {
+    refreshing.value = true
+    await mcpStore.refreshNpmRegistry()
+    await loadNpmRegistryStatus()
+    toast({
+      title: t('settings.mcp.npmRegistry.refreshSuccess'),
+      description: t('settings.mcp.npmRegistry.refreshSuccessDesc')
+    })
+  } catch (error) {
+    console.error('Failed to refresh npm registry:', error)
+    toast({
+      title: t('settings.mcp.npmRegistry.refreshFailed'),
+      description: error instanceof Error ? error.message : String(error),
+      variant: 'destructive'
+    })
+  } finally {
+    refreshing.value = false
+  }
+}
+
+const setAutoDetectNpmRegistry = async (enabled: boolean) => {
+  try {
+    await mcpStore.setAutoDetectNpmRegistry(enabled)
+    await loadNpmRegistryStatus()
+    toast({
+      title: t('settings.mcp.npmRegistry.autoDetectUpdated'),
+      description: enabled
+        ? t('settings.mcp.npmRegistry.autoDetectEnabled')
+        : t('settings.mcp.npmRegistry.autoDetectDisabled')
+    })
+  } catch (error) {
+    console.error('Failed to set auto detect npm registry:', error)
+    toast({
+      title: t('settings.mcp.npmRegistry.updateFailed'),
+      description: error instanceof Error ? error.message : String(error),
+      variant: 'destructive'
+    })
+  }
+}
+
+const normalizeNpmRegistryUrl = (registry: string): string => {
+  let normalized = registry.trim()
+  if (!normalized.endsWith('/')) {
+    normalized += '/'
+  }
+  return normalized
+}
+
+// 验证自定义NPM源是否可用
+const validateCustomRegistry = async (registry: string): Promise<boolean> => {
+  try {
+    if (!registry.startsWith('http://') && !registry.startsWith('https://')) {
+      toast({
+        title: t('settings.mcp.npmRegistry.invalidUrl'),
+        description: t('settings.mcp.npmRegistry.invalidUrlDesc'),
+        variant: 'destructive'
+      })
+      return false
+    }
+    const normalizedRegistry = normalizeNpmRegistryUrl(registry)
+    const testPackage = 'tiny-runtime-injector'
+    const testUrl = `${normalizedRegistry}${testPackage}`
+    toast({
+      title: t('settings.mcp.npmRegistry.testing'),
+      description: t('settings.mcp.npmRegistry.testingDesc', { registry: normalizedRegistry })
+    })
+    const response = await fetch(testUrl, {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(10000)
+    })
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+    return true
+  } catch (error) {
+    console.error('Custom registry validation failed:', error)
+    toast({
+      title: t('settings.mcp.npmRegistry.testFailed'),
+      description: t('settings.mcp.npmRegistry.testFailedDesc', {
+        registry: normalizeNpmRegistryUrl(registry),
+        error: error instanceof Error ? error.message : String(error)
+      }),
+      variant: 'destructive'
+    })
+    return false
+  }
+}
+
+const saveCustomNpmRegistry = async () => {
+  try {
+    const registry = customRegistryInput.value.trim()
+    if (!registry) {
+      return
+    }
+    const isValid = await validateCustomRegistry(registry)
+    if (!isValid) {
+      return
+    }
+    await mcpStore.setCustomNpmRegistry(registry)
+    await loadNpmRegistryStatus()
+    const normalizedRegistry = npmRegistryStatus.value.customRegistry
+    if (normalizedRegistry) {
+      customRegistryInput.value = normalizedRegistry
+    }
+    toast({
+      title: t('settings.mcp.npmRegistry.customSourceSet'),
+      description: t('settings.mcp.npmRegistry.customSourceSetDesc', {
+        registry: normalizedRegistry || registry
+      })
+    })
+  } catch (error) {
+    console.error('Failed to save custom npm registry:', error)
+    toast({
+      title: t('settings.mcp.npmRegistry.updateFailed'),
+      description: error instanceof Error ? error.message : String(error),
+      variant: 'destructive'
+    })
+  }
+}
+
+const clearCustomNpmRegistry = async () => {
+  try {
+    await mcpStore.setCustomNpmRegistry(undefined)
+    customRegistryInput.value = ''
+    await mcpStore.clearNpmRegistryCache()
+    toast({
+      title: t('settings.mcp.npmRegistry.customSourceCleared'),
+      description: t('settings.mcp.npmRegistry.redetectingOptimal')
+    })
+    try {
+      await mcpStore.refreshNpmRegistry()
+      await loadNpmRegistryStatus()
+      toast({
+        title: t('settings.mcp.npmRegistry.redetectComplete'),
+        description: t('settings.mcp.npmRegistry.redetectCompleteDesc')
+      })
+      advancedDialogOpen.value = false
+    } catch (detectError) {
+      console.error('Failed to re-detect optimal registry:', detectError)
+      await loadNpmRegistryStatus()
+      toast({
+        title: t('settings.mcp.npmRegistry.redetectFailed'),
+        description: t('settings.mcp.npmRegistry.redetectFailedDesc'),
+        variant: 'destructive'
+      })
+      advancedDialogOpen.value = false
+    }
+  } catch (error) {
+    console.error('Failed to clear custom npm registry:', error)
+    toast({
+      title: t('settings.mcp.npmRegistry.updateFailed'),
+      description: error instanceof Error ? error.message : String(error),
+      variant: 'destructive'
+    })
+  }
+}
+
+const formatLastChecked = (timestamp: number) => {
+  const now = Date.now()
+  const diff = now - timestamp
+  const minutes = Math.floor(diff / (1000 * 60))
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  if (minutes < 1) {
+    return t('settings.mcp.npmRegistry.justNow')
+  } else if (minutes < 60) {
+    return t('settings.mcp.npmRegistry.minutesAgo', { minutes })
+  } else if (hours < 24) {
+    return t('settings.mcp.npmRegistry.hoursAgo', { hours })
+  } else {
+    return t('settings.mcp.npmRegistry.daysAgo', { days })
+  }
+}
+
 onMounted(async () => {
   await loadApiKey()
+  await loadNpmRegistryStatus()
   await fetchPage()
 
   // 初始加载后检查是否需要启用强制拉取模式

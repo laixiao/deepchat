@@ -26,6 +26,15 @@ const router = createRouter({
       }
     },
     {
+      path: '/mcp',
+      name: 'mcp',
+      component: () => import('@/views/McpManagementView.vue'),
+      meta: {
+        titleKey: 'routes.mcp',
+        icon: 'lucide:cpu'
+      }
+    },
+    {
       path: '/settings',
       name: 'settings',
       component: () => import('@/views/SettingsTabView.vue'),
@@ -50,15 +59,6 @@ const router = createRouter({
           meta: {
             titleKey: 'routes.settings-common',
             icon: 'lucide:bolt'
-          }
-        },
-        {
-          path: 'mcp',
-          name: 'settings-mcp',
-          component: () => import('@/components/settings/McpSettings.vue'),
-          meta: {
-            titleKey: 'routes.settings-mcp',
-            icon: 'lucide:server'
           }
         },
         {

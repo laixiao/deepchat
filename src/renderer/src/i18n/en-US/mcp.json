@@ -1,4 +1,29 @@
 {
+  "title": "MCP Management",
+  "description": "Manage and configure MCP (Model Context Protocol) servers and tools",
+  "capability": {
+    "title": "MCP Capabilities",
+    "description": "Manage and configure MCP (Model Context Protocol) servers, tools and settings"
+  },
+  "globalToggle": "Global Toggle",
+  "serverCount": "{count} servers total",
+  "status": {
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "disabled": {
+    "title": "MCP Feature Disabled",
+    "description": "Enable MCP feature to use server and tool calling functionality. MCP allows AI models to interact with external tools and services.",
+    "enable": "Enable MCP"
+  },
+  "enabled": "MCP enabled",
+  "enabledDescription": "MCP feature is now enabled",
+  "disabledDescription": "MCP feature is now disabled",
+  "toggleError": "Failed to toggle MCP status",
+  "refreshed": "Server list refreshed",
+  "refreshError": "Failed to refresh server list",
+  "serverAdded": "Server {name} added",
+  "addServerError": "Failed to add server",
   "tools": {
     "searchPlaceholder": "Search tools...",
     "noToolsAvailable": "No tools available",
@@ -264,6 +289,8 @@
     "noMore": "No more",
     "empty": "No services",
     "loadMore": "Load More",
-    "pullDownToLoad": "Continue pulling down to load more"
+    "pullDownToLoad": "Continue pulling down to load more",
+    "externalMarkets": "External Markets",
+    "externalMarketsDesc": "Browse third-party MCP server markets to discover more available servers and tools"
   }
 }

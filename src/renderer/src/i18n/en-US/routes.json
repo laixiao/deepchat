@@ -1,10 +1,10 @@
 {
   "chat": "Chat",
   "welcome": "Welcome",
+  "mcp": "MCP Capabilities",
   "settings": "Settings",
   "settings-common": "Common Settings",
   "settings-provider": "Model API",
-  "settings-mcp": "MCP Settings",
   "settings-about": "About",
   "settings-shortcut": "Shortcuts",
   "settings-knowledge-base": "Knowledge Base",

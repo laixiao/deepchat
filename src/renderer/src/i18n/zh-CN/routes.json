@@ -1,10 +1,10 @@
 {
   "chat": "聊天",
   "welcome": "欢迎",
+  "mcp": "MCP能力",
   "settings": "设置",
   "settings-common": "通用设置",
   "settings-provider": "模型API",
-  "settings-mcp": "MCP设置",
   "settings-about": "关于",
   "settings-shortcut": "快捷键",
   "settings-knowledge-base": "知识库",
