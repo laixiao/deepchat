@@ -130,6 +130,9 @@
     "provider": "Fournisseur de service",
     "providerSetting": "Paramètres du fournisseur",
     "selectModel": "Sélectionner un modèle",
+    "visionModel": "Modèle de vision",
+    "visionModelDesc": "Sélectionnez un modèle pour traiter les images et le contenu visuel, utilisé pour la description d'images, l'analyse et d'autres fonctionnalités",
+    "visionModelNotSelectedWarning": "Aucun modèle de vision sélectionné. Vous serez invité à en configurer un lors de l'utilisation des fonctionnalités d'image",
     "modelConfig": {
       "cancel": "Annuler",
       "contextLength": {

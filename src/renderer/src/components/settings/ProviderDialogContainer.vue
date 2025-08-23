@@ -22,7 +22,7 @@
 
     <!-- 模型列表对话框 -->
     <Dialog v-model:open="showModelListDialog">
-      <DialogContent class="max-w-2xl p-0 pb-4 gap-2 flex flex-col">
+      <DialogContent class="w-[90vw] h-[90vh] max-w-[90vw] max-h-[90vh] p-0 pb-4 gap-2 flex flex-col">
         <DialogHeader class="p-0">
           <DialogTitle class="p-4">{{
             t('settings.provider.dialog.configModels.title')
@@ -31,7 +31,7 @@
             {{ t('settings.provider.dialog.configModels.description') }}
           </DialogDescription>
         </DialogHeader>
-        <div class="px-4 py-2 flex-1 h-0 max-h-80 overflow-y-auto">
+        <div class="px-4 py-2 flex-1 overflow-y-auto">
           <ProviderModelList
             :provider-models="[{ providerId: provider.id, models: providerModels }]"
             :custom-models="customModels"

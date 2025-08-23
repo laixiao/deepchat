@@ -56,7 +56,6 @@
   "searchAssistantModel": "Search Model",
   "visionModel": "Vision Model",
   "visionModelDesc": "Select a model for processing images and visual content, used for image description, analysis and other features",
-  "visionModelNotSelectedWarning": "No vision model selected. You will be prompted to set one up when using image features.",
   "searchEngine": "Search Engine",
   "searchEngineSelect": "Select a search engine",
   "searchPreview": "Search preview",

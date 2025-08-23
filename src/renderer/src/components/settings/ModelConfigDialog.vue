@@ -1,6 +1,6 @@
 <template>
   <Dialog :open="open" @update:open="$emit('update:open', $event)">
-    <DialogContent class="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col">
+    <DialogContent class="w-[90vw] h-[90vh] max-w-[90vw] max-h-[90vh] overflow-hidden flex flex-col">
       <DialogHeader>
         <DialogTitle>{{ t('settings.model.modelConfig.title') }} - {{ modelName }}</DialogTitle>
         <p class="text-sm text-muted-foreground">
@@ -268,7 +268,7 @@
 
   <!-- 重置确认对话框 -->
   <Dialog :open="showResetConfirm" @update:open="showResetConfirm = $event">
-    <DialogContent class="sm:max-w-[425px]">
+    <DialogContent class="w-[90vw] h-[90vh] max-w-[90vw] max-h-[90vh]">
       <DialogHeader>
         <DialogTitle>{{ t('settings.model.modelConfig.resetConfirm.title') }}</DialogTitle>
         <p class="text-sm text-muted-foreground">

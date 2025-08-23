@@ -22,6 +22,7 @@
     "searchAssistantModelDesc": "选择用于处理搜索结果并生成回答的模型，影响搜索增强的质量和速度",
     "visionModel": "视觉模型",
     "visionModelDesc": "选择用于处理图像和视觉内容的模型，用于图像描述、分析等功能",
+    "visionModelNotSelectedWarning": "未选择视觉模型，使用图像功能时将提示您先进行设定",
     "selectModel": "选择模型",
     "proxyMode": "代理模式",
     "proxyModeDesc": "设置网络代理模式，可选择系统代理、不使用代理或自定义代理，用于访问国外服务",

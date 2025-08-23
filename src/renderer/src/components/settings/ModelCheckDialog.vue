@@ -1,6 +1,6 @@
 <template>
   <Dialog v-model:open="isOpen" @update:open="onOpenChange">
-    <DialogContent class="sm:max-w-[500px] max-h-[80vh] overflow-hidden flex flex-col">
+    <DialogContent class="w-[90vw] h-[90vh] max-w-[90vw] max-h-[90vh] overflow-hidden flex flex-col">
       <DialogHeader>
         <DialogTitle>{{ t('settings.provider.dialog.modelCheck.title') }}</DialogTitle>
         <DialogDescription>

@@ -169,14 +169,14 @@
 
     <!-- 拉取模型对话框 -->
     <Dialog v-model:open="showPullModelDialog">
-      <DialogContent class="max-w-2xl">
+      <DialogContent class="w-[90vw] h-[90vh] max-w-[90vw] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{{ t('settings.provider.dialog.pullModel.title') }}</DialogTitle>
           <DialogDescription>
             {{ t('settings.provider.dialog.pullModel.description') }}
           </DialogDescription>
         </DialogHeader>
-        <div class="py-4 max-h-80 overflow-y-auto">
+        <div class="py-4 flex-1 overflow-y-auto">
           <div class="grid grid-cols-1 gap-2">
             <div
               v-for="model in availableModels"
