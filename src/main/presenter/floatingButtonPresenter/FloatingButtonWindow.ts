@@ -81,6 +81,18 @@ export class FloatingButtonWindow {
         await this.window.loadURL('http://localhost:5173/floating/')
         // 开发模式下可选择性打开开发者工具（暂时禁用，避免影响拖拽）
         // this.window.webContents.openDevTools({ mode: 'detach' })
+
+        // 根据设置自动打开开发者工具
+        try {
+          const { presenter } = await import('@/presenter')
+          const devToolsAutoOpen = presenter.configPresenter.getDevToolsAutoOpen()
+          if (devToolsAutoOpen) {
+            this.window.webContents.openDevTools({ mode: 'detach' })
+            console.log('根据设置自动打开了悬浮按钮窗口开发者工具')
+          }
+        } catch (error) {
+          console.error('检查悬浮按钮窗口开发者工具设置时出错:', error)
+        }
       } else {
         await this.window.loadFile(path.join(__dirname, '../renderer/floating/index.html'))
       }

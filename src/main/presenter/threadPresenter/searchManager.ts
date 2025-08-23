@@ -701,6 +701,17 @@ export class SearchManager {
         }
       )
 
+      // 根据设置自动打开开发者工具
+      try {
+        const devToolsAutoOpen = presenter.configPresenter.getDevToolsAutoOpen()
+        if (devToolsAutoOpen) {
+          searchWindow.webContents.openDevTools({ mode: 'detach' })
+          console.log('根据设置自动打开了隐藏搜索窗口开发者工具')
+        }
+      } catch (error) {
+        console.error('检查开发者工具设置时出错:', error)
+      }
+
       this.searchWindows.set(conversationId, searchWindow)
       return searchWindow
     }
@@ -863,6 +874,17 @@ export class SearchManager {
     )
     if (is.dev) {
       // searchWindow.webContents.openDevTools({ mode: 'detach' })
+    }
+
+    // 根据设置自动打开开发者工具
+    try {
+      const devToolsAutoOpen = presenter.configPresenter.getDevToolsAutoOpen()
+      if (devToolsAutoOpen) {
+        searchWindow.webContents.openDevTools({ mode: 'detach' })
+        console.log('根据设置自动打开了搜索窗口开发者工具')
+      }
+    } catch (error) {
+      console.error('检查开发者工具设置时出错:', error)
     }
     this.searchWindows.set(conversationId, searchWindow)
     return searchWindow
@@ -1333,6 +1355,17 @@ export class SearchManager {
           devTools: is.dev
         }
       })
+
+      // 根据设置自动打开开发者工具
+      try {
+        const devToolsAutoOpen = presenter.configPresenter.getDevToolsAutoOpen()
+        if (devToolsAutoOpen) {
+          testWindow.webContents.openDevTools({ mode: 'detach' })
+          console.log('根据设置自动打开了测试搜索窗口开发者工具')
+        }
+      } catch (error) {
+        console.error('检查开发者工具设置时出错:', error)
+      }
 
       // 配置User-Agent
       testWindow.webContents.session.webRequest.onBeforeSendHeaders(

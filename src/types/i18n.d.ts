@@ -608,6 +608,12 @@ declare module 'vue-i18n' {
       loggingEnableDesc: string
       loggingDisableDesc: string
       loggingRestartNotice: string
+      devToolsAutoOpen: string
+      devToolsAutoOpenDesc: string
+      devToolsDialogTitle: string
+      devToolsEnableDesc: string
+      devToolsDisableDesc: string
+      devToolsRestartNotice: string
       openLogFolder: string
       notifications: string
       notificationsDesc: string

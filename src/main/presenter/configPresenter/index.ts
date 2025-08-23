@@ -46,6 +46,7 @@ interface IAppSettings {
   copyWithCotEnabled?: boolean
   loggingEnabled?: boolean // 日志记录是否启用
   floatingButtonEnabled?: boolean // 悬浮按钮是否启用
+  devToolsAutoOpen?: boolean // 开发者工具是否自动打开
   default_system_prompt?: string // 默认系统提示词
   sidebarOpen?: boolean // 侧边栏展开状态
   [key: string]: unknown // 允许任意键，使用unknown类型替代any
@@ -109,6 +110,7 @@ export class ConfigPresenter implements IConfigPresenter {
         copyWithCotEnabled: true,
         loggingEnabled: false,
         floatingButtonEnabled: false,
+        devToolsAutoOpen: false,
         default_system_prompt: '',
         sidebarOpen: true,
         appVersion: this.currentAppVersion
@@ -1191,6 +1193,18 @@ export class ConfigPresenter implements IConfigPresenter {
   // 设置自动检测NPM Registry
   setAutoDetectNpmRegistry(enabled: boolean): void {
     this.mcpConfHelper.setAutoDetectNpmRegistry(enabled)
+  }
+
+  // 获取开发者工具自动打开状态
+  getDevToolsAutoOpen(): boolean {
+    const value = this.getSetting<boolean>('devToolsAutoOpen') ?? false
+    return value === undefined || value === null ? false : value
+  }
+
+  // 设置开发者工具自动打开状态
+  setDevToolsAutoOpen(enabled: boolean): void {
+    this.setSetting('devToolsAutoOpen', enabled)
+    eventBus.send(CONFIG_EVENTS.DEV_TOOLS_AUTO_OPEN_CHANGED, SendTarget.ALL_WINDOWS, enabled)
   }
 
   // 清除NPM Registry缓存

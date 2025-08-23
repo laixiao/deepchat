@@ -34,6 +34,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const copyWithCotEnabled = ref<boolean>(true)
   const closeToQuitEnabled = ref<boolean>(false) // 关闭应用行为设置，默认隐藏到托盘
   const notificationsEnabled = ref<boolean>(true) // 系统通知是否启用，默认启用
+  const devToolsAutoOpen = ref<boolean>(false) // 开发者工具是否自动打开，默认禁用
   const fontSizeLevel = ref<number>(DEFAULT_FONT_SIZE_LEVEL) // 字体大小级别，默认为 1
   // Ollama 相关状态
   const ollamaRunningModels = ref<OllamaModel[]>([])
@@ -328,6 +329,9 @@ export const useSettingsStore = defineStore('settings', () => {
       // 获取关闭应用行为设置
       closeToQuitEnabled.value = await configP.getCloseToQuit()
 
+      // 获取开发者工具自动打开设置
+      devToolsAutoOpen.value = await configP.getDevToolsAutoOpen()
+
       // 加载最后选中的provider
       lastSelectedProviderId.value = await loadLastSelectedProvider()
 
@@ -371,6 +375,9 @@ export const useSettingsStore = defineStore('settings', () => {
 
       // 设置拷贝事件监听器
       setupCopyWithCotEnabledListener()
+
+      // 设置开发者工具事件监听器
+      setupDevToolsAutoOpenListener()
 
       // 单独刷新一次 Ollama 模型，确保即使没有启用 Ollama provider 也能获取模型列表
       if (providers.value.some((p) => p.id === 'ollama')) {
@@ -1435,6 +1442,23 @@ export const useSettingsStore = defineStore('settings', () => {
     await configP.setLoggingEnabled(enabled)
   }
 
+  // 开发者工具自动打开状态
+  const devToolsAutoOpenEnabled = computed({
+    get: () => devToolsAutoOpen.value,
+    set: (value) => {
+      setDevToolsAutoOpen(value)
+    }
+  })
+
+  // 设置开发者工具自动打开状态
+  const setDevToolsAutoOpen = async (enabled: boolean) => {
+    // 更新本地状态
+    devToolsAutoOpen.value = Boolean(enabled)
+
+    // 调用ConfigPresenter设置值
+    await configP.setDevToolsAutoOpen(enabled)
+  }
+
   ///////////////////////////////////////////////////////////////////////////////////////
   const setCopyWithCotEnabled = async (enabled: boolean) => {
     copyWithCotEnabled.value = Boolean(enabled)
@@ -1459,6 +1483,15 @@ export const useSettingsStore = defineStore('settings', () => {
       CONFIG_EVENTS.COPY_WITH_COT_CHANGED,
       (_event, enabled: boolean) => {
         copyWithCotEnabled.value = enabled
+      }
+    )
+  }
+
+  const setupDevToolsAutoOpenListener = () => {
+    window.electron.ipcRenderer.on(
+      CONFIG_EVENTS.DEV_TOOLS_AUTO_OPEN_CHANGED,
+      (_event, enabled: boolean) => {
+        devToolsAutoOpen.value = enabled
       }
     )
   }
@@ -1677,6 +1710,8 @@ export const useSettingsStore = defineStore('settings', () => {
     copyWithCotEnabled,
     closeToQuitEnabled,
     notificationsEnabled, // 暴露系统通知状态
+    devToolsAutoOpen, // 暴露开发者工具自动打开状态
+    devToolsAutoOpenEnabled, // 暴露开发者工具计算属性
     loggingEnabled,
     updateProvider,
     updateFontSizeLevel, // Expose update function
@@ -1723,10 +1758,12 @@ export const useSettingsStore = defineStore('settings', () => {
     setContentProtectionEnabled,
     setupContentProtectionListener,
     setLoggingEnabled,
+    setDevToolsAutoOpen, // 暴露设置开发者工具的方法
     getCopyWithCotEnabled,
     setCopyWithCotEnabled,
     setCloseToQuitEnabled,
     setupCopyWithCotEnabledListener,
+    setupDevToolsAutoOpenListener,
     testSearchEngine,
     refreshSearchEngines,
     findModelByIdOrName,

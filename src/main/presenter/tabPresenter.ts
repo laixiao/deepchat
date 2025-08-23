@@ -143,6 +143,17 @@ export class TabPresenter implements ITabPresenter {
       // view.webContents.openDevTools({ mode: 'detach' })
     }
 
+    // 根据设置自动打开开发者工具
+    try {
+      const devToolsAutoOpen = presenter.configPresenter.getDevToolsAutoOpen()
+      if (devToolsAutoOpen) {
+        view.webContents.openDevTools({ mode: 'detach' })
+        console.log('根据设置自动打开了标签页开发者工具')
+      }
+    } catch (error) {
+      console.error('检查开发者工具设置时出错:', error)
+    }
+
     // 存储标签信息
     const tabId = view.webContents.id
     this.tabs.set(tabId, view)

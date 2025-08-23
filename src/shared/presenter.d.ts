@@ -361,6 +361,9 @@ export interface IConfigPresenter {
   // 悬浮按钮设置
   getFloatingButtonEnabled(): boolean
   setFloatingButtonEnabled(enabled: boolean): void
+  // 开发者工具设置
+  getDevToolsAutoOpen(): boolean
+  setDevToolsAutoOpen(enabled: boolean): void
   // 日志设置
   getLoggingEnabled(): boolean
   setLoggingEnabled(enabled: boolean): void

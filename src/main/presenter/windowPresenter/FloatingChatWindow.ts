@@ -102,6 +102,18 @@ export class FloatingChatWindow {
       this.setupWindowEvents()
       this.registerVirtualTab()
 
+      // 根据设置自动打开开发者工具
+      try {
+        const { presenter } = await import('@/presenter')
+        const devToolsAutoOpen = presenter.configPresenter.getDevToolsAutoOpen()
+        if (devToolsAutoOpen) {
+          this.window.webContents.openDevTools({ mode: 'detach' })
+          console.log('根据设置自动打开了悬浮聊天窗口开发者工具')
+        }
+      } catch (error) {
+        console.error('检查悬浮聊天窗口开发者工具设置时出错:', error)
+      }
+
       logger.info('FloatingChatWindow created successfully')
 
       this.loadPageContent()

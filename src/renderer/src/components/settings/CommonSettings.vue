@@ -266,6 +266,28 @@
           </div>
         </div>
 
+        <!-- 开发者工具开关 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:code" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.devToolsAutoOpen') }}</span>
+              </span>
+              <div class="flex-shrink-0">
+                <Switch
+                  id="dev-tools-switch"
+                  :checked="devToolsAutoOpenEnabled"
+                  @update:checked="handleDevToolsAutoOpenChange"
+                />
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.devToolsAutoOpenDesc') }}
+            </div>
+          </div>
+        </div>
+
         <!-- 音效开关 -->
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
           <div class="flex flex-col gap-2">
@@ -639,6 +661,31 @@
           <DialogFooter>
             <Button variant="outline" @click="cancelLoggingChange">{{ t('common.cancel') }}</Button>
             <Button @click="confirmLoggingChange">{{ t('common.confirm') }}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <!-- 开发者工具开关确认对话框 -->
+      <Dialog :open="isDevToolsDialogOpen" @update:open="cancelDevToolsChange">
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{{ t('settings.common.devToolsDialogTitle') }}</DialogTitle>
+            <DialogDescription>
+              <div class="space-y-2">
+                <p>
+                  {{
+                    newDevToolsValue
+                      ? t('settings.common.devToolsEnableDesc')
+                      : t('settings.common.devToolsDisableDesc')
+                  }}
+                </p>
+                <p>{{ t('settings.common.devToolsRestartNotice') }}</p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" @click="cancelDevToolsChange">{{ t('common.cancel') }}</Button>
+            <Button @click="confirmDevToolsChange">{{ t('common.confirm') }}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1288,6 +1335,16 @@ const loggingEnabled = computed({
   }
 })
 
+// 开发者工具自动打开开关
+const devToolsAutoOpenEnabled = computed({
+  get: () => {
+    return settingsStore.devToolsAutoOpenEnabled
+  },
+  set: (value) => {
+    settingsStore.setDevToolsAutoOpen(value)
+  }
+})
+
 // 处理搜索预览状态变更
 const handleSearchPreviewChange = (value: boolean) => {
   console.log('切换搜索预览状态:', value)
@@ -1313,6 +1370,27 @@ const cancelLoggingChange = () => {
 const confirmLoggingChange = () => {
   settingsStore.setLoggingEnabled(newLoggingValue.value)
   isLoggingDialogOpen.value = false
+}
+
+// 开发者工具开关相关
+const isDevToolsDialogOpen = ref(false)
+const newDevToolsValue = ref(false)
+
+// 处理开发者工具开关状态变更
+const handleDevToolsAutoOpenChange = (value: boolean) => {
+  console.log('准备切换开发者工具状态:', value)
+  // 显示确认对话框
+  newDevToolsValue.value = value
+  isDevToolsDialogOpen.value = true
+}
+
+const cancelDevToolsChange = () => {
+  isDevToolsDialogOpen.value = false
+}
+
+const confirmDevToolsChange = () => {
+  settingsStore.setDevToolsAutoOpen(newDevToolsValue.value)
+  isDevToolsDialogOpen.value = false
 }
 
 const openLogFolder = () => {
