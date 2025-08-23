@@ -17,6 +17,13 @@ export interface ProviderModelSetting {
   reasoningEffort?: 'minimal' | 'low' | 'medium' | 'high'
   verbosity?: 'low' | 'medium' | 'high'
   maxCompletionTokens?: number // GPT-5 系列使用此参数替代 maxTokens
+  // 新增属性
+  network?: boolean // 是否支持网络访问
+  isFree?: boolean // 是否免费
+  pricing?: {
+    input?: number // 输入价格 (per 1K tokens)
+    output?: number // 输出价格 (per 1K tokens)
+  }
 }
 
 // 为每个提供商创建映射对象，使用models数组包装模型配置
@@ -35,7 +42,13 @@ export const providerModelSettings: Record<string, { models: ProviderModelSettin
         reasoning: true,
         reasoningEffort: 'medium',
         verbosity: 'medium',
-        maxCompletionTokens: 16384
+        maxCompletionTokens: 16384,
+        network: false,
+        isFree: false,
+        pricing: {
+          input: 10.0, // $10 per 1K input tokens
+          output: 30.0  // $30 per 1K output tokens
+        }
       },
       {
         id: 'gpt-5-mini',
@@ -48,7 +61,13 @@ export const providerModelSettings: Record<string, { models: ProviderModelSettin
         reasoning: true,
         reasoningEffort: 'medium',
         verbosity: 'medium',
-        maxCompletionTokens: 128000
+        maxCompletionTokens: 128000,
+        network: false,
+        isFree: false,
+        pricing: {
+          input: 0.15,
+          output: 0.60
+        }
       },
       {
         id: 'gpt-5-nano',

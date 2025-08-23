@@ -26,5 +26,17 @@
     "code": "Code",
     "writing": "Writing",
     "analysis": "Analysis"
+  },
+  "categories": {
+    "all": "All",
+    "chat": "Chat",
+    "reasoning": "Reasoning",
+    "vision": "Vision",
+    "network": "Network",
+    "free": "Free",
+    "rerank": "Rerank",
+    "tool": "Tool",
+    "embedding": "Embedding",
+    "imageGeneration": "Image Generation"
   }
 }

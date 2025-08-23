@@ -26,5 +26,17 @@
     "code": "Код",
     "writing": "Письмо",
     "analysis": "Анализ"
+  },
+  "categories": {
+    "all": "Все",
+    "chat": "Чат",
+    "reasoning": "Рассуждение",
+    "vision": "Зрение",
+    "network": "Сеть",
+    "free": "Бесплатно",
+    "rerank": "Переранжирование",
+    "tool": "Инструмент",
+    "embedding": "Векторизация",
+    "imageGeneration": "Генерация изображений"
   }
 }

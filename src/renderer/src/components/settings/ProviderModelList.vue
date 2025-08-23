@@ -1,6 +1,26 @@
 <template>
   <div class="flex flex-col w-full gap-2">
     <Input v-model="modelSearchQuery" :placeholder="t('model.search.placeholder')" />
+    
+    <!-- 模型分类选择器 -->
+    <div class="flex flex-wrap gap-2 p-2 border rounded-lg bg-muted/30">
+      <Button
+        v-for="category in Object.values(ModelCategory)"
+        :key="category"
+        :variant="selectedCategory === category ? 'default' : 'outline'"
+        size="xs"
+        class="text-xs h-7 px-3"
+        @click="selectedCategory = category"
+      >
+        {{ t(`model.categories.${category}`) }}
+        <span 
+          v-if="categoryStats[category] > 0" 
+          class="ml-1 px-1.5 py-0.5 bg-primary/20 text-primary rounded text-xs"
+        >
+          {{ categoryStats[category] }}
+        </span>
+      </Button>
+    </div>
     <div class="text-xs text-muted-foreground px-2">{{ t('model.type.custom') }}</div>
     <div
       v-show="filteredCustomModels.length > 0"
@@ -138,6 +158,11 @@ import ModelConfigItem from './ModelConfigItem.vue'
 import { type RENDERER_MODEL_META } from '@shared/presenter'
 import { ModelType } from '@shared/model'
 import { useSettingsStore } from '@/stores/settings'
+import { 
+  ModelCategory, 
+  filterModelsByCategory, 
+  getCategoryStats 
+} from '@/lib/modelCategories'
 
 const { t } = useI18n()
 interface ModelEdit {
@@ -150,6 +175,7 @@ interface ModelEdit {
 
 const addModelList = ref<ModelEdit[]>([])
 const modelSearchQuery = ref('')
+const selectedCategory = ref<ModelCategory>(ModelCategory.All)
 const settingsStore = useSettingsStore()
 
 const props = defineProps<{
@@ -163,43 +189,68 @@ const emit = defineEmits<{
   'config-changed': []
 }>()
 
+// 计算所有模型的分类统计
+const allModels = computed(() => {
+  const models: RENDERER_MODEL_META[] = []
+  // 添加官方模型
+  props.providerModels.forEach(provider => {
+    models.push(...provider.models)
+  })
+  // 添加自定义模型
+  models.push(...props.customModels)
+  return models
+})
+
+const categoryStats = computed(() => getCategoryStats(allModels.value))
+
 const filteredProviderModels = computed(() => {
-  if (!modelSearchQuery.value) {
-    return props.providerModels
+  let providerModels = props.providerModels
+
+  // 按搜索关键词过滤
+  if (modelSearchQuery.value) {
+    providerModels = providerModels
+      .map((provider) => ({
+        providerId: provider.providerId,
+        models: provider.models.filter(
+          (model) =>
+            model.name.toLowerCase().includes(modelSearchQuery.value.toLowerCase()) ||
+            model.id.toLowerCase().includes(modelSearchQuery.value.toLowerCase())
+        )
+      }))
+      .filter((provider) => provider.models.length > 0)
   }
 
-  return props.providerModels
-    .map((provider) => ({
-      providerId: provider.providerId,
-      models: provider.models.filter(
-        (model) =>
-          model.name.toLowerCase().includes(modelSearchQuery.value.toLowerCase()) ||
-          model.id.toLowerCase().includes(modelSearchQuery.value.toLowerCase())
-      )
-    }))
-    .filter((provider) => provider.models.length > 0)
+  // 按分类过滤
+  if (selectedCategory.value !== ModelCategory.All) {
+    providerModels = providerModels
+      .map((provider) => ({
+        providerId: provider.providerId,
+        models: filterModelsByCategory(provider.models, selectedCategory.value)
+      }))
+      .filter((provider) => provider.models.length > 0)
+  }
+
+  return providerModels
 })
 
 const filteredCustomModels = computed(() => {
-  const customModelsList: RENDERER_MODEL_META[] = []
-  for (const model of props.customModels) {
-    customModelsList.push(model)
+  let customModelsList: RENDERER_MODEL_META[] = [...props.customModels]
+
+  // 按搜索关键词过滤
+  if (modelSearchQuery.value) {
+    customModelsList = customModelsList.filter(
+      (model) =>
+        model.name.toLowerCase().includes(modelSearchQuery.value.toLowerCase()) ||
+        model.id.toLowerCase().includes(modelSearchQuery.value.toLowerCase())
+    )
   }
 
-  if (!modelSearchQuery.value) {
-    return customModelsList
+  // 按分类过滤
+  if (selectedCategory.value !== ModelCategory.All) {
+    customModelsList = filterModelsByCategory(customModelsList, selectedCategory.value)
   }
 
-  const filteredModels: RENDERER_MODEL_META[] = []
-  for (const model of customModelsList) {
-    if (
-      model.name.toLowerCase().includes(modelSearchQuery.value.toLowerCase()) ||
-      model.id.toLowerCase().includes(modelSearchQuery.value.toLowerCase())
-    ) {
-      filteredModels.push(model)
-    }
-  }
-  return filteredModels
+  return customModelsList
 })
 
 const getProviderName = (providerId: string) => {

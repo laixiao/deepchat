@@ -26,5 +26,17 @@
     "code": "کد",
     "writing": "نوشتار",
     "analysis": "تحلیل"
+  },
+  "categories": {
+    "all": "همه",
+    "chat": "گفتگو",
+    "reasoning": "استدلال",
+    "vision": "بینایی",
+    "network": "شبکه",
+    "free": "رایگان",
+    "rerank": "بازرتبه‌بندی",
+    "tool": "ابزار",
+    "embedding": "جاسازی",
+    "imageGeneration": "تولید تصویر"
   }
 }

@@ -26,5 +26,17 @@
     "code": "コード",
     "writing": "執筆",
     "analysis": "分析"
+  },
+  "categories": {
+    "all": "すべて",
+    "chat": "チャット",
+    "reasoning": "推論",
+    "vision": "ビジョン",
+    "network": "ネットワーク",
+    "free": "無料",
+    "rerank": "再ランキング",
+    "tool": "ツール",
+    "embedding": "埋め込み",
+    "imageGeneration": "画像生成"
   }
 }

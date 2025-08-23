@@ -483,6 +483,13 @@ export type RENDERER_MODEL_META = {
   functionCall?: boolean
   reasoning?: boolean
   type?: ModelType
+  // 新增属性
+  network?: boolean // 是否支持网络访问
+  isFree?: boolean // 是否免费
+  pricing?: {
+    input?: number // 输入价格 (per 1K tokens)
+    output?: number // 输出价格 (per 1K tokens)
+  }
 }
 export type MODEL_META = {
   id: string

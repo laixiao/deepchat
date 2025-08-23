@@ -453,6 +453,18 @@ declare module 'vue-i18n' {
       custom: string
       official: string
     }
+    categories: {
+      all: string
+      chat: string
+      reasoning: string
+      vision: string
+      network: string
+      free: string
+      rerank: string
+      tool: string
+      embedding: string
+      imageGeneration: string
+    }
     actions: {
       add: string
       enableAll: string

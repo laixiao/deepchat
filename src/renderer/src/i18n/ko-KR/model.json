@@ -26,5 +26,17 @@
     "code": "코드",
     "writing": "글쓰기",
     "analysis": "분석"
+  },
+  "categories": {
+    "all": "모두",
+    "chat": "채팅",
+    "reasoning": "추론",
+    "vision": "비전",
+    "network": "네트워크",
+    "free": "무료",
+    "rerank": "재정렬",
+    "tool": "도구",
+    "embedding": "임베딩",
+    "imageGeneration": "이미지 생성"
   }
 }

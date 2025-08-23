@@ -26,5 +26,17 @@
     "code": "代碼",
     "writing": "寫作",
     "analysis": "分析"
+  },
+  "categories": {
+    "all": "全部",
+    "chat": "對話",
+    "reasoning": "推理",
+    "vision": "視覺",
+    "network": "聯網",
+    "free": "免費",
+    "rerank": "重排",
+    "tool": "工具",
+    "embedding": "嵌入",
+    "imageGeneration": "圖像生成"
   }
 }
