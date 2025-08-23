@@ -31,7 +31,10 @@ export const CONFIG_EVENTS = {
   // OAuth相关事件
   OAUTH_LOGIN_START: 'config:oauth-login-start', // OAuth登录开始
   OAUTH_LOGIN_SUCCESS: 'config:oauth-login-success', // OAuth登录成功
-  OAUTH_LOGIN_ERROR: 'config:oauth-login-error' // OAuth登录失败
+  OAUTH_LOGIN_ERROR: 'config:oauth-login-error', // OAuth登录失败
+  // 视觉模型相关事件
+  VISION_MODEL_CHANGED: 'config:vision-model-changed', // 视觉模型变更事件
+  VISION_MODEL_RESET: 'config:vision-model-reset' // 视觉模型重置事件
 }
 
 // 会话相关事件

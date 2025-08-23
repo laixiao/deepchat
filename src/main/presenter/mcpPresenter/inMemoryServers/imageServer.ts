@@ -46,12 +46,20 @@ const OcrImageArgsSchema = z.object({
 
 export class ImageServer {
   private server: Server
-  private provider: string
-  private model: string
+  private provider: string | null = null
+  private model: string | null = null
 
-  constructor(provider: string, model: string) {
-    this.provider = provider
-    this.model = model
+  constructor(provider?: string, model?: string) {
+    // 如果传入了provider和model，则使用传入的值
+    if (provider && model) {
+      this.provider = provider
+      this.model = model
+      console.log(`Using specified vision model: ${this.provider}/${this.model}`)
+    } else {
+      // 不设置默认值，实际使用时再检查配置
+      console.log('No vision model specified, will check configuration when needed')
+    }
+
     this.server = new Server(
       {
         name: 'image-processing-server',
@@ -64,6 +72,25 @@ export class ImageServer {
       }
     )
     this.setupRequestHandlers()
+  }
+
+  // 动态获取视觉模型配置
+  private async getVisionModelConfig(): Promise<{ provider: string; model: string }> {
+    // 如果已经有配置，直接返回
+    if (this.provider && this.model) {
+      return { provider: this.provider, model: this.model }
+    }
+
+    // 从配置中获取视觉模型设置
+    const visionModelConfig = presenter.configPresenter.getVisionModelSync()
+    if (visionModelConfig) {
+      this.provider = visionModelConfig.providerId
+      this.model = visionModelConfig.modelId
+      return { provider: this.provider, model: this.model }
+    }
+
+    // 如果没有配置，抛出错误
+    throw new Error('Vision model not configured. Please set up a vision model in settings first.')
   }
 
   // No specific initialization needed for now, but can be added for upload service config
@@ -94,9 +121,12 @@ export class ImageServer {
     fileBuffer: Buffer,
     prompt: string
   ): Promise<string> {
+    // 获取视觉模型配置
+    const { provider, model } = await this.getVisionModelConfig()
+
     // TODO: Implement actual API call to a multimodal model (e.g., GPT-4o, Gemini)
     console.log(
-      `Querying ${filePath} (size: ${fileBuffer.length} bytes) using ${this.provider}/${this.model} with prompt: "${prompt}"...`
+      `Querying ${filePath} (size: ${fileBuffer.length} bytes) using ${provider}/${model} with prompt: "${prompt}"...`
     )
 
     // Construct the messages array for the multimodal model
@@ -117,13 +147,13 @@ export class ImageServer {
       }
     ]
 
-    const modelConfig = presenter.configPresenter.getModelConfig(this.model, this.provider)
+    const modelConfig = presenter.configPresenter.getModelConfig(model, provider)
 
     try {
       const response = await presenter.llmproviderPresenter.generateCompletionStandalone(
-        this.provider,
+        provider,
         messages,
-        this.model,
+        model,
         modelConfig?.temperature || 0.6,
         modelConfig?.maxTokens || 1000
       )
@@ -139,9 +169,12 @@ export class ImageServer {
   }
 
   private async ocrImageWithModel(filePath: string, fileBuffer: Buffer): Promise<string> {
+    // 获取视觉模型配置
+    const { provider, model } = await this.getVisionModelConfig()
+
     // TODO: Implement actual API call to an OCR service or a multimodal model capable of OCR
     console.log(
-      `Requesting OCR for ${filePath} (size: ${fileBuffer.length} bytes) using ${this.provider}/${this.model}...`
+      `Requesting OCR for ${filePath} (size: ${fileBuffer.length} bytes) using ${provider}/${model}...`
     )
 
     // Construct the messages array for the multimodal model
@@ -164,13 +197,13 @@ export class ImageServer {
 
     console.log(messages)
 
-    const modelConfig = presenter.configPresenter.getModelConfig(this.model)
+    const modelConfig = presenter.configPresenter.getModelConfig(model, provider)
 
     try {
       const ocrText = await presenter.llmproviderPresenter.generateCompletionStandalone(
-        this.provider,
+        provider,
         messages,
-        this.model,
+        model,
         modelConfig?.temperature || 0.6,
         modelConfig?.maxTokens || 1000
       )

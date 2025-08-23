@@ -47,6 +47,51 @@
             </div>
           </div>
         </div>
+        
+        <!-- 视觉模型选择 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:eye" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.visionModel') }}</span>
+              </span>
+              <div class="flex-shrink-0 min-w-64 max-w-96">
+                <Popover v-model:open="visionModelSelectOpen">
+                  <PopoverTrigger as-child>
+                    <Button variant="outline" class="w-full justify-between">
+                      <div class="flex items-center gap-2">
+                        <ModelIcon
+                          :model-id="selectedVisionModel?.id || ''"
+                          class="h-4 w-4"
+                          :is-dark="themeStore.isDark"
+                        />
+                        <span class="truncate">{{
+                          selectedVisionModel?.name || t('settings.common.selectModel')
+                        }}</span>
+                      </div>
+                      <ChevronDown class="h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent class="w-80 p-0">
+                    <ModelSelect
+                      :type="[]"
+                      :vision-only="true"
+                      @update:model="handleVisionModelSelect"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.visionModelDesc') }}
+            </div>
+            <!-- 添加提示信息，当未选择视觉模型时显示 -->
+            <div v-if="!selectedVisionModel" class="text-xs text-yellow-600 dark:text-yellow-400 pl-0">
+              {{ t('settings.common.visionModelNotSelectedWarning') }}
+            </div>
+          </div>
+        </div>
       </div>
       
       <!-- 搜索设置组 -->
@@ -1035,6 +1080,9 @@ onMounted(async () => {
   
   // 初始化数据同步
   await syncStore.initialize()
+  
+  // 初始化视觉模型
+  await initVisionModel()
 })
 
 watch(selectedSearchEngine, async (newValue) => {
@@ -1055,6 +1103,37 @@ watch(customProxyUrl, () => {
 })
 
 const modelSelectOpen = ref(false)
+const visionModelSelectOpen = ref(false)
+
+// 视觉模型相关
+const selectedVisionModel = ref<RENDERER_MODEL_META | null>(null)
+
+// 处理视觉模型选择
+const handleVisionModelSelect = (model: RENDERER_MODEL_META, providerId: string) => {
+  console.log('update vision model', model, providerId)
+  selectedVisionModel.value = model
+  configPresenter.setVisionModel(providerId, model.id)
+  visionModelSelectOpen.value = false
+}
+
+// 初始化视觉模型
+const initVisionModel = async () => {
+  try {
+    const visionModelConfig = await configPresenter.getVisionModel()
+    if (visionModelConfig) {
+      // 从enabled models中查找对应的模型
+      const provider = settingsStore.enabledModels.find(p => p.providerId === visionModelConfig.providerId)
+      if (provider) {
+        const model = provider.models.find(m => m.id === visionModelConfig.modelId && m.vision)
+        if (model) {
+          selectedVisionModel.value = model
+        }
+      }
+    }
+  } catch (error) {
+    console.error('获取视觉模型配置失败:', error)
+  }
+}
 
 // 数据同步相关状态
 const isImportDialogOpen = ref(false)

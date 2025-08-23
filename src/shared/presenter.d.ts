@@ -365,6 +365,10 @@ export interface IConfigPresenter {
   getLoggingEnabled(): boolean
   setLoggingEnabled(enabled: boolean): void
   openLoggingFolder(): void
+  // 视觉模型设置
+  getVisionModel(): Promise<{ providerId: string; modelId: string } | null>
+  setVisionModel(providerId: string, modelId: string): void
+  resetVisionModel(): void
   // 自定义模型管理
   getCustomModels(providerId: string): MODEL_META[]
   setCustomModels(providerId: string, models: MODEL_META[]): void
@@ -727,7 +731,7 @@ export interface IThreadPresenter {
   setSearchEngine(engineId: string): Promise<boolean>
   // 搜索引擎测试
   testSearchEngine(query?: string): Promise<boolean>
-  // 搜索助手模型设置
+  // 搜索模型设置
   setSearchAssistantModel(model: MODEL_META, providerId: string): void
   getMainMessageByParentId(conversationId: string, parentId: string): Promise<Message | null>
   destroy(): void

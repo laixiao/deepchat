@@ -43,11 +43,11 @@ export const useSettingsStore = defineStore('settings', () => {
   // 最后选中的provider ID
   const lastSelectedProviderId = ref<string | null>(null)
 
-  // 搜索助手模型相关
+  // 搜索模型相关
   const searchAssistantModelRef = ref<RENDERER_MODEL_META | null>(null)
   const searchAssistantProviderRef = ref<string>('')
 
-  // 搜索助手模型计算属性
+  // 搜索模型计算属性
   const searchAssistantModel = computed(() => searchAssistantModelRef.value)
 
   // 模型匹配字符串数组，按优先级排序
@@ -102,7 +102,7 @@ export const useSettingsStore = defineStore('settings', () => {
     return null
   }
 
-  // 设置搜索助手模型
+  // 设置搜索模型
   const setSearchAssistantModel = async (model: RENDERER_MODEL_META, providerId: string) => {
     const _model = toRaw(model)
     searchAssistantModelRef.value = _model
@@ -113,13 +113,13 @@ export const useSettingsStore = defineStore('settings', () => {
       providerId
     })
 
-    // 通知更新搜索助手模型
+    // 通知更新搜索模型
     threadP.setSearchAssistantModel(_model, providerId)
   }
 
-  // 初始化或更新搜索助手模型
+  // 初始化或更新搜索模型
   const initOrUpdateSearchAssistantModel = async () => {
-    // 尝试从配置中加载搜索助手模型
+    // 尝试从配置中加载搜索模型
     let savedModel = await configP.getSetting<{ model: RENDERER_MODEL_META; providerId: string }>(
       'searchAssistantModel'
     )
@@ -132,7 +132,7 @@ export const useSettingsStore = defineStore('settings', () => {
       // if (modelExists) {
       searchAssistantModelRef.value = savedModel.model
       searchAssistantProviderRef.value = savedModel.providerId
-      // 通知线程处理器更新搜索助手模型
+      // 通知线程处理器更新搜索模型
       threadP.setSearchAssistantModel(savedModel.model, savedModel.providerId)
       return
       // }
@@ -163,7 +163,7 @@ export const useSettingsStore = defineStore('settings', () => {
         providerId: priorityModel.providerId
       })
 
-      // 通知线程处理器更新搜索助手模型
+      // 通知线程处理器更新搜索模型
       threadP.setSearchAssistantModel(
         {
           id: priorityModel.model.id,
@@ -376,7 +376,7 @@ export const useSettingsStore = defineStore('settings', () => {
       if (providers.value.some((p) => p.id === 'ollama')) {
         await refreshOllamaModels()
       }
-      // 初始化搜索助手模型
+      // 初始化搜索模型
       await initOrUpdateSearchAssistantModel()
       // 设置事件监听
       setupProviderListener()
@@ -566,11 +566,11 @@ export const useSettingsStore = defineStore('settings', () => {
       const modelExists = provider?.models.some((m) => m.id === searchAssistantModelRef.value?.id)
 
       if (!modelExists) {
-        // 如果当前搜索助手模型不再可用，重新选择
+        // 如果当前搜索模型不再可用，重新选择
         await initOrUpdateSearchAssistantModel()
       }
     } else {
-      // 如果还没有设置搜索助手模型，设置一个
+      // 如果还没有设置搜索模型，设置一个
       await initOrUpdateSearchAssistantModel()
     }
   }
@@ -1210,7 +1210,7 @@ export const useSettingsStore = defineStore('settings', () => {
       })
     }
 
-    // 触发搜索助手模型更新，确保如果有 Ollama 模型符合条件也能被用作搜索助手
+    // 触发搜索模型更新，确保如果有 Ollama 模型符合条件也能被用作搜索模型
     await initOrUpdateSearchAssistantModel()
   }
 
@@ -1363,6 +1363,16 @@ export const useSettingsStore = defineStore('settings', () => {
   // 搜索预览设置 - 直接从configPresenter获取
   const getSearchPreviewEnabled = async (): Promise<boolean> => {
     return await configP.getSearchPreviewEnabled()
+  }
+
+  // 添加设置visionModel的方法
+  const setVisionModel = async (providerId: string, modelId: string) => {
+    await configP.setVisionModel(providerId, modelId)
+  }
+
+  // 重置视觉模型设置
+  const resetVisionModel = async () => {
+    await configP.resetVisionModel()
   }
 
   // 添加监听搜索引擎更新的事件
@@ -1744,6 +1754,9 @@ export const useSettingsStore = defineStore('settings', () => {
     setupProviderListener,
     getModelConfig,
     setModelConfig,
-    resetModelConfig
+    resetModelConfig,
+    // 视觉模型相关方法
+    setVisionModel,
+    resetVisionModel
   }
 })

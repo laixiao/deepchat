@@ -762,6 +762,37 @@ export class ConfigPresenter implements IConfigPresenter {
     this.setSetting('searchPreviewEnabled', boolValue)
   }
 
+  // 获取视觉模型配置
+  getVisionModel(): Promise<{ providerId: string; modelId: string } | null> {
+    const visionModel = this.getSetting<{ providerId: string; modelId: string }>('visionModel')
+    return Promise.resolve(visionModel || null)
+  }
+
+  // 同步获取视觉模型配置
+  getVisionModelSync(): { providerId: string; modelId: string } | null {
+    return this.getSetting<{ providerId: string; modelId: string }>('visionModel') || null
+  }
+
+  // 设置视觉模型配置
+  setVisionModel(providerId: string, modelId: string): void {
+    console.log('ConfigPresenter.setVisionModel:', providerId, modelId)
+    this.setSetting('visionModel', { providerId, modelId })
+
+    // 发送事件通知视觉模型配置变更
+    eventBus.send(CONFIG_EVENTS.VISION_MODEL_CHANGED, SendTarget.ALL_WINDOWS, {
+      providerId,
+      modelId
+    })
+  }
+
+  // 重置视觉模型配置
+  resetVisionModel(): void {
+    this.store.delete('visionModel')
+
+    // 发送事件通知视觉模型配置重置
+    eventBus.send(CONFIG_EVENTS.VISION_MODEL_RESET, SendTarget.ALL_WINDOWS)
+  }
+
   // 获取投屏保护设置状态
   getContentProtectionEnabled(): boolean {
     const value = this.getSetting<boolean>('contentProtectionEnabled')

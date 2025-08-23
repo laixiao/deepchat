@@ -1184,7 +1184,7 @@ export class SearchManager {
       const searchAssistantModel = presenter.threadPresenter.searchAssistantModel
       const searchAssistantProviderId = presenter.threadPresenter.searchAssistantProviderId
       if (!searchAssistantModel || !searchAssistantProviderId) {
-        throw new Error('搜索助手模型或提供商ID未设置')
+        throw new Error('搜索模型或提供商ID未设置')
       }
       const modelResponse = await presenter.llmproviderPresenter.generateCompletion(
         searchAssistantProviderId,
