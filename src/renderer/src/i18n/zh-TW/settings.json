@@ -712,6 +712,7 @@
     "npmRegistry": {
       "title": "NPM源設定",
       "currentSource": "目前來源",
+      "detecting": "檢測中...",
       "cached": "快取",
       "lastChecked": "上次檢測",
       "refresh": "重新整理",

@@ -709,6 +709,7 @@
     "npmRegistry": {
       "title": "NPMソース設定",
       "currentSource": "現在のソース",
+      "detecting": "検出中...",
       "cached": "キャッシュ",
       "lastChecked": "最終チェック",
       "refresh": "更新",

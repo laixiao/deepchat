@@ -703,6 +703,7 @@
     "npmRegistry": {
       "title": "Configuration des sources NPM",
       "currentSource": "Source actuelle",
+      "detecting": "Détection...",
       "cached": "En cache",
       "lastChecked": "Dernière vérification",
       "refresh": "Actualiser",

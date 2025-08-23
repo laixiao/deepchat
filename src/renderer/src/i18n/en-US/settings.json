@@ -719,6 +719,7 @@
     "npmRegistry": {
       "title": "NPM Registry Configuration",
       "currentSource": "Current Source",
+      "detecting": "Detecting...",
       "cached": "Cached",
       "lastChecked": "Last Checked",
       "refresh": "Refresh",

@@ -710,6 +710,7 @@
     "npmRegistry": {
       "title": "NPM 소스 설정",
       "currentSource": "현재 소스",
+      "detecting": "감지 중...",
       "cached": "캐시됨",
       "lastChecked": "마지막 확인",
       "refresh": "새로고침",

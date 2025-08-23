@@ -1,78 +1,65 @@
 <template>
-  <div class="w-full h-full flex flex-col">
-    <div class="p-4 border-b bg-card sticky top-0 z-10 flex items-center gap-2">
-      <Icon icon="lucide:shopping-bag" class="w-4 h-4" />
-      <h3 class="text-sm font-medium">{{ t('mcp.market.builtinTitle') }}</h3>
-      <a
-        href="https://mcprouter.co/"
-        target="_blank"
-        class="text-xs text-muted-foreground hover:text-foreground transition-colors"
-      >
-        {{ t('mcp.market.poweredBy') }}
-      </a>
-      <div class="ml-auto flex items-center gap-2">
+  <div class="w-full h-full overflow-auto bg-background">
+    <!-- 页面标题栏 -->
+    <div class="px-6 py-4 border-b bg-card/50">
+      <div class="flex items-center gap-3">
         <div class="flex items-center gap-2">
-          <Input
-            v-model="apiKeyInput"
-            type="password"
-            :placeholder="t('mcp.market.apiKeyPlaceholder')"
-            class="w-64"
-          />
-          <Button size="sm" @click="saveApiKey">{{ t('common.save') }}</Button>
+          <Icon icon="lucide:shopping-bag" class="w-5 h-5 text-primary" />
+          <h1 class="text-lg font-semibold">{{ t('mcp.market.builtinTitle') }}</h1>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-muted-foreground">
+          <span>•</span>
+          <a
+            href="https://mcprouter.co/"
+            target="_blank"
+            class="hover:text-foreground transition-colors underline-offset-4 hover:underline"
+          >
+            {{ t('mcp.market.poweredBy') }}
+          </a>
         </div>
       </div>
     </div>
-
-    <!-- API Key 获取提示 -->
-    <div class="px-4 py-2 bg-muted/30 border-b text-xs text-muted-foreground">
-      {{ t('mcp.market.keyHelpText') }}
-      <Button
-        variant="link"
-        size="sm"
-        class="text-xs p-0 h-auto font-normal text-primary hover:underline"
-        @click="openHowToGetKey"
-      >
-        {{ t('mcp.market.keyGuide') }}
-      </Button>
-      {{ t('mcp.market.keyHelpEnd') }}
-    </div>
-
     <!-- MCP全局开关 -->
-    <div class="p-4 border-b bg-card">
-      <div class="flex items-center justify-between">
-        <div :dir="languageStore.dir">
-          <h3 class="text-sm font-medium">{{ t('settings.mcp.enabledTitle') }}</h3>
-          <p class="text-xs text-muted-foreground mt-1">
-            {{ t('settings.mcp.enabledDescription') }}
-          </p>
+    <div class="mx-6 mt-6 p-4 bg-card rounded-lg border shadow-sm">
+        <div class="flex items-center justify-between">
+          <div :dir="languageStore.dir" class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <Icon icon="lucide:power" class="w-4 h-4 text-primary" />
+              <h3 class="text-sm font-semibold">{{ t('settings.mcp.enabledTitle') }}</h3>
+            </div>
+            <p class="text-xs text-muted-foreground">
+              {{ t('settings.mcp.enabledDescription') }}
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <Badge v-if="mcpEnabled" variant="default" class="text-xs px-2 py-1">
+              {{ t('mcp.status.enabled') }}
+            </Badge>
+            <Badge v-else variant="secondary" class="text-xs px-2 py-1">
+              {{ t('mcp.status.disabled') }}
+            </Badge>
+            <Switch dir="ltr" :checked="mcpEnabled" @update:checked="handleMcpEnabledChange" />
+          </div>
         </div>
-        <div class="flex items-center gap-2">
-          <Badge v-if="mcpEnabled" variant="default" class="text-xs">
-            {{ t('mcp.status.enabled') }}
-          </Badge>
-          <Badge v-else variant="secondary" class="text-xs">
-            {{ t('mcp.status.disabled') }}
-          </Badge>
-          <Switch dir="ltr" :checked="mcpEnabled" @update:checked="handleMcpEnabledChange" />
-        </div>
-      </div>
     </div>
 
     <!-- NPM源配置区域 -->
-    <div class="border-b bg-card">
-      <div class="p-4">
-        <h4 class="text-sm font-medium mb-3">{{ t('settings.mcp.npmRegistry.title') }}</h4>
-        <div class="space-y-3">
+    <div class="mx-6 mt-4 p-4 bg-card rounded-lg border shadow-sm">
+        <div class="flex items-center gap-2 mb-4">
+          <Icon icon="lucide:package" class="w-4 h-4 text-primary" />
+          <h4 class="text-sm font-semibold">{{ t('settings.mcp.npmRegistry.title') }}</h4>
+        </div>
+        <div class="space-y-4">
           <!-- 当前源状态 -->
-          <div class="flex items-center justify-between bg-muted/30 rounded p-3">
-            <div class="flex items-center gap-2">
+          <div class="flex items-center justify-between bg-muted/20 rounded-lg p-3 border">
+            <div class="flex items-center gap-3">
               <Icon icon="lucide:globe" class="w-4 h-4 text-muted-foreground" />
               <div>
-                <div class="text-xs text-muted-foreground">{{ t('settings.mcp.npmRegistry.currentRegistry') }}</div>
+                <div class="text-xs text-muted-foreground mb-1">{{ t('settings.mcp.npmRegistry.currentSource') }}</div>
                 <div class="text-sm font-mono truncate max-w-[300px]" :title="npmRegistryStatus.currentRegistry || undefined">
                   {{ npmRegistryStatus.currentRegistry || t('settings.mcp.npmRegistry.detecting') }}
                 </div>
-                <div v-if="npmRegistryStatus.lastChecked" class="text-xs text-muted-foreground mt-0.5">
+                <div v-if="npmRegistryStatus.lastChecked" class="text-xs text-muted-foreground mt-1">
                   {{ t('settings.mcp.npmRegistry.lastChecked') }}: {{ formatLastChecked(npmRegistryStatus.lastChecked) }}
                   <Badge v-if="npmRegistryStatus.isFromCache" variant="outline" class="ml-1 text-xs">
                     {{ t('settings.mcp.npmRegistry.cached') }}
@@ -80,7 +67,7 @@
                 </div>
               </div>
             </div>
-            <Button size="sm" @click="refreshNpmRegistry" :disabled="refreshing">
+            <Button size="sm" variant="outline" @click="refreshNpmRegistry" :disabled="refreshing">
               <Icon v-if="refreshing" icon="lucide:loader-2" class="w-3.5 h-3.5 mr-1 animate-spin" />
               <Icon v-else icon="lucide:refresh-cw" class="w-3.5 h-3.5 mr-1" />
               {{ t('settings.mcp.npmRegistry.refresh') }}
@@ -88,10 +75,10 @@
           </div>
 
           <!-- 自动检测开关 -->
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between p-3 bg-muted/10 rounded-lg">
             <div>
               <div class="text-sm font-medium">{{ t('settings.mcp.npmRegistry.autoDetect') }}</div>
-              <div class="text-xs text-muted-foreground">{{ t('settings.mcp.npmRegistry.autoDetectDesc') }}</div>
+              <div class="text-xs text-muted-foreground mt-1">{{ t('settings.mcp.npmRegistry.autoDetectDesc') }}</div>
             </div>
             <Switch
               :checked="npmRegistryStatus.autoDetectEnabled"
@@ -100,7 +87,7 @@
           </div>
 
           <!-- 高级设置按钮 -->
-          <div class="pt-1">
+          <div>
             <Dialog v-model:open="advancedDialogOpen">
               <DialogTrigger as-child>
                 <Button variant="outline" size="sm" class="w-full">
@@ -117,11 +104,11 @@
                 </DialogHeader>
                 <div class="space-y-4">
                   <div class="space-y-2">
-                    <label class="text-sm font-medium">{{ t('settings.mcp.npmRegistry.customRegistry') }}</label>
+                    <label class="text-sm font-medium">{{ t('settings.mcp.npmRegistry.customSource') }}</label>
                     <div class="flex gap-2">
                       <Input
                         v-model="customRegistryInput"
-                        :placeholder="t('settings.mcp.npmRegistry.registryUrlPlaceholder')"
+                        :placeholder="t('settings.mcp.npmRegistry.customSourcePlaceholder')"
                         class="flex-1"
                       />
                       <Button size="sm" @click="saveCustomNpmRegistry">
@@ -129,7 +116,7 @@
                       </Button>
                     </div>
                     <div class="text-xs text-muted-foreground">
-                      {{ t('settings.mcp.npmRegistry.customRegistryDesc') }}
+                      {{ t('settings.mcp.npmRegistry.advancedSettingsDesc') }}
                     </div>
                   </div>
                   <div v-if="npmRegistryStatus.customRegistry" class="space-y-2">
@@ -146,92 +133,146 @@
             </Dialog>
           </div>
         </div>
-      </div>
     </div>
 
     <!-- 外部MCP市场入口 -->
-    <div class="p-4 border-b bg-card">
-      <h4 class="text-sm font-medium mb-3">{{ t('mcp.market.externalMarkets') }}</h4>
-      <div class="space-y-2">
-        <div class="flex gap-2">
-          <Button v-if="false" variant="outline" class="flex-1 flex items-center justify-center gap-2" @click="openMcpMarketplace">
-            <Icon icon="lucide:shopping-bag" class="w-4 h-4" />
-            <span>{{ t('settings.mcp.marketplace') }}</span>
-            <Icon icon="lucide:external-link" class="w-3.5 h-3.5 text-muted-foreground" />
-          </Button>
-
-          <!-- Higress MCP Marketplace 入口 -->
-          <Button variant="outline" class="flex-1 flex items-center justify-center gap-2" @click="openHigressMcpMarketplace">
-            <img src="@/assets/mcp-icons/higress.avif" class="w-4 h-4" />
-            <span>{{ t('settings.mcp.higressMarket') }}</span>
-            <Icon icon="lucide:external-link" class="w-3.5 h-3.5 text-muted-foreground" />
-          </Button>
+    <div class="mx-6 mt-4 p-4 bg-card rounded-lg border shadow-sm">
+        <div class="flex items-center gap-2 mb-4">
+          <Icon icon="lucide:external-link" class="w-4 h-4 text-primary" />
+          <h4 class="text-sm font-semibold">{{ t('mcp.market.externalMarkets') }}</h4>
         </div>
-        <div class="text-xs text-muted-foreground">
-          {{ t('mcp.market.externalMarketsDesc') }}
-        </div>
-      </div>
-    </div>
+        <div class="space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Button v-if="false" variant="outline" class="h-auto p-3 flex flex-col items-center gap-2" @click="openMcpMarketplace">
+              <Icon icon="lucide:shopping-bag" class="w-5 h-5" />
+              <span class="text-sm font-medium">{{ t('settings.mcp.marketplace') }}</span>
+              <Icon icon="lucide:external-link" class="w-3 h-3 text-muted-foreground" />
+            </Button>
 
-    <div class="flex-1 overflow-auto" ref="scrollContainer" @scroll="onScroll">
-      <div
-        class="p-4 grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
-      >
-        <div
-          v-for="item in items"
-          :key="item.uuid"
-          class="border rounded-lg p-3 bg-card hover:bg-accent/30 transition-colors flex flex-col"
-        >
-          <div class="text-xs text-muted-foreground">{{ item.author_name }}</div>
-          <div class="text-sm font-semibold mt-1 line-clamp-1" :title="item.title">
-            {{ item.title }}
-          </div>
-          <div class="text-xs mt-1 text-muted-foreground line-clamp-3" :title="item.description">
-            {{ item.description }}
-          </div>
-          <div class="mt-2 flex items-center justify-between">
-            <span class="text-xs font-mono px-2 py-0.5 bg-muted rounded">{{
-              item.server_key
-            }}</span>
-            <Button
-              size="sm"
-              :variant="installedServers.has(item.server_key) ? 'secondary' : 'default'"
-              :disabled="installedServers.has(item.server_key)"
-              @click="install(item)"
-            >
-              <Icon
-                :icon="installedServers.has(item.server_key) ? 'lucide:check' : 'lucide:download'"
-                class="w-3.5 h-3.5 mr-1"
-              />
-              {{
-                installedServers.has(item.server_key)
-                  ? t('mcp.market.installed')
-                  : t('mcp.market.install')
-              }}
+            <!-- Higress MCP Marketplace 入口 -->
+            <Button variant="outline" class="h-auto p-3 flex flex-col items-center gap-2" @click="openHigressMcpMarketplace">
+              <img src="@/assets/mcp-icons/higress.avif" class="w-5 h-5" />
+              <span class="text-sm font-medium">{{ t('settings.mcp.higressMarket') }}</span>
+              <Icon icon="lucide:external-link" class="w-3 h-3 text-muted-foreground" />
             </Button>
           </div>
+          <div class="text-xs text-muted-foreground bg-muted/20 p-2 rounded">
+            {{ t('mcp.market.externalMarketsDesc') }}
+          </div>
         </div>
-      </div>
+    </div>
 
-      <div v-if="loading" class="py-4 text-center text-xs text-muted-foreground">
-        <Icon icon="lucide:loader-2" class="inline w-4 h-4 animate-spin mr-1" />
-        {{ t('common.loading') }}
-      </div>
-      <div v-if="showPullToLoad && !loading" class="py-4 text-center text-xs text-muted-foreground">
-        {{ t('mcp.market.pullDownToLoad') }}
-      </div>
-      <div
-        v-if="!hasMore && !showPullToLoad && items.length > 0"
-        class="py-4 text-center text-xs text-muted-foreground"
-      >
-        {{ t('mcp.market.noMore') }}
-      </div>
-      <div
-        v-if="!loading && items.length === 0"
-        class="py-8 text-center text-xs text-muted-foreground"
-      >
-        {{ t('mcp.market.empty') }}
-      </div>
+    <!-- API密钥配置区域 -->
+    <div class="mx-6 mt-4 p-4 bg-card rounded-lg border shadow-sm">
+        <div class="flex items-center gap-2 mb-3">
+          <Icon icon="lucide:key" class="w-4 h-4 text-primary" />
+          <h4 class="text-sm font-semibold">API密钥配置</h4>
+        </div>
+
+        <!-- API Key 获取提示 -->
+        <div class="mb-3 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div class="text-xs text-blue-700 dark:text-blue-300">
+            {{ t('mcp.market.keyHelpText') }}
+            <Button
+              variant="link"
+              size="sm"
+              class="text-xs p-0 h-auto font-normal text-blue-600 dark:text-blue-400 hover:underline"
+              @click="openHowToGetKey"
+            >
+              {{ t('mcp.market.keyGuide') }}
+            </Button>
+            {{ t('mcp.market.keyHelpEnd') }}
+          </div>
+        </div>
+
+        <!-- 密钥输入框 -->
+        <div class="flex items-center gap-3">
+          <div class="flex-1">
+            <Input
+              v-model="apiKeyInput"
+              type="password"
+              :placeholder="t('mcp.market.apiKeyPlaceholder')"
+              class="w-full"
+            />
+          </div>
+          <Button @click="saveApiKey" class="shrink-0">
+            <Icon icon="lucide:save" class="w-4 h-4 mr-2" />
+            {{ t('common.save') }}
+          </Button>
+        </div>
+    </div>
+
+    <!-- MCP服务器列表 -->
+    <div class="mx-6 mt-4 mb-6 bg-card rounded-lg border shadow-sm">
+        <div class="p-4 border-b bg-muted/10">
+          <div class="flex items-center gap-2">
+            <Icon icon="lucide:grid-3x3" class="w-4 h-4 text-primary" />
+            <h4 class="text-sm font-semibold">可用的MCP服务器</h4>
+            <Badge variant="outline" class="text-xs">{{ items.length }} 个</Badge>
+          </div>
+        </div>
+
+        <div ref="scrollContainer" @scroll="onScroll">
+          <div class="p-4 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <div
+              v-for="item in items"
+              :key="item.uuid"
+              class="group border rounded-lg p-4 bg-background hover:bg-accent/50 hover:border-primary/20 transition-all duration-200 flex flex-col shadow-sm hover:shadow-md"
+            >
+              <div class="text-xs text-muted-foreground mb-2">{{ item.author_name }}</div>
+              <div class="text-sm font-semibold mb-2 line-clamp-1 group-hover:text-primary transition-colors" :title="item.title">
+                {{ item.title }}
+              </div>
+              <div class="text-xs text-muted-foreground line-clamp-3 flex-1 mb-3" :title="item.description">
+                {{ item.description }}
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-mono px-2 py-1 bg-muted/50 rounded text-muted-foreground">{{
+                  item.server_key
+                }}</span>
+                <Button
+                  size="sm"
+                  :variant="installedServers.has(item.server_key) ? 'secondary' : 'default'"
+                  :disabled="installedServers.has(item.server_key)"
+                  @click="install(item)"
+                  class="shrink-0"
+                >
+                  <Icon
+                    :icon="installedServers.has(item.server_key) ? 'lucide:check' : 'lucide:download'"
+                    class="w-3.5 h-3.5 mr-1"
+                  />
+                  {{
+                    installedServers.has(item.server_key)
+                      ? t('mcp.market.installed')
+                      : t('mcp.market.install')
+                  }}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 加载状态 -->
+          <div v-if="loading" class="py-6 text-center text-sm text-muted-foreground">
+            <Icon icon="lucide:loader-2" class="inline w-4 h-4 animate-spin mr-2" />
+            {{ t('common.loading') }}
+          </div>
+          <div v-if="showPullToLoad && !loading" class="py-6 text-center text-sm text-muted-foreground">
+            {{ t('mcp.market.pullDownToLoad') }}
+          </div>
+          <div
+            v-if="!hasMore && !showPullToLoad && items.length > 0"
+            class="py-6 text-center text-sm text-muted-foreground"
+          >
+            {{ t('mcp.market.noMore') }}
+          </div>
+          <div
+            v-if="!loading && items.length === 0"
+            class="py-12 text-center text-sm text-muted-foreground"
+          >
+            <Icon icon="lucide:package-x" class="w-8 h-8 mx-auto mb-2 opacity-50" />
+            {{ t('mcp.market.empty') }}
+          </div>
+        </div>
     </div>
   </div>
 </template>

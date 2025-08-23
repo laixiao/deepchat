@@ -706,6 +706,7 @@
     "npmRegistry": {
       "title": "Настройка источников NPM",
       "currentSource": "Текущий источник",
+      "detecting": "Обнаружение...",
       "cached": "Кэшировано",
       "lastChecked": "Последняя проверка",
       "refresh": "Обновить",

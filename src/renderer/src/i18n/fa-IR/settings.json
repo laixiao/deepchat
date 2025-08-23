@@ -713,6 +713,7 @@
     "npmRegistry": {
       "title": "تنظیمات منابع NPM",
       "currentSource": "منبع فعلی",
+      "detecting": "در حال تشخیص...",
       "cached": "ذخیره شده",
       "lastChecked": "آخرین بررسی",
       "refresh": "تازه‌سازی",
