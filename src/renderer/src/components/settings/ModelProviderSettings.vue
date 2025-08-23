@@ -155,7 +155,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, nextTick } from 'vue'
+import { computed, ref, nextTick, onMounted, watch } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
 import { useRoute, useRouter } from 'vue-router'
 import { refDebounced } from '@vueuse/core'
@@ -210,50 +210,28 @@ const allDisabledProviders = computed(() => settingsStore.sortedProviders.filter
 const enabledProviders = computed({
   get: () => filterProviders(allEnabledProviders.value),
   set: (newProviders) => {
-    const isFiltered = searchQuery.value.trim().length > 0
-    if (isFiltered) {
-      const orderMap = new Map(newProviders.map((provider, index) => [provider.id, index]))
-      const reorderedEnabled = [...allEnabledProviders.value].sort((a, b) => {
-        const orderA = orderMap.get(a.id) ?? Infinity
-        const orderB = orderMap.get(b.id) ?? Infinity
-        return orderA - orderB
-      })
-      const allProviders = [...reorderedEnabled, ...allDisabledProviders.value]
-      settingsStore.updateProvidersOrder(allProviders)
-    } else {
-      const allProviders = [...newProviders, ...allDisabledProviders.value]
-      settingsStore.updateProvidersOrder(allProviders)
-    }
+    const allProviders = [...newProviders, ...allDisabledProviders.value]
+    settingsStore.updateProvidersOrder(allProviders)
   }
 })
 
 const disabledProviders = computed({
   get: () => filterProviders(allDisabledProviders.value),
   set: (newProviders) => {
-    const isFiltered = searchQuery.value.trim().length > 0
-    if (isFiltered) {
-      const orderMap = new Map(newProviders.map((provider, index) => [provider.id, index]))
-      const reorderedDisabled = [...allDisabledProviders.value].sort((a, b) => {
-        const orderA = orderMap.get(a.id) ?? Infinity
-        const orderB = orderMap.get(b.id) ?? Infinity
-        return orderA - orderB
-      })
-      const allProviders = [...allEnabledProviders.value, ...reorderedDisabled]
-      settingsStore.updateProvidersOrder(allProviders)
-    } else {
-      const allProviders = [...allEnabledProviders.value, ...newProviders]
-      settingsStore.updateProvidersOrder(allProviders)
-    }
+    const allProviders = [...allEnabledProviders.value, ...newProviders]
+    settingsStore.updateProvidersOrder(allProviders)
   }
 })
 
-const setActiveProvider = (providerId: string) => {
+const setActiveProvider = async (providerId: string) => {
   router.push({
     name: 'settings-provider',
     params: {
       providerId
     }
   })
+  // 保存用户的选择偏好
+  await settingsStore.saveLastSelectedProvider(providerId)
 }
 
 const scrollToProvider = (providerId: string) => {
@@ -306,36 +284,76 @@ const handleAnthropicAuthError = (error: string) => {
   // 可以在这里添加用户友好的错误提示
 }
 
-// 处理拖拽结束事件
+// 处理拖拽结束事件（简化后可能不需要）
 const handleDragEnd = () => {
-  // 可以在这里添加额外的处理逻辑
+  // 如果需要额外的处理逻辑可以在这里添加
 }
 
-// 处理启用区域的拖拽移动事件
+// 处理启用区域的拖拽移动事件（简化）
 const onMoveEnabled = (evt: any) => {
   const draggedProvider = evt.draggedContext.element
-  const relatedProvider = evt.relatedContext?.element
-  if (!draggedProvider || !draggedProvider.enable) {
-    return false
-  }
-  if (relatedProvider && !relatedProvider.enable) {
-    return false
-  }
-  return true
+  return draggedProvider && draggedProvider.enable
 }
 
-// 处理禁用区域的拖拽移动事件
+// 处理禁用区域的拖拽移动事件（简化）
 const onMoveDisabled = (evt: any) => {
   const draggedProvider = evt.draggedContext.element
-  const relatedProvider = evt.relatedContext?.element
-  if (!draggedProvider || draggedProvider.enable) {
-    return false
-  }
-  if (relatedProvider && relatedProvider.enable) {
-    return false
-  }
-  return true
+  return draggedProvider && !draggedProvider.enable
 }
+
+// 选择第一个可用的服务商（使用store中的优先级逻辑）
+const selectFirstProvider = () => {
+  return settingsStore.getPreferredProviderId()
+}
+
+// 初始化逻辑，确保有选中的服务商
+const initializeProvider = async () => {
+  await nextTick() // 确保store数据已加载
+  
+  if (!route.params.providerId) {
+    // 无providerId时自动选择第一个
+    const firstProviderId = selectFirstProvider()
+    if (firstProviderId) {
+      await router.replace({
+        name: 'settings-provider',
+        params: { providerId: firstProviderId }
+      })
+    }
+  } else {
+    // 验证providerId是否有效
+    const isValid = settingsStore.providers.some(p => p.id === route.params.providerId)
+    if (!isValid) {
+      const firstProviderId = selectFirstProvider()
+      if (firstProviderId) {
+        await router.replace({
+          name: 'settings-provider',
+          params: { providerId: firstProviderId }
+        })
+      }
+    }
+  }
+}
+
+// 监听服务商列表变化，确保选中的服务商仍然有效
+const hasInitialized = ref(false)
+watch(
+  () => settingsStore.providers,
+  async () => {
+    if (!hasInitialized.value && settingsStore.providers.length > 0) {
+      await initializeProvider()
+      hasInitialized.value = true
+    }
+  },
+  { immediate: true }
+)
+
+// 组件挂载时初始化
+onMounted(async () => {
+  if (settingsStore.providers.length > 0) {
+    await initializeProvider()
+    hasInitialized.value = true
+  }
+})
 </script>
 
 <style scoped>

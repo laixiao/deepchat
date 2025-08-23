@@ -40,6 +40,9 @@ export const useSettingsStore = defineStore('settings', () => {
   const ollamaLocalModels = ref<OllamaModel[]>([])
   const ollamaPullingModels = ref<Map<string, number>>(new Map()) // 模型名 -> 进度
 
+  // 最后选中的provider ID
+  const lastSelectedProviderId = ref<string | null>(null)
+
   // 搜索助手模型相关
   const searchAssistantModelRef = ref<RENDERER_MODEL_META | null>(null)
   const searchAssistantProviderRef = ref<string>('')
@@ -324,6 +327,9 @@ export const useSettingsStore = defineStore('settings', () => {
 
       // 获取关闭应用行为设置
       closeToQuitEnabled.value = await configP.getCloseToQuit()
+
+      // 加载最后选中的provider
+      lastSelectedProviderId.value = await loadLastSelectedProvider()
 
       // 获取搜索引擎
       searchEngines.value = await threadP.getSearchEngines()
@@ -1599,6 +1605,53 @@ export const useSettingsStore = defineStore('settings', () => {
     await refreshProviderModels(providerId)
   }
 
+  // 保存最后选中的provider
+  const saveLastSelectedProvider = async (providerId: string) => {
+    lastSelectedProviderId.value = providerId
+    await configP.setSetting('lastSelectedProviderId', providerId)
+  }
+
+  // 加载最后选中的provider
+  const loadLastSelectedProvider = async (): Promise<string | null> => {
+    const saved = await configP.getSetting<string>('lastSelectedProviderId')
+    return saved || null
+  }
+
+  // 保存最后选中的设置标签页
+  const saveLastSelectedSettingsTab = async (tabName: string) => {
+    await configP.setSetting('lastSelectedSettingsTab', tabName)
+  }
+
+  // 加载最后选中的设置标签页
+  const loadLastSelectedSettingsTab = async (): Promise<string | null> => {
+    const saved = await configP.getSetting<string>('lastSelectedSettingsTab')
+    return saved || null
+  }
+
+  // 获取首选的provider ID（考虑持久化偏好）
+  const getPreferredProviderId = (): string | null => {
+    // 1. 优先使用最后选中的provider（如果仍然有效）
+    if (lastSelectedProviderId.value) {
+      const isValid = sortedProviders.value.some((p) => p.id === lastSelectedProviderId.value)
+      if (isValid) {
+        return lastSelectedProviderId.value
+      }
+    }
+
+    // 2. 选择第一个启用的provider
+    const enabledProviders = sortedProviders.value.filter((p) => p.enable)
+    if (enabledProviders.length > 0) {
+      return enabledProviders[0].id
+    }
+
+    // 3. 回退到第一个provider
+    if (sortedProviders.value.length > 0) {
+      return sortedProviders.value[0].id
+    }
+
+    return null
+  }
+
   return {
     providers,
     fontSizeLevel, // Expose font size level
@@ -1677,6 +1730,13 @@ export const useSettingsStore = defineStore('settings', () => {
     getAzureApiVersion,
     setGeminiSafety,
     getGeminiSafety,
+    // 新增的provider持久化方法
+    saveLastSelectedProvider,
+    loadLastSelectedProvider,
+    saveLastSelectedSettingsTab,
+    loadLastSelectedSettingsTab,
+    getPreferredProviderId,
+    lastSelectedProviderId,
     setAwsBedrockCredential,
     getAwsBedrockCredential,
     getDefaultSystemPrompt,
