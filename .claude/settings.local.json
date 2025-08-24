@@ -6,7 +6,19 @@
       "Bash(pnpm run dev:*)",
       "Bash(taskkill:*)",
       "Bash(pkill:*)",
-      "Bash(exit)"
+      "Bash(exit)",
+      "Bash(npm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm run build:server:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(node dist/server/index.js:*)",
+      "Bash(node:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(timeout:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件上传测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        
+        .upload-area i {
+            font-size: 48px;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+        
+        .upload-area p {
+            color: #666;
+            margin: 10px 0;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .result.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .file-info {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .token-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+        
+        .token-section input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .md5-section {
+            margin-bottom: 20px;
+        }
+        
+        .md5-section input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>文件上传测试</h1>
+        
+        <div class="token-section">
+            <label for="token">JWT Token:</label>
+            <input type="text" id="token" placeholder="请输入JWT Token">
+        </div>
+        
+        <div class="md5-section">
+            <label for="md5">文件MD5 (可选):</label>
+            <input type="text" id="md5" placeholder="请输入文件MD5值">
+        </div>
+        
+        <div class="upload-area" id="uploadArea">
+            <div>📁</div>
+            <p>拖拽文件到此处上传</p>
+            <p>或</p>
+            <button class="btn" id="selectFileBtn">选择文件</button>
+            <input type="file" id="fileInput" class="file-input">
+        </div>
+        
+        <button class="btn" id="uploadBtn" disabled>上传文件</button>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const selectFileBtn = document.getElementById('selectFileBtn');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const resultDiv = document.getElementById('result');
+        const tokenInput = document.getElementById('token');
+        const md5Input = document.getElementById('md5');
+        
+        let selectedFile = null;
+        
+        // 事件监听器
+        selectFileBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                selectedFile = e.target.files[0];
+                updateUI();
+            }
+        });
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                selectedFile = e.dataTransfer.files[0];
+                updateUI();
+            }
+        });
+        
+        uploadBtn.addEventListener('click', uploadFile);
+        
+        // 更新UI状态
+        function updateUI() {
+            if (selectedFile) {
+                uploadBtn.disabled = false;
+                uploadArea.innerHTML = `
+                    <div>📄</div>
+                    <p>已选择文件: ${selectedFile.name}</p>
+                    <p>文件大小: ${formatFileSize(selectedFile.size)}</p>
+                    <p>文件类型: ${selectedFile.type || '未知'}</p>
+                    <button class="btn" id="changeFileBtn">重新选择</button>
+                `;
+                
+                // 重新绑定事件
+                document.getElementById('changeFileBtn').addEventListener('click', () => {
+                    fileInput.click();
+                });
+            } else {
+                uploadBtn.disabled = true;
+                uploadArea.innerHTML = `
+                    <div>📁</div>
+                    <p>拖拽文件到此处上传</p>
+                    <p>或</p>
+                    <button class="btn" id="selectFileBtn">选择文件</button>
+                `;
+                
+                // 重新绑定事件
+                document.getElementById('selectFileBtn').addEventListener('click', () => {
+                    fileInput.click();
+                });
+            }
+        }
+        
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 上传文件
+        async function uploadFile() {
+            if (!selectedFile) return;
+            
+            const token = tokenInput.value.trim();
+            if (!token) {
+                showMessage('请先输入JWT Token', 'error');
+                return;
+            }
+            
+            // 显示上传中状态
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = '上传中...';
+            showMessage('正在上传文件...', 'info');
+            
+            try {
+                // 创建FormData对象
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                
+                // 如果提供了MD5值，则添加到FormData中
+                const md5 = md5Input.value.trim();
+                if (md5) {
+                    formData.append('md5', md5);
+                }
+                
+                // 发送请求
+                const response = await fetch('/api/files/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showMessage(`
+                        <strong>文件上传成功!</strong><br>
+                        URL: <a href="${result.data.url}" target="_blank">${result.data.url}</a><br>
+                        文件ID: ${result.data.fileId}<br>
+                        消息: ${result.message}
+                    `, 'success');
+                } else {
+                    showMessage(`上传失败: ${result.message || '未知错误'}`, 'error');
+                }
+            } catch (error) {
+                console.error('上传错误:', error);
+                showMessage(`上传过程中发生错误: ${error.message}`, 'error');
+            } finally {
+                // 恢复按钮状态
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '上传文件';
+            }
+        }
+        
+        // 显示消息
+        function showMessage(message, type) {
+            resultDiv.innerHTML = message;
+            resultDiv.className = 'result ' + type;
+            resultDiv.style.display = 'block';
+            
+            // 3秒后自动隐藏成功消息
+            if (type === 'success') {
+                setTimeout(() => {
+                    resultDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>

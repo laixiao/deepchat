@@ -19,3 +19,5 @@ runtime/**/*
 .env
 .env.local
 .npmrc
+/server/uploads
+/server/temp
