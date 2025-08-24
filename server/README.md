@@ -19,18 +19,21 @@ DeepChat 后端服务器是基于 Node.js + Express + MongoDB 构建的 RESTful 
 使用Docker可以快速部署整个服务，无需手动安装依赖：
 
 ```bash
-# 1. 配置环境变量
+# 1. 进入server目录
+cd server
+
+# 2. 配置环境变量
 cp .env.example .env
 # 编辑 .env 文件，修改数据库密码和JWT密钥
 
-# 2. 一键启动（Windows）
+# 3. 一键启动（Windows）
 deploy.bat start
 
-# 2. 一键启动（macOS/Linux）
+# 3. 一键启动（macOS/Linux）
 ./deploy.sh start
 ```
 
-详细说明请参考：[Docker部署指南](../DOCKER_DEPLOYMENT.md)
+详细说明请参考：[Docker部署指南](./DOCKER_DEPLOYMENT.md)
 
 ### 方式二：传统部署
 

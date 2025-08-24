@@ -97,6 +97,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 // 启动服务器
 app.listen(PORT, () => {
   console.log(`服务器运行在端口 ${PORT}`)
+  console.log(`访问地址: http://localhost:${PORT}/admin`)
+  console.log(`Swagger UI: http://localhost:${PORT}/api-docs`)
 })
 
 export default app
