@@ -42,12 +42,18 @@ export function ensureDirectoryExists(dirPath: string): void {
  */
 export function getFileUrl(filename: string): string {
   const uploadDirConfig = process.env.UPLOAD_DIR || 'uploads'
-  const domain = process.env.DOMAIN || ''
+  const domain = process.env.DOMAIN
 
   // 如果UPLOAD_DIR是绝对路径，只取最后的目录名作为URL路径
   const uploadDirName = path.isAbsolute(uploadDirConfig)
     ? path.basename(uploadDirConfig)
     : uploadDirConfig
+
+  // 如果没有配置域名，警告并返回相对路径
+  if (!domain) {
+    console.warn('警告: DOMAIN 环境变量未设置，返回相对路径')
+    return `/${uploadDirName}/${filename}`
+  }
 
   return `${domain}/${uploadDirName}/${filename}`
 }
