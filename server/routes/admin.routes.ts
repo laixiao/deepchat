@@ -7,7 +7,8 @@ import {
   getAllUsers,
   getUserInfo,
   updateUserInfo,
-  deleteUser
+  deleteUser,
+  cleanupTempFiles
 } from '../controllers/admin.controller.js'
 import { authenticateToken, authorizeAdmin } from '../middleware/auth.middleware.js'
 
@@ -24,5 +25,8 @@ router.get('/users', authenticateToken, authorizeAdmin, getAllUsers)
 router.get('/users/:id', authenticateToken, authorizeAdmin, getUserInfo)
 router.put('/users/:id', authenticateToken, authorizeAdmin, updateUserInfo)
 router.delete('/users/:id', authenticateToken, authorizeAdmin, deleteUser)
+
+// 管理后台系统管理路由（需要认证和管理员权限）
+router.post('/cleanup-temp-files', authenticateToken, authorizeAdmin, cleanupTempFiles)
 
 export default router

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import File from '../models/file.model.js'
+import File, { FileType } from '../models/file.model.js'
 import User from '../models/user.model.js'
 import fs from 'fs'
 import path from 'path'
@@ -50,11 +50,15 @@ export const getAllFiles = async (req: Request, res: Response): Promise<void> =>
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 10
     const search = (req.query.search as string) || ''
+    const fileType = req.query.fileType as string
 
     // 构建查询条件
     const query: any = {}
     if (search) {
       query.originalName = { $regex: search, $options: 'i' }
+    }
+    if (fileType && fileType !== 'all') {
+      query.fileType = fileType
     }
 
     // 获取文件总数
@@ -578,6 +582,92 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
     })
   } catch (error) {
     console.error('删除用户错误:', error)
+    res.status(500).json({
+      success: false,
+      message: '服务器内部错误'
+    })
+  }
+}
+
+/**
+ * @swagger
+ * /admin/cleanup-temp-files:
+ *   post:
+ *     summary: 清理临时文件（管理后台）
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     description: 清理创建时间超过48小时的临时文件
+ *     responses:
+ *       200:
+ *         description: 清理成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     deletedCount:
+ *                       type: number
+ *                       description: 删除的文件数量
+ *                     deletedFiles:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: 删除的文件列表
+ *       401:
+ *         description: 未授权访问
+ *       500:
+ *         description: 服务器内部错误
+ */
+export const cleanupTempFiles = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // 计算48小时前的时间
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000)
+
+    // 查找超过48小时的临时文件
+    const tempFiles = await File.find({
+      fileType: FileType.TEMPORARY,
+      createdAt: { $lt: fortyEightHoursAgo }
+    })
+
+    const deletedFiles: string[] = []
+    let deletedCount = 0
+
+    // 删除文件和数据库记录
+    for (const file of tempFiles) {
+      try {
+        // 删除物理文件
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path)
+          deletedFiles.push(file.originalName)
+        }
+
+        // 删除数据库记录
+        await File.findByIdAndDelete(file._id)
+        deletedCount++
+      } catch (fileError) {
+        console.error(`删除文件失败: ${file.path}`, fileError)
+        // 继续处理其他文件，不中断整个清理过程
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `成功清理了 ${deletedCount} 个临时文件`,
+      data: {
+        deletedCount,
+        deletedFiles
+      }
+    })
+  } catch (error) {
+    console.error('清理临时文件错误:', error)
     res.status(500).json({
       success: false,
       message: '服务器内部错误'

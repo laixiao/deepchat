@@ -21,3 +21,5 @@ runtime/**/*
 .npmrc
 /server/uploads
 /server/temp
+/uploads
+/temp

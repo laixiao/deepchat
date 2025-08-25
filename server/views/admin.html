@@ -182,6 +182,14 @@
             color: #212529;
         }
 
+        .text-warning {
+            color: #ffc107 !important;
+        }
+
+        .text-success {
+            color: #28a745 !important;
+        }
+
         .pagination {
             background: white;
             padding: 15px 20px;
@@ -382,6 +390,12 @@
         <div id="filesTab" class="tab-content">
             <div class="controls">
                 <button class="btn-primary" id="refreshFilesBtn">刷新列表</button>
+                <button class="btn-danger" id="cleanupTempFilesBtn">清理临时文件</button>
+                <select id="fileTypeFilter" style="margin-left: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="all">所有文件</option>
+                    <option value="permanent">正式文件</option>
+                    <option value="temporary">临时文件</option>
+                </select>
             </div>
 
             <div class="table-container">
@@ -389,6 +403,7 @@
                     <thead>
                         <tr>
                             <th>文件名</th>
+                            <th>类型</th>
                             <th>大小</th>
                             <th>上传时间</th>
                             <th>操作</th>
@@ -448,9 +463,23 @@
         <div id="uploadTab" class="tab-content hidden">
             <div class="upload-section">
                 <h2>上传文件</h2>
+
+                <!-- 上传类型选择 -->
+                <div class="upload-type-selector" style="margin-bottom: 20px;">
+                    <label style="margin-right: 20px; font-weight: 500;">上传类型：</label>
+                    <label style="margin-right: 15px;">
+                        <input type="radio" name="uploadType" value="permanent" checked style="margin-right: 5px;">
+                        正式文件
+                    </label>
+                    <label>
+                        <input type="radio" name="uploadType" value="temporary" style="margin-right: 5px;">
+                        临时文件（免认证）
+                    </label>
+                </div>
+
                 <div class="upload-area" id="uploadArea">
                     <p>点击选择文件或拖拽文件到此处</p>
-                    <p>支持多种格式的文件上传</p>
+                    <p id="uploadTypeHint">支持多种格式的文件上传</p>
                     <button class="upload-btn" id="selectFileBtn">选择文件</button>
                     <input type="file" id="fileInput" multiple style="display: none;">
                 </div>
@@ -510,6 +539,7 @@
         let currentTab = 'files';
         let currentPage = { files: 1, users: 1 };
         let currentSearch = '';
+        let currentFileType = 'all';
         let totalPages = { files: 0, users: 0 };
         let totalItems = { files: 0, users: 0 };
 
@@ -526,6 +556,8 @@
         const filesPrevBtn = document.getElementById('filesPrevBtn');
         const filesNextBtn = document.getElementById('filesNextBtn');
         const refreshFilesBtn = document.getElementById('refreshFilesBtn');
+        const cleanupTempFilesBtn = document.getElementById('cleanupTempFilesBtn');
+        const fileTypeFilter = document.getElementById('fileTypeFilter');
 
         // 用户管理相关元素
         const usersTableBody = document.getElementById('usersTableBody');
@@ -539,6 +571,8 @@
         const selectFileBtn = document.getElementById('selectFileBtn');
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
+        const uploadTypeRadios = document.querySelectorAll('input[name="uploadType"]');
+        const uploadTypeHint = document.getElementById('uploadTypeHint');
 
         // 模态框相关元素
         const editFileModal = document.getElementById('editFileModal');
@@ -600,16 +634,23 @@
 
             // 根据当前标签页刷新数据
             if (tabName === 'files') {
-                fetchFiles(currentPage.files, currentSearch);
+                fetchFiles(currentPage.files, currentSearch, currentFileType);
             } else if (tabName === 'users') {
                 fetchUsers(currentPage.users, currentSearch);
             }
         }
 
         // 获取文件列表
-        async function fetchFiles(page = 1, search = '') {
+        async function fetchFiles(page = 1, search = '', fileType = 'all') {
             try {
-                const response = await fetch(`/api/admin/files?page=${page}&limit=10&search=${encodeURIComponent(search)}`, {
+                const params = new URLSearchParams({
+                    page: page.toString(),
+                    limit: '10',
+                    search: search,
+                    fileType: fileType
+                });
+
+                const response = await fetch(`/api/admin/files?${params}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
@@ -638,7 +679,7 @@
             if (files.length === 0) {
                 filesTableBody.innerHTML = `
                     <tr>
-                        <td colspan="4" style="text-align: center; color: #666;">暂无文件</td>
+                        <td colspan="5" style="text-align: center; color: #666;">暂无文件</td>
                     </tr>
                 `;
                 return;
@@ -646,10 +687,16 @@
             
             files.forEach(file => {
                 const row = document.createElement('tr');
+                const fileTypeText = file.fileType === 'temporary' ? '临时文件' : '正式文件';
+                const fileTypeClass = file.fileType === 'temporary' ? 'text-warning' : 'text-success';
+
                 row.innerHTML = `
                     <td>
                         <div class="file-name">${file.originalName}</div>
                         <div class="file-size">${file.filename}</div>
+                    </td>
+                    <td>
+                        <span class="${fileTypeClass}" style="font-weight: 500;">${fileTypeText}</span>
                     </td>
                     <td>${formatFileSize(file.size)}</td>
                     <td>${formatDate(file.createdAt)}</td>
@@ -774,7 +821,7 @@
                 }
                 
                 showAlert('文件删除成功', 'success');
-                fetchFiles(currentPage.files, currentSearch);
+                fetchFiles(currentPage.files, currentSearch, currentFileType);
             } catch (error) {
                 showAlert('删除文件失败: ' + error.message, 'error');
             }
@@ -843,12 +890,16 @@
             try {
                 const statusElement = document.getElementById(`status-${fileName}`);
                 const progressBar = document.getElementById(`progress-${fileName}`);
-                
+
+                // 获取当前选择的上传类型
+                const uploadType = document.querySelector('input[name="uploadType"]:checked').value;
+                const isTemporary = uploadType === 'temporary';
+
                 statusElement.textContent = '上传中...';
-                
+
                 const formData = new FormData();
                 formData.append('file', file);
-                
+
                 const xhr = new XMLHttpRequest();
                 
                 // 更新进度条
@@ -868,7 +919,7 @@
                             statusElement.style.color = 'green';
                             // 刷新文件列表
                             if (currentTab === 'files') {
-                                fetchFiles(currentPage.files, currentSearch);
+                                fetchFiles(currentPage.files, currentSearch, currentFileType);
                             }
                         } else {
                             statusElement.textContent = '上传失败: ' + response.message;
@@ -886,13 +937,55 @@
                     statusElement.style.color = 'red';
                 });
                 
-                xhr.open('POST', '/api/files/upload');
-                xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('token')}`);
+                // 根据上传类型选择不同的API端点
+                if (isTemporary) {
+                    xhr.open('POST', '/api/files/temp-upload');
+                    // 临时文件上传不需要认证
+                } else {
+                    xhr.open('POST', '/api/files/upload');
+                    xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('token')}`);
+                }
                 xhr.send(formData);
             } catch (error) {
                 console.error('上传文件失败:', error);
                 document.getElementById(`status-${fileName}`).textContent = '上传失败: ' + error.message;
                 document.getElementById(`status-${fileName}`).style.color = 'red';
+            }
+        }
+
+        // 清理临时文件
+        async function cleanupTempFiles() {
+            if (!confirm('确定要清理超过48小时的临时文件吗？此操作不可撤销。')) {
+                return;
+            }
+
+            try {
+                cleanupTempFilesBtn.disabled = true;
+                cleanupTempFilesBtn.textContent = '清理中...';
+
+                const response = await fetch('/api/admin/cleanup-temp-files', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showAlert(`${result.message}。删除的文件：${result.data.deletedFiles.join(', ') || '无'}`, 'success');
+                    // 刷新文件列表
+                    fetchFiles(currentPage.files, currentSearch, currentFileType);
+                } else {
+                    showAlert('清理失败: ' + (result.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('清理临时文件失败:', error);
+                showAlert('清理失败: ' + error.message, 'error');
+            } finally {
+                cleanupTempFilesBtn.disabled = false;
+                cleanupTempFilesBtn.textContent = '清理临时文件';
             }
         }
 
@@ -907,14 +1000,24 @@
             currentSearch = searchInput.value.trim();
             currentPage[currentTab] = 1;
             if (currentTab === 'files') {
-                fetchFiles(currentPage.files, currentSearch);
+                fetchFiles(currentPage.files, currentSearch, currentFileType);
             } else if (currentTab === 'users') {
                 fetchUsers(currentPage.users, currentSearch);
             }
         });
 
         refreshFilesBtn.addEventListener('click', () => {
-            fetchFiles(currentPage.files, currentSearch);
+            fetchFiles(currentPage.files, currentSearch, currentFileType);
+        });
+
+        cleanupTempFilesBtn.addEventListener('click', () => {
+            cleanupTempFiles();
+        });
+
+        fileTypeFilter.addEventListener('change', () => {
+            currentFileType = fileTypeFilter.value;
+            currentPage.files = 1;
+            fetchFiles(currentPage.files, currentSearch, currentFileType);
         });
 
         refreshUsersBtn.addEventListener('click', () => {
@@ -924,14 +1027,14 @@
         filesPrevBtn.addEventListener('click', () => {
             if (currentPage.files > 1) {
                 currentPage.files--;
-                fetchFiles(currentPage.files, currentSearch);
+                fetchFiles(currentPage.files, currentSearch, currentFileType);
             }
         });
 
         filesNextBtn.addEventListener('click', () => {
             if (currentPage.files < totalPages.files) {
                 currentPage.files++;
-                fetchFiles(currentPage.files, currentSearch);
+                fetchFiles(currentPage.files, currentSearch, currentFileType);
             }
         });
 
@@ -971,7 +1074,7 @@
                 
                 showAlert('文件信息更新成功', 'success');
                 editFileModal.style.display = 'none';
-                fetchFiles(currentPage.files, currentSearch);
+                fetchFiles(currentPage.files, currentSearch, currentFileType);
             } catch (error) {
                 showAlert('更新文件信息失败: ' + error.message, 'error');
             }
@@ -1123,7 +1226,20 @@
             }
 
             // token有效，加载数据
-            fetchFiles();
+            fetchFiles(1, '', 'all');
+
+            // 添加上传类型切换事件监听器
+            uploadTypeRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    if (radio.value === 'temporary') {
+                        uploadTypeHint.textContent = '临时文件上传（免认证，48小时后自动清理）';
+                        uploadTypeHint.style.color = '#ffc107';
+                    } else {
+                        uploadTypeHint.textContent = '支持多种格式的文件上传';
+                        uploadTypeHint.style.color = '';
+                    }
+                });
+            });
         });
     </script>
 </body>

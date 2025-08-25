@@ -1,5 +1,5 @@
 import express, { Router } from 'express'
-import { uploadFile, getFile } from '../controllers/file.controller.js'
+import { uploadFile, getFile, uploadTempFile } from '../controllers/file.controller.js'
 import { authenticateToken } from '../middleware/auth.middleware.js'
 import multer from 'multer'
 import { getTempDir, ensureDirectoryExists } from '../utils/paths.js'
@@ -28,6 +28,9 @@ const router: Router = express.Router()
 
 // 文件上传路由（需要认证）
 router.post('/upload', authenticateToken, upload.single('file'), uploadFile)
+
+// 临时文件上传路由（免token）
+router.post('/temp-upload', upload.single('file'), uploadTempFile)
 
 // 获取文件信息路由（需要认证）
 router.get('/:id', authenticateToken, getFile)

@@ -1,5 +1,11 @@
 import mongoose, { Document, Schema } from 'mongoose'
 
+// 文件类型枚举
+export enum FileType {
+  PERMANENT = 'permanent', // 正式文件
+  TEMPORARY = 'temporary' // 临时文件
+}
+
 // 文件接口定义
 export interface IFile extends Document {
   filename: string
@@ -10,6 +16,7 @@ export interface IFile extends Document {
   url: string
   md5: string
   userId?: string
+  fileType: FileType
   createdAt: Date
   updatedAt: Date
 }
@@ -52,6 +59,12 @@ const FileSchema: Schema = new Schema(
       type: String,
       ref: 'User',
       required: false
+    },
+    fileType: {
+      type: String,
+      enum: Object.values(FileType),
+      default: FileType.PERMANENT,
+      required: true
     }
   },
   {
