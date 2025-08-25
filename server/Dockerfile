@@ -10,8 +10,8 @@ RUN npm config set registry https://registry.npmmirror.com
 # 复制package.json和package-lock.json（如果存在）
 COPY package*.json ./
 
-# 安装依赖
-RUN npm install --only=production
+# 安装所有依赖（包括devDependencies，用于构建）
+RUN npm install
 
 # 复制源代码
 COPY . .
@@ -20,7 +20,10 @@ COPY . .
 RUN mkdir -p uploads temp
 
 # 编译TypeScript代码
-RUN npm run build || npx tsc
+RUN npm run build
+
+# 清理devDependencies以减小镜像大小
+RUN npm prune --production
 
 # 暴露端口
 EXPOSE 3000
