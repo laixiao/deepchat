@@ -16,6 +16,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       FILE_SIZE_LIMIT: ${FILE_SIZE_LIMIT:-50mb}
       UPLOAD_DIR: ${UPLOAD_DIR:-uploads}
+      TEMP_DIR: ${TEMP_DIR:-temp}
+      DOMAIN: ${DOMAIN}
     ports:
       - "${PORT:-3000}:${PORT:-3000}"
     volumes:
