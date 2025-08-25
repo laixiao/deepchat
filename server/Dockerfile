@@ -22,6 +22,9 @@ RUN mkdir -p uploads temp
 # 编译TypeScript代码
 RUN npm run build
 
+# 复制views目录到dist目录（TypeScript编译器不会复制HTML文件）
+RUN cp -r views dist/
+
 # 清理devDependencies以减小镜像大小
 RUN npm prune --production
 
