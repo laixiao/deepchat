@@ -28,7 +28,10 @@ app.use(express.urlencoded({ extended: true, limit: process.env.FILE_SIZE_LIMIT 
 initializeDirectories()
 
 // 静态文件服务
-const uploadDirName = process.env.UPLOAD_DIR || 'uploads'
+const uploadDirConfig = process.env.UPLOAD_DIR || 'uploads'
+const uploadDirName = path.isAbsolute(uploadDirConfig)
+  ? path.basename(uploadDirConfig)
+  : uploadDirConfig
 app.use(`/${uploadDirName}`, express.static(getUploadDir()))
 app.use('/admin', express.static(path.join(__dirname, 'views')))
 
