@@ -42,7 +42,8 @@ export function ensureDirectoryExists(dirPath: string): void {
  */
 export function getFileUrl(filename: string): string {
   const uploadDirName = process.env.UPLOAD_DIR || 'uploads'
-  return `/${uploadDirName}/${filename}`
+  const domain = process.env.DOMAIN || ''
+  return `${domain}/${uploadDirName}/${filename}`
 }
 
 /**
