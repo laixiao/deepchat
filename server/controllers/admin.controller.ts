@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import File from '../models/file.model'
-import User from '../models/user.model'
+import File from '../models/file.model.js'
+import User from '../models/user.model.js'
 import fs from 'fs'
 import path from 'path'
 

@@ -1,5 +1,5 @@
-import connectDB from '../config/database'
-import User from '../models/user.model'
+import connectDB from '../config/database.js'
+import User from '../models/user.model.js'
 
 const testConnection = async () => {
   try {

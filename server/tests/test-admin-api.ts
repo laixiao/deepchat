@@ -1,7 +1,7 @@
 import { describe, it, beforeAll, afterAll } from 'vitest'
 import mongoose from 'mongoose'
 import request from 'supertest'
-import app from '../index'
+import app from '../index.js'
 import dotenv from 'dotenv'
 
 // 加载环境变量

@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
-import File from '../models/file.model'
+import File from '../models/file.model.js'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
-import { getUploadDir, ensureDirectoryExists, getFileUrl } from '../utils/paths'
-import { AuthRequest } from '../middleware/auth.middleware'
+import { getUploadDir, ensureDirectoryExists, getFileUrl } from '../utils/paths.js'
+import { AuthRequest } from '../middleware/auth.middleware.js'
 
 /**
  * @swagger

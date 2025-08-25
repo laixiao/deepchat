@@ -1,13 +1,13 @@
 import express, { Application, Request, Response, NextFunction } from 'express'
 import dotenv from 'dotenv'
 import cors from 'cors'
-import connectDB from './config/database'
-import routes from './routes/index'
+import connectDB from './config/database.js'
+import routes from './routes/index.js'
 import swaggerUi from 'swagger-ui-express'
-import specs from './config/swagger'
+import specs from './config/swagger.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { getUploadDir, initializeDirectories } from './utils/paths'
+import { getUploadDir, initializeDirectories } from './utils/paths.js'
 
 // 加载环境变量
 dotenv.config()

@@ -8,8 +8,8 @@ import {
   getUserInfo,
   updateUserInfo,
   deleteUser
-} from '../controllers/admin.controller'
-import { authenticateToken, authorizeAdmin } from '../middleware/auth.middleware'
+} from '../controllers/admin.controller.js'
+import { authenticateToken, authorizeAdmin } from '../middleware/auth.middleware.js'
 
 const router: Router = express.Router()
 

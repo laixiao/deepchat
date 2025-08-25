@@ -1,8 +1,8 @@
 import express, { Router } from 'express'
-import userRoutes from './user.routes'
-import fileRoutes from './file.routes'
-import adminRoutes from './admin.routes'
-import adminAuthRoutes from './admin.auth.routes'
+import userRoutes from './user.routes.js'
+import fileRoutes from './file.routes.js'
+import adminRoutes from './admin.routes.js'
+import adminAuthRoutes from './admin.auth.routes.js'
 
 const router: Router = express.Router()
 

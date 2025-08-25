@@ -1,8 +1,8 @@
 import express, { Router } from 'express'
-import { uploadFile, getFile } from '../controllers/file.controller'
-import { authenticateToken } from '../middleware/auth.middleware'
+import { uploadFile, getFile } from '../controllers/file.controller.js'
+import { authenticateToken } from '../middleware/auth.middleware.js'
 import multer from 'multer'
-import { getTempDir, ensureDirectoryExists } from '../utils/paths'
+import { getTempDir, ensureDirectoryExists } from '../utils/paths.js'
 
 // 配置 multer 存储
 const storage = multer.diskStorage({
