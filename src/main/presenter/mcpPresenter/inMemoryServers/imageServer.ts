@@ -2,6 +2,8 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import fs from 'fs/promises'
 import path from 'path'
+import https from 'https'
+import axios from 'axios'
 import { z } from 'zod'
 import { zodToJsonSchema } from 'zod-to-json-schema'
 import { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
@@ -102,17 +104,59 @@ export class ImageServer {
     this.server.connect(transport)
   }
 
-  // --- Placeholder for Image Upload Logic ---
+  // --- Image Upload Logic ---
   private async uploadImageToService(filePath: string, fileBuffer: Buffer): Promise<string> {
-    // TODO: Implement actual image upload logic here
-    // This might involve using a library like 'axios' or a specific SDK
-    // for services like Imgur, AWS S3, Cloudinary, etc.
-    console.log(`Uploading ${filePath} (size: ${fileBuffer.length} bytes)...`)
-    // Replace with actual upload call
-    await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate network delay
-    const fakeUrl = `https://fake-upload-service.com/uploads/${path.basename(filePath)}_${Date.now()}`
-    console.log(`Upload complete: ${fakeUrl}`)
-    return fakeUrl
+    try {
+      console.log(`Uploading ${filePath} (size: ${fileBuffer.length} bytes)...`)
+
+      const fileName = path.basename(filePath)
+      const boundary = `----formdata-${Date.now()}`
+
+      // Build simple form data
+      const formDataParts: Buffer[] = []
+      formDataParts.push(Buffer.from(`--${boundary}\r\n`))
+      formDataParts.push(
+        Buffer.from(`Content-Disposition: form-data; name="file"; filename="${fileName}"\r\n`)
+      )
+      formDataParts.push(Buffer.from(`Content-Type: image/png\r\n\r\n`))
+      formDataParts.push(fileBuffer)
+      formDataParts.push(Buffer.from(`\r\n--${boundary}--\r\n`))
+
+      const formData = Buffer.concat(formDataParts)
+
+      // Force direct connection for upload (bypass proxy)
+      console.log('Using direct connection for upload (bypassing proxy)')
+
+      const axiosConfig: any = {
+        headers: {
+          'Content-Type': `multipart/form-data; boundary=${boundary}`
+        },
+        timeout: 60000, // Increase timeout for large files
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false
+        }),
+        // Force no proxy
+        proxy: false
+      }
+
+      const response = await axios.post(
+        'https://deepchat.vvvlin.com/api/files/temp-upload',
+        formData,
+        axiosConfig
+      )
+
+      console.log(`Upload response:`, response.data)
+
+      if (response.data && response.data.success) {
+        const url = response.data.data.url
+        return url.startsWith('//') ? `https:${url}` : url
+      } else {
+        throw new Error(`Upload failed: ${response.data?.message || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error(`Upload error:`, error)
+      throw new Error(`Failed to upload: ${error instanceof Error ? error.message : String(error)}`)
+    }
   }
 
   // --- Placeholder for Multimodal Model Interaction ---
