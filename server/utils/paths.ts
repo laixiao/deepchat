@@ -41,8 +41,14 @@ export function ensureDirectoryExists(dirPath: string): void {
  * 获取文件的URL路径
  */
 export function getFileUrl(filename: string): string {
-  const uploadDirName = process.env.UPLOAD_DIR || 'uploads'
+  const uploadDirConfig = process.env.UPLOAD_DIR || 'uploads'
   const domain = process.env.DOMAIN || ''
+
+  // 如果UPLOAD_DIR是绝对路径，只取最后的目录名作为URL路径
+  const uploadDirName = path.isAbsolute(uploadDirConfig)
+    ? path.basename(uploadDirConfig)
+    : uploadDirConfig
+
   return `${domain}/${uploadDirName}/${filename}`
 }
 
