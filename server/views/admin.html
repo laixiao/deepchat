@@ -791,8 +791,14 @@
 
         // 查看文件
         function viewFile(fileUrl) {
+            // 确保使用完整的URL
+            let fullUrl = fileUrl;
+            if (fileUrl.startsWith('/')) {
+                // 如果是相对路径，添加当前域名和端口
+                fullUrl = window.location.origin + fileUrl;
+            }
             // 在新窗口中打开文件
-            window.open(fileUrl, '_blank');
+            window.open(fullUrl, '_blank');
         }
 
         // 编辑文件
