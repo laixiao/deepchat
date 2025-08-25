@@ -3,7 +3,7 @@ import File, { FileType } from '../models/file.model.js'
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
-import { getUploadDir, ensureDirectoryExists, getFileUrl } from '../utils/paths.js'
+import { getUploadDir, ensureDirectoryExists, getFileUrl, safeFileMove } from '../utils/paths.js'
 import { AuthRequest } from '../middleware/auth.middleware.js'
 
 /**
@@ -86,7 +86,7 @@ export const uploadFile = async (req: Request, res: Response): Promise<void> => 
 
     // 移动文件到 uploads 目录
     const filePath = path.join(uploadDir, filename)
-    fs.renameSync(req.file.path, filePath)
+    safeFileMove(req.file.path, filePath)
 
     // 计算文件的实际MD5（如果未提供）
     const fileMD5 = md5 || (await calculateFileMD5(filePath))
@@ -267,7 +267,7 @@ export const uploadTempFile = async (req: Request, res: Response): Promise<void>
 
     // 移动文件到 uploads 目录
     const filePath = path.join(uploadDir, filename)
-    fs.renameSync(req.file.path, filePath)
+    safeFileMove(req.file.path, filePath)
 
     // 计算文件的实际MD5（如果未提供）
     const fileMD5 = md5 || (await calculateFileMD5(filePath))

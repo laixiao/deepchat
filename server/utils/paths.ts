@@ -46,6 +46,40 @@ export function getFileUrl(filename: string): string {
 }
 
 /**
+ * 安全地移动文件，处理跨设备移动的情况（同步版本）
+ */
+export function safeFileMove(sourcePath: string, destPath: string): void {
+  try {
+    fs.renameSync(sourcePath, destPath)
+  } catch (error: any) {
+    // 如果是跨设备错误，使用复制+删除的方式
+    if (error.code === 'EXDEV') {
+      fs.copyFileSync(sourcePath, destPath)
+      fs.unlinkSync(sourcePath)
+    } else {
+      throw error
+    }
+  }
+}
+
+/**
+ * 安全地移动文件，处理跨设备移动的情况（异步版本）
+ */
+export async function safeFileMoveAsync(sourcePath: string, destPath: string): Promise<void> {
+  try {
+    await fs.promises.rename(sourcePath, destPath)
+  } catch (error: any) {
+    // 如果是跨设备错误，使用复制+删除的方式
+    if (error.code === 'EXDEV') {
+      await fs.promises.copyFile(sourcePath, destPath)
+      await fs.promises.unlink(sourcePath)
+    } else {
+      throw error
+    }
+  }
+}
+
+/**
  * 初始化所有必要的目录
  */
 export function initializeDirectories(): void {
