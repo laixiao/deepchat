@@ -64,6 +64,11 @@
               </TooltipTrigger>
               <TooltipContent>{{ t('chat.input.fileSelect') }}</TooltipContent>
             </Tooltip>
+            
+            <McpToolsList />
+            
+            <slot name="addon-buttons"></slot>
+            
             <Tooltip>
               <TooltipTrigger>
                 <span
@@ -113,10 +118,6 @@
               </TooltipTrigger>
               <TooltipContent>{{ t('chat.features.webSearch') }}</TooltipContent>
             </Tooltip>
-
-            <McpToolsList />
-            <!-- {{ t('chat.input.fileSelect') }} -->
-            <slot name="addon-buttons"></slot>
           </div>
           <div class="flex items-center gap-2">
             <div
