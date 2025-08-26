@@ -8,6 +8,7 @@ import { DocFileAdapter } from './DocFileAdapter'
 import { PptFileAdapter } from './PptFileAdapter'
 import { CodeFileAdapter } from './CodeFileAdapter'
 import { AudioFileAdapter } from './AudioFileAdapter'
+import { VideoFileAdapter } from './VideoFileAdapter'
 import { UnsupportFileAdapter } from './UnsupportFileAdapter'
 import { fileTypeFromFile } from 'file-type'
 import fs from 'fs/promises'
@@ -33,6 +34,21 @@ export const getMimeTypeAdapterMap = (): Map<string, FileAdapterConstructor> => 
   map.set('audio/x-wav', AudioFileAdapter)
   map.set('audio/x-m4a', AudioFileAdapter)
   map.set('audio/m4a', AudioFileAdapter)
+  map.set('audio/aac', AudioFileAdapter)
+  map.set('audio/ogg', AudioFileAdapter)
+  map.set('audio/flac', AudioFileAdapter)
+  map.set('audio/*', AudioFileAdapter)
+
+  // Video formats
+  map.set('video/mp4', VideoFileAdapter)
+  map.set('video/avi', VideoFileAdapter)
+  map.set('video/quicktime', VideoFileAdapter) // .mov files
+  map.set('video/x-msvideo', VideoFileAdapter) // .avi files
+  map.set('video/x-ms-wmv', VideoFileAdapter) // .wmv files
+  map.set('video/x-flv', VideoFileAdapter) // .flv files
+  map.set('video/webm', VideoFileAdapter)
+  map.set('video/x-matroska', VideoFileAdapter) // .mkv files
+  map.set('video/*', VideoFileAdapter)
 
   // Code formats
   map.set('application/javascript', CodeFileAdapter)

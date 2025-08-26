@@ -172,13 +172,13 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
     },
     disable: false
   },
-  imageServer: {
+  mediaServer: {
     args: [],
-    descriptions: 'Image processing MCP service',
-    icons: '🖼️',
-    autoApprove: ['read_image_base64', 'read_multiple_images_base64'], // Auto-approve reading, require confirmation for uploads
+    descriptions: 'Media processing MCP service (images, videos, audio)',
+    icons: '🎬',
+    autoApprove: ['read_media_base64', 'read_multiple_media_base64', 'get_media_info'], // Auto-approve reading, require confirmation for uploads
     type: 'inmemory' as MCPServerType,
-    command: 'image', // We need to map this command to the ImageServer class later
+    command: 'media', // We need to map this command to the MediaServer class later
     env: {},
     disable: false
   },

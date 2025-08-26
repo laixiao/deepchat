@@ -17,7 +17,7 @@
     "enable": "启用MCP"
   },
   "enabled": "MCP已启用",
-  "enabledDescription": "MCP功能现在已启用",
+  "enabledDescription": "启用或禁用MCP功能和工具",
   "disabledDescription": "MCP功能现在已禁用",
   "toggleError": "切换MCP状态失败",
   "refreshed": "服务器列表已刷新",
@@ -25,7 +25,6 @@
   "serverAdded": "服务器 {name} 已添加",
   "addServerError": "添加服务器失败",
   "enabledTitle": "启用MCP",
-  "enabledDescription": "启用或禁用MCP功能和工具",
   "enableToAccess": "请先启用MCP以访问配置选项",
   "errors": {
     "loadConfigFailed": "加载MCP配置失败",
@@ -195,9 +194,9 @@
       "name": "Artifacts",
       "desc": "让你的 DeepChat 输出的多样化的 Artifacts 内容"
     },
-    "imageServer": {
-      "name": "图片服务",
-      "desc": "开启后 DeepChat 中任意模型都能看懂图片，能生成图片"
+    "mediaServer": {
+      "name": "媒体服务",
+      "desc": "开启后 DeepChat 中任意模型都能处理图片、视频、音频等媒体文件"
     },
     "braveSearch": {
       "name": "Brave搜索",
@@ -242,6 +241,10 @@
     "deepchat-inmemory/meeting-server": {
       "name": "多智能体会议",
       "desc": "DeepChat 内置会议服务，支持发起和主持多智能体讨论"
+    },
+    "deepchat-inmemory/media-server": {
+      "name": "媒体处理服务",
+      "desc": "DeepChat 内置媒体处理服务，支持图片、视频、音频文件的上传和处理"
     },
     "deepchat/apple-server": {
       "name": "macOS系统助手",

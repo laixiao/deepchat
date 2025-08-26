@@ -152,9 +152,9 @@
       "desc": "讓 DeepChat 能夠操作本地文件",
       "name": "文件系統"
     },
-    "imageServer": {
-      "desc": "開啟後 DeepChat 中任意模型都能看懂圖片，能生成圖片",
-      "name": "圖片服務"
+    "mediaServer": {
+      "desc": "開啟後 DeepChat 中任意模型都能處理圖片、視頻、音頻等媒體文件",
+      "name": "媒體服務"
     },
     "braveSearch": {
       "desc": "Brave搜索 API https://brave.com/search/api/",

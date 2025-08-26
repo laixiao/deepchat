@@ -71,8 +71,8 @@ const e2bApiKey = ref('')
 
 // 判断是否是inmemory类型
 const isInMemoryType = computed(() => type.value === 'inmemory')
-// 判断是否是imageServer
-const isImageServer = computed(() => isInMemoryType.value && name.value === 'imageServer')
+// 判断是否是mediaServer
+const isMediaServer = computed(() => isInMemoryType.value && name.value === 'mediaServer')
 // 判断是否是buildInFileSystem
 const isBuildInFileSystem = computed(
   () => isInMemoryType.value && name.value === 'buildInFileSystem'
@@ -139,7 +139,7 @@ const showArgsInput = computed(
   () =>
     showCommandFields.value ||
     (isInMemoryType.value &&
-      !isImageServer.value &&
+      !isMediaServer.value &&
       !isBuildInFileSystem.value &&
       !isPowerpackServer.value)
 )
@@ -241,10 +241,10 @@ const isCommandValid = computed(() => {
   // 对于SSE类型，命令不是必需的
   if (type.value === 'sse' || type.value === 'http') return true
   // 对于STDIO 或 inmemory 类型，命令是必需的 (排除内置 server)
-  if (type.value === 'stdio' || (isInMemoryType.value && !isImageServer.value)) {
+  if (type.value === 'stdio' || (isInMemoryType.value && !isMediaServer.value)) {
     return command.value.trim().length > 0
   }
-  return true // 其他情况（如 imageServer）默认有效
+  return true // 其他情况（如 mediaServer）默认有效
 })
 const isEnvValid = computed(() => {
   try {
@@ -612,11 +612,11 @@ watch(
   { immediate: true }
 )
 
-// 初始化时解析args中的provider和modelId（针对imageServer）
+// 初始化时解析args中的provider和modelId（针对mediaServer）
 watch(
   [() => name.value, () => args.value, () => type.value],
   ([newName, newArgs, newType]) => {
-    if (newType === 'inmemory' && newName === 'imageServer' && newArgs) {
+    if (newType === 'inmemory' && newName === 'mediaServer' && newArgs) {
       // 从args中解析出provider和modelId
       const argsParts = newArgs.split(/\s+/)
       if (argsParts.length >= 2) {
@@ -866,8 +866,8 @@ HTTP-Referer=deepchatai.cn`
           />
         </div>
 
-        <!-- 参数 (特殊处理 imageServer) -->
-        <div v-if="isImageServer" class="space-y-2">
+        <!-- 参数 (特殊处理 mediaServer) -->
+        <div v-if="isMediaServer" class="space-y-2">
           <Label class="text-xs text-muted-foreground" for="server-model">
             {{ t('settings.mcp.serverForm.imageModel') || '模型选择' }}
           </Label>

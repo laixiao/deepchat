@@ -2,7 +2,7 @@ import { ArtifactsServer } from './artifactsServer'
 import { FileSystemServer } from './filesystem'
 import { BochaSearchServer } from './bochaSearchServer'
 import { BraveSearchServer } from './braveSearchServer'
-import { ImageServer } from './imageServer'
+import { MediaServer } from './mediaServer'
 import { PowerpackServer } from './powerpackServer'
 import { DifyKnowledgeServer } from './difyKnowledgeServer'
 import { RagflowKnowledgeServer } from './ragflowKnowledgeServer'
@@ -32,8 +32,8 @@ export function getInMemoryServer(
       return new BraveSearchServer(env)
     case 'deepResearch':
       return new DeepResearchServer(env)
-    case 'imageServer':
-      return new ImageServer(args[0], args[1])
+    case 'mediaServer':
+      return new MediaServer(args[0], args[1])
     case 'powerpack':
       return new PowerpackServer(env)
     case 'difyKnowledge':

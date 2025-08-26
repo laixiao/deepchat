@@ -374,7 +374,7 @@ declare module 'vue-i18n' {
         name: string
         desc: string
       }
-      imageServer: {
+      mediaServer: {
         name: string
         desc: string
       }

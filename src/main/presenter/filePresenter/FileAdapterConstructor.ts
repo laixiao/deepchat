@@ -7,6 +7,7 @@ import { DocFileAdapter } from './DocFileAdapter'
 import { PptFileAdapter } from './PptFileAdapter'
 import { CodeFileAdapter } from './CodeFileAdapter'
 import { AudioFileAdapter } from './AudioFileAdapter'
+import { VideoFileAdapter } from './VideoFileAdapter'
 import { UnsupportFileAdapter } from './UnsupportFileAdapter'
 
 export type FileAdapterConstructor = new (
@@ -22,4 +23,5 @@ export type FileAdapterConstructor = new (
   | PptFileAdapter
   | CodeFileAdapter
   | AudioFileAdapter
+  | VideoFileAdapter
   | UnsupportFileAdapter

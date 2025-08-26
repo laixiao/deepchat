@@ -152,9 +152,9 @@
       "desc": "Permettre à DeepChat de manipuler des fichiers locaux",
       "name": "Système de fichiers"
     },
-    "imageServer": {
-      "desc": "Après ouverture, tout modèle dans DeepChat peut comprendre des images et générer des images.",
-      "name": "Service d'images"
+    "mediaServer": {
+      "desc": "Permet à tous les modèles DeepChat de traiter les images, vidéos et fichiers audio",
+      "name": "Service multimédia"
     },
     "braveSearch": {
       "desc": "Brave Search API https://brave.com/search/api/",

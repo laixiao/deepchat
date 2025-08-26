@@ -9,24 +9,24 @@ import { zodToJsonSchema } from 'zod-to-json-schema'
 import { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
 import { presenter } from '@/presenter'
 import { ChatMessage, ChatMessageContent } from '@shared/presenter'
-// import { GenerateCompletionOptions } from '@/presenter/llmProviderPresenter' // Assuming this path and type exist - using any for now
+import { detectMimeType } from '@/presenter/filePresenter/mime'
 
 // --- Zod Schemas for Tool Arguments ---
 
-const ReadImageBase64ArgsSchema = z.object({
-  path: z.string().describe('Path to the image file.')
+const ReadMediaBase64ArgsSchema = z.object({
+  path: z.string().describe('Path to the media file.')
 })
 
-const UploadImageArgsSchema = z.object({
-  path: z.string().describe('Path to the image file to upload.')
+const UploadMediaArgsSchema = z.object({
+  path: z.string().describe('Path to the media file to upload.')
 })
 
-const ReadMultipleImagesBase64ArgsSchema = z.object({
-  paths: z.array(z.string()).describe('List of paths to the image files.')
+const ReadMultipleMediaBase64ArgsSchema = z.object({
+  paths: z.array(z.string()).describe('List of paths to the media files.')
 })
 
-const UploadMultipleImagesArgsSchema = z.object({
-  paths: z.array(z.string()).describe('List of paths to the image files to upload.')
+const UploadMultipleMediaArgsSchema = z.object({
+  paths: z.array(z.string()).describe('List of paths to the media files to upload.')
 })
 
 const QueryImageWithPromptArgsSchema = z.object({
@@ -44,9 +44,13 @@ const OcrImageArgsSchema = z.object({
   path: z.string().describe('Path to the image file for OCR text extraction.')
 })
 
-// --- Image Server Implementation ---
+const GetMediaInfoArgsSchema = z.object({
+  path: z.string().describe('Path to the media file to get information about.')
+})
 
-export class ImageServer {
+// --- Media Server Implementation ---
+
+export class MediaServer {
   private server: Server
   private provider: string | null = null
   private model: string | null = null
@@ -64,7 +68,7 @@ export class ImageServer {
 
     this.server = new Server(
       {
-        name: 'image-processing-server',
+        name: 'media-processing-server',
         version: '0.1.0'
       },
       {
@@ -95,22 +99,21 @@ export class ImageServer {
     throw new Error('Vision model not configured. Please set up a vision model in settings first.')
   }
 
-  // No specific initialization needed for now, but can be added for upload service config
-  // public async initialize(): Promise<void> {
-  //   // Initialization logic, e.g., configure upload service client
-  // }
-
   public startServer(transport: Transport): void {
     this.server.connect(transport)
   }
 
-  // --- Image Upload Logic ---
-  private async uploadImageToService(filePath: string, fileBuffer: Buffer): Promise<string> {
+  // --- Media Upload Logic ---
+  private async uploadMediaToService(filePath: string, fileBuffer: Buffer): Promise<string> {
     try {
       console.log(`Uploading ${filePath} (size: ${fileBuffer.length} bytes)...`)
 
       const fileName = path.basename(filePath)
       const boundary = `----formdata-${Date.now()}`
+
+      // 检测文件的MIME类型
+      const mimeType = await detectMimeType(filePath)
+      console.log(`Detected MIME type: ${mimeType}`)
 
       // Build simple form data
       const formDataParts: Buffer[] = []
@@ -118,7 +121,7 @@ export class ImageServer {
       formDataParts.push(
         Buffer.from(`Content-Disposition: form-data; name="file"; filename="${fileName}"\r\n`)
       )
-      formDataParts.push(Buffer.from(`Content-Type: image/png\r\n\r\n`))
+      formDataParts.push(Buffer.from(`Content-Type: ${mimeType}\r\n\r\n`))
       formDataParts.push(fileBuffer)
       formDataParts.push(Buffer.from(`\r\n--${boundary}--\r\n`))
 
@@ -131,7 +134,7 @@ export class ImageServer {
         headers: {
           'Content-Type': `multipart/form-data; boundary=${boundary}`
         },
-        timeout: 60000, // Increase timeout for large files
+        timeout: 120000, // Increase timeout for large media files
         httpsAgent: new https.Agent({
           rejectUnauthorized: false
         }),
@@ -157,6 +160,43 @@ export class ImageServer {
       console.error(`Upload error:`, error)
       throw new Error(`Failed to upload: ${error instanceof Error ? error.message : String(error)}`)
     }
+  }
+
+  // --- Get Media Information ---
+  private async getMediaInfo(filePath: string): Promise<string> {
+    try {
+      const stats = await fs.stat(filePath)
+      const mimeType = await detectMimeType(filePath)
+      const fileName = path.basename(filePath)
+      const fileExtension = path.extname(filePath)
+
+      const mediaInfo = {
+        fileName,
+        filePath,
+        fileExtension,
+        mimeType,
+        fileSize: stats.size,
+        fileSizeFormatted: this.formatFileSize(stats.size),
+        createdAt: stats.birthtime.toISOString(),
+        modifiedAt: stats.mtime.toISOString(),
+        isImage: mimeType.startsWith('image/'),
+        isVideo: mimeType.startsWith('video/'),
+        isAudio: mimeType.startsWith('audio/')
+      }
+
+      return JSON.stringify(mediaInfo, null, 2)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      throw new Error(`Failed to get media info: ${errorMessage}`)
+    }
+  }
+
+  private formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
   // --- Placeholder for Multimodal Model Interaction ---
@@ -270,28 +310,34 @@ export class ImageServer {
       return {
         tools: [
           {
-            name: 'read_image_base64',
+            name: 'read_media_base64',
             description:
-              'Reads an image file from the specified path and returns its base64 encoded content.',
-            inputSchema: zodToJsonSchema(ReadImageBase64ArgsSchema)
+              'Reads a media file (image, video, or audio) from the specified path and returns its base64 encoded content.',
+            inputSchema: zodToJsonSchema(ReadMediaBase64ArgsSchema)
           },
           {
-            name: 'upload_image',
+            name: 'upload_media',
             description:
-              'Uploads an image file from the specified path to a hosting service and returns the public URL.',
-            inputSchema: zodToJsonSchema(UploadImageArgsSchema)
+              'Uploads a media file (image, video, or audio) from the specified path to a hosting service and returns the public URL.',
+            inputSchema: zodToJsonSchema(UploadMediaArgsSchema)
           },
           {
-            name: 'read_multiple_images_base64',
+            name: 'read_multiple_media_base64',
             description:
-              'Reads multiple image files from the specified paths and returns their base64 encoded content.',
-            inputSchema: zodToJsonSchema(ReadMultipleImagesBase64ArgsSchema)
+              'Reads multiple media files from the specified paths and returns their base64 encoded content.',
+            inputSchema: zodToJsonSchema(ReadMultipleMediaBase64ArgsSchema)
           },
           {
-            name: 'upload_multiple_images',
+            name: 'upload_multiple_media',
             description:
-              'Uploads multiple image files from the specified paths to a hosting service and returns their public URLs.',
-            inputSchema: zodToJsonSchema(UploadMultipleImagesArgsSchema)
+              'Uploads multiple media files from the specified paths to a hosting service and returns their public URLs.',
+            inputSchema: zodToJsonSchema(UploadMultipleMediaArgsSchema)
+          },
+          {
+            name: 'get_media_info',
+            description:
+              'Gets detailed information about a media file including size, type, and metadata.',
+            inputSchema: zodToJsonSchema(GetMediaInfoArgsSchema)
           },
           {
             name: 'describe_image',
@@ -321,46 +367,40 @@ export class ImageServer {
         const { name, arguments: args } = request.params
 
         switch (name) {
-          case 'read_image_base64': {
-            const parsed = ReadImageBase64ArgsSchema.safeParse(args)
+          case 'read_media_base64': {
+            const parsed = ReadMediaBase64ArgsSchema.safeParse(args)
             if (!parsed.success) {
               throw new Error(`Invalid arguments for ${name}: ${parsed.error}`)
             }
-            // TODO: Implement path validation if necessary (similar to FileSystemServer)
             const filePath = parsed.data.path
             const fileBuffer = await fs.readFile(filePath)
             const base64Content = fileBuffer.toString('base64')
-            // Determine mime type (optional but good practice)
-            // const mimeType = lookup(filePath) || 'application/octet-stream';
-            // const dataUri = `data:${mimeType};base64,${base64Content}`;
             return {
-              content: [{ type: 'text', text: base64Content }] // Or return dataUri
+              content: [{ type: 'text', text: base64Content }]
             }
           }
 
-          case 'upload_image': {
-            const parsed = UploadImageArgsSchema.safeParse(args)
+          case 'upload_media': {
+            const parsed = UploadMediaArgsSchema.safeParse(args)
             if (!parsed.success) {
               throw new Error(`Invalid arguments for ${name}: ${parsed.error}`)
             }
-            // TODO: Implement path validation if necessary
             const filePath = parsed.data.path
             const fileBuffer = await fs.readFile(filePath)
-            const imageUrl = await this.uploadImageToService(filePath, fileBuffer)
+            const mediaUrl = await this.uploadMediaToService(filePath, fileBuffer)
             return {
-              content: [{ type: 'text', text: imageUrl }]
+              content: [{ type: 'text', text: mediaUrl }]
             }
           }
 
-          case 'read_multiple_images_base64': {
-            const parsed = ReadMultipleImagesBase64ArgsSchema.safeParse(args)
+          case 'read_multiple_media_base64': {
+            const parsed = ReadMultipleMediaBase64ArgsSchema.safeParse(args)
             if (!parsed.success) {
               throw new Error(`Invalid arguments for ${name}: ${parsed.error}`)
             }
             const results = await Promise.allSettled(
               parsed.data.paths.map(async (filePath: string) => {
                 try {
-                  // TODO: Implement path validation if necessary
                   const fileBuffer = await fs.readFile(filePath)
                   return {
                     path: filePath,
@@ -369,18 +409,15 @@ export class ImageServer {
                   }
                 } catch (error) {
                   const errorMessage = error instanceof Error ? error.message : String(error)
-                  // Ensure the structure includes path and error for rejected promises
                   return Promise.reject({ path: filePath, error: errorMessage })
                 }
               })
             )
 
-            // Format output: [{path: string, base64?: string, error?: string}]
             const formattedResults = results.map((result) => {
               if (result.status === 'fulfilled') {
                 return { path: result.value.path, base64: result.value.base64 }
               } else {
-                // Access reason directly as it contains the rejected structure
                 return { path: result.reason.path, error: result.reason.error }
               }
             })
@@ -390,8 +427,8 @@ export class ImageServer {
             }
           }
 
-          case 'upload_multiple_images': {
-            const parsed = UploadMultipleImagesArgsSchema.safeParse(args)
+          case 'upload_multiple_media': {
+            const parsed = UploadMultipleMediaArgsSchema.safeParse(args)
             if (!parsed.success) {
               throw new Error(`Invalid arguments for ${name}: ${parsed.error}`)
             }
@@ -399,30 +436,38 @@ export class ImageServer {
             const results = await Promise.allSettled(
               parsed.data.paths.map(async (filePath: string) => {
                 try {
-                  // TODO: Implement path validation if necessary
                   const fileBuffer = await fs.readFile(filePath)
-                  const url = await this.uploadImageToService(filePath, fileBuffer)
+                  const url = await this.uploadMediaToService(filePath, fileBuffer)
                   return { path: filePath, url: url, status: 'fulfilled' }
                 } catch (error) {
                   const errorMessage = error instanceof Error ? error.message : String(error)
-                  // Ensure the structure includes path and error for rejected promises
                   return Promise.reject({ path: filePath, error: errorMessage })
                 }
               })
             )
 
-            // Format output: [{path: string, url?: string, error?: string}]
             const formattedResults = results.map((result) => {
               if (result.status === 'fulfilled') {
                 return { path: result.value.path, url: result.value.url }
               } else {
-                // Access reason directly as it contains the rejected structure
                 return { path: result.reason.path, error: result.reason.error }
               }
             })
 
             return {
               content: [{ type: 'text', text: JSON.stringify(formattedResults, null, 2) }]
+            }
+          }
+
+          case 'get_media_info': {
+            const parsed = GetMediaInfoArgsSchema.safeParse(args)
+            if (!parsed.success) {
+              throw new Error(`Invalid arguments for ${name}: ${parsed.error}`)
+            }
+            const filePath = parsed.data.path
+            const mediaInfo = await this.getMediaInfo(filePath)
+            return {
+              content: [{ type: 'text', text: mediaInfo }]
             }
           }
 
@@ -431,7 +476,6 @@ export class ImageServer {
             if (!parsed.success) {
               throw new Error(`Invalid arguments for ${name}: ${parsed.error}`)
             }
-            // TODO: Implement path validation if necessary
             const filePath = parsed.data.path
             const fileBuffer = await fs.readFile(filePath)
             const description = await this.queryImageWithModel(
@@ -449,11 +493,9 @@ export class ImageServer {
             if (!parsed.success) {
               throw new Error(`Invalid arguments for ${name}: ${parsed.error}`)
             }
-            // TODO: Implement path validation if necessary
             const filePath = parsed.data.path
-            const prompt = parsed.data.prompt // Get the prompt
+            const prompt = parsed.data.prompt
             const fileBuffer = await fs.readFile(filePath)
-            // Call the renamed function with the prompt
             const response = await this.queryImageWithModel(filePath, fileBuffer, prompt)
             return {
               content: [{ type: 'text', text: response }]
@@ -465,7 +507,6 @@ export class ImageServer {
             if (!parsed.success) {
               throw new Error(`Invalid arguments for ${name}: ${parsed.error}`)
             }
-            // TODO: Implement path validation if necessary
             const filePath = parsed.data.path
             const fileBuffer = await fs.readFile(filePath)
             const ocrText = await this.ocrImageWithModel(filePath, fileBuffer)
@@ -479,27 +520,12 @@ export class ImageServer {
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error)
-        // Consider logging the error server-side
         console.error(`Error processing tool call: ${errorMessage}`)
-        // Ensure the error response structure matches expected format
         return {
           content: [{ type: 'text', text: `Error: ${errorMessage}` }],
-          isError: true // Indicate this is an error response
+          isError: true
         }
       }
     })
   }
 }
-
-// --- Usage Example (similar to FileSystemServer) ---
-// import { WebSocketServerTransport } from '@modelcontextprotocol/sdk/transport/node';
-//
-// const imageServer = new ImageServer('your-llm-provider', 'your-multimodal-model');
-// // await imageServer.initialize(); // If initialization is added
-//
-// // Example using WebSocket transport
-// const transport = new WebSocketServerTransport({ port: 8081 }); // Choose a different port
-// imageServer.startServer(transport);
-// console.log('ImageServer started on port 8081');
-
-// You would need a client to connect to this server and call the tools.
