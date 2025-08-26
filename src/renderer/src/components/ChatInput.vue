@@ -822,9 +822,13 @@ const handleEditorEnter = (e: KeyboardEvent) => {
     return
   }
 
-  if (!e.isComposing) {
-    emitSend()
+  // Check if we're in IME composition
+  if (e.isComposing || e.keyCode === 229) {
+    // 229 is the keyCode for IME composition events
+    return
   }
+
+  emitSend()
 }
 
 const onWebSearchClick = async () => {
