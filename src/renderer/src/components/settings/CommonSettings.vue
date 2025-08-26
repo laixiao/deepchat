@@ -91,6 +91,33 @@
               {{ t('settings.common.visionModelNotSelectedWarning') }}
             </div>
           </div>
+
+          <Button
+            variant="outline"
+            size="icon"
+            :title="t('settings.common.addCustomSearchEngine')"
+            @click="openAddSearchEngineDialog"
+          >
+            <Icon icon="lucide:plus" class="w-4 h-4" />
+          </Button>
+          <Button
+            v-if="isCurrentEngineCustom"
+            variant="outline"
+            size="icon"
+            :title="t('settings.common.deleteCustomSearchEngine')"
+            @click="currentEngine && openDeleteSearchEngineDialog(currentEngine)"
+          >
+            <Icon icon="lucide:trash-2" class="w-4 h-4 text-destructive" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            :title="t('settings.common.testSearchEngine')"
+            @click="openTestSearchEngineDialog"
+          >
+            <Icon icon="lucide:flask-conical" class="w-4 h-4" />
+          </Button>
+          
         </div>
       </div>
       

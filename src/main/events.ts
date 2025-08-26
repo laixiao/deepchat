@@ -35,7 +35,8 @@ export const CONFIG_EVENTS = {
   OAUTH_LOGIN_ERROR: 'config:oauth-login-error', // OAuth登录失败
   // 视觉模型相关事件
   VISION_MODEL_CHANGED: 'config:vision-model-changed', // 视觉模型变更事件
-  VISION_MODEL_RESET: 'config:vision-model-reset' // 视觉模型重置事件
+  VISION_MODEL_RESET: 'config:vision-model-reset', // 视觉模型重置事件
+  THEME_CHANGED: 'config:theme-changed' // 主题变更事件
 }
 
 // 会话相关事件

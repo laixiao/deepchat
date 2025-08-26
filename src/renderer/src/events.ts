@@ -21,7 +21,8 @@ export const CONFIG_EVENTS = {
   LANGUAGE_CHANGED: 'config:language-changed', // 新增：语言变更事件
   SOUND_ENABLED_CHANGED: 'config:sound-enabled-changed', // 新增：声音启用状态变更事件
   COPY_WITH_COT_CHANGED: 'config:copy-with-cot-enabled-changed',
-  DEV_TOOLS_AUTO_OPEN_CHANGED: 'config:dev-tools-auto-open-changed' // 新增：开发者工具自动打开变更事件
+  DEV_TOOLS_AUTO_OPEN_CHANGED: 'config:dev-tools-auto-open-changed', // 新增：开发者工具自动打开变更事件
+  THEME_CHANGED: 'config:theme-changed'
 }
 
 // 会话相关事件
@@ -143,4 +144,8 @@ export const DIALOG_EVENTS = {
 // 知识库事件
 export const RAG_EVENTS = {
   FILE_UPDATED: 'rag:file-updated' // 文件状态更新
+}
+// 系统相关事件
+export const SYSTEM_EVENTS = {
+  SYSTEM_THEME_UPDATED: 'system:theme-updated'
 }
