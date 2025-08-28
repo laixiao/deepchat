@@ -71,23 +71,26 @@
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="openMcp"
       >
-        <Icon icon="lucide:cpu" class="w-4 h-4" />
+        <Icon icon="lucide:cpu" class="w-4 h-4 mr-1" />
+        <span>{{ t('appbar.mcp') }}</span>
       </Button>
       <Button
         variant="ghost"
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="onThemeClick"
       >
-        <Icon v-if="themeStore.themeMode === 'dark'" icon="lucide:moon" class="w-4 h-4" />
-        <Icon v-else-if="themeStore.themeMode === 'light'" icon="lucide:sun" class="w-4 h-4" />
-        <Icon v-else icon="lucide:monitor" class="w-4 h-4" />
+        <Icon v-if="themeStore.themeMode === 'dark'" icon="lucide:moon" class="w-4 h-4 mr-1" />
+        <Icon v-else-if="themeStore.themeMode === 'light'" icon="lucide:sun" class="w-4 h-4 mr-1" />
+        <Icon v-else icon="lucide:monitor" class="w-4 h-4 mr-1" />
+        <span>{{ t('appbar.theme') }}</span>
       </Button>
       <Button
         variant="ghost"
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="openSettings"
       >
-        <Icon icon="lucide:settings" class="w-4 h-4" />
+        <Icon icon="lucide:settings" class="w-4 h-4 mr-1" />
+        <span>{{ t('appbar.settings') }}</span>
       </Button>
       <!-- <Button
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center"
