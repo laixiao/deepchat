@@ -69,6 +69,7 @@
       <Button
         variant="ghost"
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        :class="{ 'animate-pulse bg-red-500/20': systemAlert }"
         @click="openGpuInfo"
       >
         <Icon icon="lucide:monitor" class="w-4 h-4 mr-1" />
@@ -134,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed } from 'vue'
+import { ref, onMounted, nextTick, computed, onUnmounted } from 'vue'
 import { MinusIcon, XIcon } from 'lucide-vue-next'
 import MaximizeIcon from './icons/MaximizeIcon.vue'
 import RestoreIcon from './icons/RestoreIcon.vue'
@@ -169,6 +170,20 @@ let draggedTabId: number | null = null
 const dragInsertIndex = ref(-1)
 const dragInsertPosition = ref(0)
 
+// 系统监控相关状态
+import {
+  GPU_MEMORY_THRESHOLD,
+  GPU_UTILIZATION_THRESHOLD,
+  GPU_TEMPERATURE_THRESHOLD,
+  POWER_UTILIZATION_THRESHOLD,
+  CPU_UTILIZATION_THRESHOLD,
+  DISK_PERFORMANCE_THRESHOLD,
+  MEMORY_UTILIZATION_THRESHOLD
+} from '@shared/constants'
+
+const systemAlert = ref(false)
+const systemAlertInterval = ref<number | null>(null)
+
 const tabContainerWrapperSize = useElementSize(tabContainerWrapper)
 const tabContainerSize = useElementSize(tabContainer)
 const tabContainerWrapperScrollLeft = ref(0)
@@ -193,6 +208,88 @@ const isTabContainerOverflowingRight = computed(() => {
       (tabContainerWrapper.value?.scrollWidth ?? 0) - tabContainerWrapperSize.width.value
   )
 })
+
+// 检查系统状态
+const checkSystemStatus = async () => {
+  try {
+    // 检查GPU支持
+    const isSupported = await window.electron.ipcRenderer.invoke('gpu:is-supported')
+    if (!isSupported) return
+
+    // 获取GPU信息
+    const gpuData = await window.electron.ipcRenderer.invoke('gpu:get-info')
+    
+    // 获取CPU使用率
+    const cpuUsage = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getCPUUsage')
+
+    // 获取内存使用率
+    const memoryUsageResponse = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getMemoryUsage')
+    const memoryUsage = (memoryUsageResponse.used / memoryUsageResponse.total) * 100
+
+    // 获取磁盘性能
+    const diskData = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getDisksPerformance')
+    
+    // 检查是否有任何系统指标超过阈值
+    let hasSystemAlert = false
+    
+    // 检查GPU相关指标
+    for (const gpu of gpuData) {
+      if (gpu.memoryUtilization >= GPU_MEMORY_THRESHOLD ||
+          gpu.gpuUtilization >= GPU_UTILIZATION_THRESHOLD ||
+          gpu.temperature >= GPU_TEMPERATURE_THRESHOLD ||
+          gpu.powerUtilization >= POWER_UTILIZATION_THRESHOLD) {
+        hasSystemAlert = true
+        break
+      }
+    }
+    
+    // 检查CPU使用率
+    if (cpuUsage >= CPU_UTILIZATION_THRESHOLD) {
+      hasSystemAlert = true
+    }
+
+    // 检查内存使用率
+    if (memoryUsage >= MEMORY_UTILIZATION_THRESHOLD) {
+      hasSystemAlert = true
+    }
+
+    // 检查磁盘性能
+    if (!hasSystemAlert) {
+      for (const disk of diskData) {
+        if (disk.performance !== undefined && disk.performance >= DISK_PERFORMANCE_THRESHOLD) {
+          hasSystemAlert = true
+          break
+        }
+      }
+    }
+    
+    systemAlert.value = hasSystemAlert
+  } catch (error) {
+    console.error('Failed to check system status:', error)
+    systemAlert.value = false
+  }
+}
+
+// 启动系统监控
+const startSystemMonitoring = () => {
+  // 先立即检查一次
+  checkSystemStatus()
+  
+  // 设置定时检查
+  if (systemAlertInterval.value) {
+    clearInterval(systemAlertInterval.value)
+  }
+  systemAlertInterval.value = window.setInterval(checkSystemStatus, 3000) // 每3秒检查一次
+}
+
+// 停止系统监控
+const stopSystemMonitoring = () => {
+  if (systemAlertInterval.value) {
+    clearInterval(systemAlertInterval.value)
+    systemAlertInterval.value = null
+  }
+  systemAlert.value = false
+}
 
 const onTabDragStart = (tabId: number, event: DragEvent) => {
   const tab = tabStore.tabs.find((t) => t.id === tabId)
@@ -479,6 +576,17 @@ onMounted(() => {
 
   window.addEventListener('dragover', handleDragOver)
   window.addEventListener('dragend', handleDragEnd)
+  
+  // 启动系统监控
+  startSystemMonitoring()
+})
+
+onUnmounted(() => {
+  // 停止系统监控
+  stopSystemMonitoring()
+  
+  window.removeEventListener('dragover', handleDragOver)
+  window.removeEventListener('dragend', handleDragEnd)
 })
 
 const openNewTab = () => {

@@ -7,6 +7,7 @@
   "memory": "Memory",
   "gpuUtilization": "GPU Utilization",
   "cpuUtilization": "CPU Utilization",
+  "memoryUtilization": "Memory Utilization",
   "utilization": "Utilization",
   "temperature": "Temperature",
   "fanSpeed": "Fan Speed",
@@ -21,5 +22,12 @@
   "notSupported": "No NVIDIA GPU detected or NVIDIA drivers not installed",
   "diskUsage": "Disk Usage",
   "diskPerformance": "Disk Performance",
-  "performance": "Performance"
+  "performance": "Performance",
+  "highMemoryUsageWarning": "GPU memory usage has reached {threshold}%! May run out of memory at any time, consider upgrading your graphics card.",
+  "highGpuUtilizationWarning": "GPU utilization has reached 100%! GPU is running at full capacity.",
+  "highTemperatureWarning": "GPU temperature has reached {threshold}°C! Temperature is too high, consider opening the case or installing additional cooling.",
+  "highPowerUsageWarning": "Power usage has reached 99.7%! Running at full capacity, monitor power supply.",
+  "highCpuUsageWarning": "CPU utilization has reached 100%! CPU is running at full capacity, consider upgrading to next generation CPU.",
+  "highDiskPerformanceWarning": "Disk read performance has reached {threshold}%! Affects project extraction and installation speed.",
+  "highSystemMemoryUsageWarning": "Memory usage has reached {threshold}%! Memory is running at full capacity, consider adding more RAM."
 }

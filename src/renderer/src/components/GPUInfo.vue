@@ -50,8 +50,14 @@
               <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
                 <div 
                   class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
+                  :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].memoryUtilization >= GPU_MEMORY_THRESHOLD }"
                   :style="{ width: gpuData[index - 1].memoryUtilization + '%' }"
                 ></div>
+              </div>
+              <!-- 显存使用率警告 -->
+              <div v-if="gpuData[index - 1].memoryUtilization >= GPU_MEMORY_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
+                <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
+                <span>{{ t('gpuInfo.highMemoryUsageWarning', { threshold: gpuData[index - 1].memoryUtilization.toFixed(1) }) }}</span>
               </div>
             </div>
 
@@ -64,8 +70,14 @@
               <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
                 <div 
                   class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
+                  :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].gpuUtilization >= GPU_UTILIZATION_THRESHOLD }"
                   :style="{ width: gpuData[index - 1].gpuUtilization + '%' }"
                 ></div>
+              </div>
+              <!-- GPU使用率警告 -->
+              <div v-if="gpuData[index - 1].gpuUtilization >= GPU_UTILIZATION_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
+                <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
+                <span>{{ t('gpuInfo.highGpuUtilizationWarning', { threshold: gpuData[index - 1].gpuUtilization }) }}</span>
               </div>
             </div>
 
@@ -81,8 +93,14 @@
               <div class="w-full bg-secondary rounded-full h-2.5 mt-2 overflow-hidden">
                 <div 
                   class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
+                  :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].temperature >= GPU_TEMPERATURE_THRESHOLD }"
                   :style="{ width: (gpuData[index - 1].temperature / 100) * 100 + '%' }"
                 ></div>
+              </div>
+              <!-- 温度警告 -->
+              <div v-if="gpuData[index - 1].temperature >= GPU_TEMPERATURE_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
+                <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
+                <span>{{ t('gpuInfo.highTemperatureWarning', { threshold: gpuData[index - 1].temperature }) }}</span>
               </div>
             </div>
 
@@ -98,8 +116,14 @@
               <div class="w-full bg-secondary rounded-full h-2.5 mt-2 overflow-hidden">
                 <div 
                   class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
+                  :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].powerUtilization >= POWER_UTILIZATION_THRESHOLD }"
                   :style="{ width: gpuData[index - 1].powerUtilization + '%' }"
                 ></div>
+              </div>
+              <!-- 功耗警告 -->
+              <div v-if="gpuData[index - 1].powerUtilization >= POWER_UTILIZATION_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
+                <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
+                <span>{{ t('gpuInfo.highPowerUsageWarning', { threshold: gpuData[index - 1].powerUtilization.toFixed(1) }) }}</span>
               </div>
             </div>
           </div>
@@ -154,10 +178,16 @@
                   <span class="text-sm font-mono">{{ disk.performance }}%</span>
                 </div>
                 <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
-                  <div 
-                    class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
+                  <div
+                    class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out"
+                    :class="{ 'bg-red-500 animate-pulse': disk.performance !== undefined && disk.performance >= DISK_PERFORMANCE_THRESHOLD }"
                     :style="{ width: disk.performance + '%' }"
                   ></div>
+                </div>
+                <!-- 硬盘性能警告 -->
+                <div v-if="disk.performance !== undefined && disk.performance >= DISK_PERFORMANCE_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
+                  <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
+                  <span>{{ t('gpuInfo.highDiskPerformanceWarning', { threshold: disk.performance, drive: disk.drive }) }}</span>
                 </div>
               </div>
             </div>
@@ -187,12 +217,57 @@
               <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
                 <div 
                   class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
+                  :class="{ 'bg-red-500 animate-pulse': cpuUsage >= CPU_UTILIZATION_THRESHOLD }"
                   :style="{ width: cpuUsage + '%' }"
                 ></div>
               </div>
               <div class="flex justify-between text-xs text-muted-foreground mt-1">
                 <span>{{ cpuUsage.toFixed(1) }}%</span>
                 <span>{{ t('gpuInfo.utilization') }}</span>
+              </div>
+              <!-- CPU使用率警告 -->
+              <div v-if="cpuUsage >= CPU_UTILIZATION_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
+                <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
+                <span>{{ t('gpuInfo.highCpuUsageWarning', { threshold: cpuUsage.toFixed(1) }) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 内存使用率 -->
+        <div class="bg-card border rounded-lg p-5 mt-6 mb-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+              <div class="bg-primary/10 p-2 rounded-lg mr-3">
+                <Icon icon="lucide:memory-stick" class="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h2 class="font-bold text-lg">{{ t('gpuInfo.memoryUtilization') }}</h2>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4">
+            <div class="bg-muted/50 rounded-lg p-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium">{{ t('gpuInfo.utilization') }}</h3>
+                <span class="text-sm font-mono">{{ memoryUsage.toFixed(1) }}%</span>
+              </div>
+              <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                <div
+                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out"
+                  :class="{ 'bg-red-500 animate-pulse': memoryUsage >= MEMORY_UTILIZATION_THRESHOLD }"
+                  :style="{ width: memoryUsage + '%' }"
+                ></div>
+              </div>
+              <div class="flex justify-between text-xs text-muted-foreground mt-1">
+                <span>{{ memoryUsage.toFixed(1) }}%</span>
+                <span>{{ t('gpuInfo.utilization') }}</span>
+              </div>
+              <!-- 内存使用率警告 -->
+              <div v-if="memoryUsage >= MEMORY_UTILIZATION_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
+                <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
+                <span>{{ t('gpuInfo.highSystemMemoryUsageWarning', { threshold: memoryUsage.toFixed(1) }) }}</span>
               </div>
             </div>
           </div>
@@ -210,6 +285,15 @@ import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Icon } from '@iconify/vue'
+import {
+  GPU_MEMORY_THRESHOLD,
+  GPU_UTILIZATION_THRESHOLD,
+  GPU_TEMPERATURE_THRESHOLD,
+  POWER_UTILIZATION_THRESHOLD,
+  CPU_UTILIZATION_THRESHOLD,
+  DISK_PERFORMANCE_THRESHOLD,
+  MEMORY_UTILIZATION_THRESHOLD
+} from '@shared/constants'
 
 const { t } = useI18n()
 
@@ -221,9 +305,12 @@ const refreshInterval = ref<number | null>(null)
 const isSupported = ref<boolean>(true)
 const gpuCount = ref(0)
 
-// CPU和硬盘监控数据
+// CPU、内存和硬盘监控数据
 const cpuUsage = ref<number>(0)
+const memoryUsage = ref<number>(0)
 const diskData = ref<Array<{ drive: string; total: number; free: number; used: number; utilization: number; performance?: number }>>([])
+
+// GPU内存使用率阈值
 
 // 格式化字节大小
 const formatBytes = (bytes: number, decimals = 2): string => {
@@ -267,15 +354,21 @@ const fetchGPUInfo = async () => {
     
     // 获取CPU使用率
     const cpuUsageResponse = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getCPUUsage')
-    
+
+    // 获取内存使用率
+    const memoryUsageResponse = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getMemoryUsage')
+
     // 获取各磁盘使用情况
     const diskSpaceResponse = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getDisksSpace')
-    
+
     // 获取各磁盘性能情况
     const diskPerformanceResponse = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getDisksPerformance')
-    
+
     // 更新CPU使用率
     cpuUsage.value = cpuUsageResponse
+
+    // 更新内存使用率（计算百分比）
+    memoryUsage.value = (memoryUsageResponse.used / memoryUsageResponse.total) * 100
     
     // 合并磁盘空间和性能数据
     const mergedDiskData = diskSpaceResponse.map(disk => {

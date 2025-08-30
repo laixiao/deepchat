@@ -7,6 +7,7 @@
   "memory": "显存",
   "gpuUtilization": "GPU使用率",
   "cpuUtilization": "CPU使用率",
+  "memoryUtilization": "内存使用率",
   "utilization": "使用率",
   "temperature": "温度",
   "fanSpeed": "风扇转速",
@@ -21,5 +22,12 @@
   "notSupported": "未检测到NVIDIA显卡或未安装NVIDIA驱动程序",
   "diskUsage": "硬盘使用情况",
   "diskPerformance": "硬盘性能",
-  "performance": "性能"
+  "performance": "性能",
+  "highMemoryUsageWarning": "显存占用已达{threshold}%！随时可能爆显存，建议升级显卡。",
+  "highGpuUtilizationWarning": "GPU使用率已达100%！GPU正在满负荷运行。",
+  "highTemperatureWarning": "GPU温度已达{threshold}°C！温度过高，建议打开机箱或加装散热器散热。",
+  "highPowerUsageWarning": "功耗已达99.7%！正在满负荷运行，注意电源供电。",
+  "highCpuUsageWarning": "CPU使用率已达100%！CPU正在满负荷运行，建议更换下一代CPU。",
+  "highDiskPerformanceWarning": "硬盘读取性能已达{threshold}%！影响项目解压和安装速度。",
+  "highSystemMemoryUsageWarning": "内存使用率已达{threshold}%！内存正在满负荷运行，建议加装内存。"
 }
