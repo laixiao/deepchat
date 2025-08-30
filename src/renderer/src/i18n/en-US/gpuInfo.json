@@ -19,5 +19,7 @@
   "processes": "Processes",
   "refresh": "Refresh",
   "notSupported": "No NVIDIA GPU detected or NVIDIA drivers not installed",
-  "diskUsage": "Disk Usage"
+  "diskUsage": "Disk Usage",
+  "diskPerformance": "Disk Performance",
+  "performance": "Performance"
 }

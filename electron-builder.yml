@@ -85,7 +85,7 @@ linux:
   artifactName: ${name}-${version}-linux-${arch}.${ext}
   mimeTypes:
     - x-scheme-handler/deepchat
-npmRebuild: true
+npmRebuild: false
 publish:
   provider: generic
   url: https://cdn.deepchatai.cn/upgrade/

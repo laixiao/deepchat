@@ -113,9 +113,11 @@ export class DevicePresenter implements IDevicePresenter {
     Array<{ drive: string; total: number; free: number; used: number; utilization: number }>
   > {
     if (process.platform === 'win32') {
-      // Windows implementation
-      const { stdout } = await execAsync('wmic logicaldisk get caption,size,freespace')
-      const lines = stdout.trim().split('\n').slice(1)
+      // Windows implementation - 获取磁盘空间信息
+      const { stdout: spaceStdout } = await execAsync(
+        'wmic logicaldisk where "DriveType=3" get Caption,Size,FreeSpace'
+      )
+      const spaceLines = spaceStdout.trim().split('\n').slice(1)
       const disks: Array<{
         drive: string
         total: number
@@ -124,12 +126,12 @@ export class DevicePresenter implements IDevicePresenter {
         utilization: number
       }> = []
 
-      lines.forEach((line) => {
+      spaceLines.forEach((line) => {
         const parts = line.trim().split(/\s+/)
         if (parts.length >= 3) {
           const drive = parts[0]
+          const size = parseInt(parts[2]) // 注意：WMIC输出顺序是Caption,FreeSpace,Size
           const freeSpace = parseInt(parts[1])
-          const size = parseInt(parts[2])
 
           if (!isNaN(size) && !isNaN(freeSpace) && size > 0) {
             const used = size - freeSpace
@@ -181,6 +183,48 @@ export class DevicePresenter implements IDevicePresenter {
       })
 
       return disks
+    }
+  }
+
+  /**
+   * 获取各个磁盘驱动器的性能信息（磁盘时间百分比）
+   */
+  async getDisksPerformance(): Promise<Array<{ drive: string; performance: number }>> {
+    if (process.platform === 'win32') {
+      // Windows implementation - 获取磁盘性能信息
+      try {
+        const { stdout } = await execAsync(
+          'wmic path Win32_PerfFormattedData_PerfDisk_LogicalDisk where "Name LIKE \'[A-Z]:\'" get Name,PercentDiskTime'
+        )
+        const lines = stdout.trim().split('\n').slice(1)
+        const disks: Array<{ drive: string; performance: number }> = []
+
+        lines.forEach((line) => {
+          const parts = line.trim().split(/\s+/)
+          if (parts.length >= 2) {
+            const drive = parts[0]
+            const performance = parseInt(parts[1])
+
+            if (!isNaN(performance)) {
+              // 限制性能值在0-100范围内
+              const clampedPerformance = Math.min(100, Math.max(0, performance))
+              disks.push({
+                drive,
+                performance: clampedPerformance
+              })
+            }
+          }
+        })
+
+        return disks
+      } catch (error) {
+        console.error('Failed to get disk performance:', error)
+        // 返回空数组作为降级处理
+        return []
+      }
+    } else {
+      // Unix-like systems implementation (简化处理)
+      return []
     }
   }
 

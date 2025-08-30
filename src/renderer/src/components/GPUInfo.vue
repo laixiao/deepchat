@@ -22,38 +22,7 @@
 
       <!-- 显卡信息 -->
       <div v-else>
-        <!-- CPU使用率 -->
-        <div class="bg-card border rounded-lg p-5 mb-6 shadow-sm">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center">
-              <div class="bg-primary/10 p-2 rounded-lg mr-3">
-                <Icon icon="lucide:cpu" class="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h2 class="font-bold text-lg">{{ t('gpuInfo.cpuUtilization') }}</h2>
-              </div>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-1 gap-4">
-            <div class="bg-muted/50 rounded-lg p-4">
-              <div class="flex justify-between items-center mb-2">
-                <h3 class="font-medium">{{ t('gpuInfo.utilization') }}</h3>
-                <span class="text-sm font-mono">{{ cpuUsage.toFixed(1) }}%</span>
-              </div>
-              <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
-                <div 
-                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
-                  :style="{ width: cpuUsage + '%' }"
-                ></div>
-              </div>
-              <div class="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>{{ cpuUsage.toFixed(1) }}%</span>
-                <span>{{ t('gpuInfo.utilization') }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        
         
         <div v-for="index in gpuCount" :key="index" class="bg-card border rounded-lg p-5 mb-6 shadow-sm">
           <div v-if="gpuData[index - 1]" class="gpu-item" :data-gpu-index="index - 1">
@@ -84,10 +53,6 @@
                   :style="{ width: gpuData[index - 1].memoryUtilization + '%' }"
                 ></div>
               </div>
-              <div class="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>{{ gpuData[index - 1].memoryUtilization.toFixed(1) }}%</span>
-                <span>{{ t('gpuInfo.utilization') }}</span>
-              </div>
             </div>
 
             <!-- GPU使用率 -->
@@ -101,10 +66,6 @@
                   class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
                   :style="{ width: gpuData[index - 1].gpuUtilization + '%' }"
                 ></div>
-              </div>
-              <div class="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>{{ gpuData[index - 1].gpuUtilization }}%</span>
-                <span>{{ t('gpuInfo.utilization') }}</span>
               </div>
             </div>
 
@@ -123,9 +84,6 @@
                   :style="{ width: (gpuData[index - 1].temperature / 100) * 100 + '%' }"
                 ></div>
               </div>
-              <div class="mt-2 text-xs text-muted-foreground">
-                {{ t('gpuInfo.temperature') }}: {{ gpuData[index - 1].temperature }}°C
-              </div>
             </div>
 
             <!-- 功耗 -->
@@ -142,9 +100,6 @@
                   class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
                   :style="{ width: gpuData[index - 1].powerUtilization + '%' }"
                 ></div>
-              </div>
-              <div class="mt-2 text-xs text-muted-foreground">
-                {{ t('gpuInfo.powerUtilization') }}: {{ gpuData[index - 1].powerUtilization.toFixed(2) }}%
               </div>
             </div>
           </div>
@@ -188,13 +143,62 @@
                   :style="{ width: disk.utilization + '%' }"
                 ></div>
               </div>
+              
+              <!-- 硬盘性能监控 -->
+              <div v-if="disk.performance !== undefined" class="mt-3 pt-3 border-t border-muted">
+                <div class="flex justify-between items-center mb-2">
+                  <div class="flex items-center">
+                    <Icon icon="lucide:activity" class="w-4 h-4 mr-2 text-muted-foreground" />
+                    <h4 class="font-medium text-sm">{{ t('gpuInfo.diskPerformance') }}</h4>
+                  </div>
+                  <span class="text-sm font-mono">{{ disk.performance }}%</span>
+                </div>
+                <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                  <div 
+                    class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
+                    :style="{ width: disk.performance + '%' }"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- CPU使用率 -->
+        <div class="bg-card border rounded-lg p-5 mt-6 mb-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center">
+              <div class="bg-primary/10 p-2 rounded-lg mr-3">
+                <Icon icon="lucide:cpu" class="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h2 class="font-bold text-lg">{{ t('gpuInfo.cpuUtilization') }}</h2>
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 gap-4">
+            <div class="bg-muted/50 rounded-lg p-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium">{{ t('gpuInfo.utilization') }}</h3>
+                <span class="text-sm font-mono">{{ cpuUsage.toFixed(1) }}%</span>
+              </div>
+              <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                <div 
+                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
+                  :style="{ width: cpuUsage + '%' }"
+                ></div>
+              </div>
               <div class="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>{{ disk.utilization.toFixed(1) }}%</span>
+                <span>{{ cpuUsage.toFixed(1) }}%</span>
                 <span>{{ t('gpuInfo.utilization') }}</span>
               </div>
             </div>
           </div>
         </div>
+
+
       </div>
     </div>
   </div>
@@ -219,7 +223,7 @@ const gpuCount = ref(0)
 
 // CPU和硬盘监控数据
 const cpuUsage = ref<number>(0)
-const diskData = ref<Array<{ drive: string; total: number; free: number; used: number; utilization: number }>>([])
+const diskData = ref<Array<{ drive: string; total: number; free: number; used: number; utilization: number; performance?: number }>>([])
 
 // 格式化字节大小
 const formatBytes = (bytes: number, decimals = 2): string => {
@@ -265,13 +269,25 @@ const fetchGPUInfo = async () => {
     const cpuUsageResponse = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getCPUUsage')
     
     // 获取各磁盘使用情况
-    const diskDataResponse = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getDisksSpace')
+    const diskSpaceResponse = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getDisksSpace')
+    
+    // 获取各磁盘性能情况
+    const diskPerformanceResponse = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getDisksPerformance')
     
     // 更新CPU使用率
     cpuUsage.value = cpuUsageResponse
     
+    // 合并磁盘空间和性能数据
+    const mergedDiskData = diskSpaceResponse.map(disk => {
+      const performanceData = diskPerformanceResponse.find(p => p.drive === disk.drive)
+      return {
+        ...disk,
+        performance: performanceData ? performanceData.performance : undefined
+      }
+    })
+    
     // 更新磁盘数据
-    diskData.value = diskDataResponse
+    diskData.value = mergedDiskData
     
     // 首次加载时初始化数据
     if (loading.value) {

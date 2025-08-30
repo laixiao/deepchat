@@ -832,6 +832,7 @@ export interface IDevicePresenter {
   getDisksSpace(): Promise<
     Array<{ drive: string; total: number; free: number; used: number; utilization: number }>
   >
+  getDisksPerformance(): Promise<Array<{ drive: string; performance: number }>>
   resetData(): Promise<void>
   resetDataByType(resetType: 'chat' | 'knowledge' | 'config' | 'all'): Promise<void>
 
