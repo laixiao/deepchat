@@ -1,0 +1,23 @@
+{
+  "title": "GPU情報",
+  "loading": "GPU情報を読み込み中...",
+  "error": "GPU情報の取得に失敗しました",
+  "retry": "再試行",
+  "gpu": "GPU",
+  "memory": "メモリ",
+  "gpuUtilization": "GPU使用率",
+  "utilization": "使用率",
+  "temperature": "温度",
+  "fanSpeed": "ファン速度",
+  "power": "消費電力",
+  "powerUtilization": "電力使用率",
+  "details": "詳細情報",
+  "pcie": "PCIeリンク",
+  "clock": "コアクロック",
+  "memoryClock": "メモリクロック",
+  "processes": "プロセス数",
+  "refresh": "更新",
+  "notSupported": "NVIDIA GPUが検出されていないか、NVIDIAドライバーがインストールされていません",
+  "cpuUtilization": "CPU使用率",
+  "diskUsage": "ディスク使用量"
+}

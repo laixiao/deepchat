@@ -1,0 +1,23 @@
+{
+  "title": "GPU Information",
+  "loading": "Loading GPU information...",
+  "error": "Failed to fetch GPU information",
+  "retry": "Retry",
+  "gpu": "GPU",
+  "memory": "Memory",
+  "gpuUtilization": "GPU Utilization",
+  "cpuUtilization": "CPU Utilization",
+  "utilization": "Utilization",
+  "temperature": "Temperature",
+  "fanSpeed": "Fan Speed",
+  "power": "Power",
+  "powerUtilization": "Power Utilization",
+  "details": "Details",
+  "pcie": "PCIe Link",
+  "clock": "Core Clock",
+  "memoryClock": "Memory Clock",
+  "processes": "Processes",
+  "refresh": "Refresh",
+  "notSupported": "No NVIDIA GPU detected or NVIDIA drivers not installed",
+  "diskUsage": "Disk Usage"
+}

@@ -99,6 +99,15 @@ const router = createRouter({
           }
         }
       ]
+    },
+    {
+      path: '/gpu',
+      name: 'gpu',
+      component: () => import('@/views/GpuInfoView.vue'),
+      meta: {
+        titleKey: 'routes.gpu',
+        icon: 'lucide:chip'
+      }
     }
   ]
 })

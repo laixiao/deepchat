@@ -1,0 +1,23 @@
+{
+  "title": "Informations GPU",
+  "loading": "Chargement des informations GPU...",
+  "error": "Échec de la récupération des informations GPU",
+  "retry": "Réessayer",
+  "gpu": "GPU",
+  "memory": "Mémoire",
+  "gpuUtilization": "Utilisation GPU",
+  "utilization": "Utilisation",
+  "temperature": "Température",
+  "fanSpeed": "Vitesse du ventilateur",
+  "power": "Alimentation",
+  "powerUtilization": "Utilisation de l'alimentation",
+  "details": "Détails",
+  "pcie": "Lien PCIe",
+  "clock": "Fréquence du cœur",
+  "memoryClock": "Fréquence de la mémoire",
+  "processes": "Processus",
+  "refresh": "Actualiser",
+  "notSupported": "Aucun GPU NVIDIA détecté ou pilotes NVIDIA non installés",
+  "cpuUtilization": "Utilisation du processeur",
+  "diskUsage": "Utilisation du disque"
+}

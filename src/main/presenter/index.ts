@@ -23,6 +23,7 @@ import { OAuthPresenter } from './oauthPresenter'
 import { FloatingButtonPresenter } from './floatingButtonPresenter'
 import { CONFIG_EVENTS, WINDOW_EVENTS } from '@/events'
 import { KnowledgePresenter } from './knowledgePresenter'
+import { GpuPresenter } from './gpuPresenter'
 
 // IPC调用上下文接口
 interface IPCCallContext {
@@ -57,6 +58,7 @@ export class Presenter implements IPresenter {
   oauthPresenter: OAuthPresenter
   floatingButtonPresenter: FloatingButtonPresenter
   knowledgePresenter: KnowledgePresenter
+  gpuPresenter: GpuPresenter
   // llamaCppPresenter: LlamaCppPresenter // 保留原始注释
   dialogPresenter: DialogPresenter
 
@@ -92,6 +94,7 @@ export class Presenter implements IPresenter {
       dbDir,
       this.filePresenter
     )
+    this.gpuPresenter = new GpuPresenter()
 
     // this.llamaCppPresenter = new LlamaCppPresenter() // 保留原始注释
     this.setupEventBus() // 设置事件总线监听
@@ -251,3 +254,22 @@ ipcMain.handle(
     }
   }
 )
+
+// GPU信息专用IPC处理程序
+ipcMain.handle('gpu:get-info', async () => {
+  try {
+    return await presenter.gpuPresenter.getNvidiaGpuInfo()
+  } catch (error) {
+    console.error('Failed to get GPU info:', error)
+    throw error
+  }
+})
+
+ipcMain.handle('gpu:is-supported', async () => {
+  try {
+    return await presenter.gpuPresenter.isGpuMonitoringSupported()
+  } catch (error) {
+    console.error('Failed to check GPU support:', error)
+    throw error
+  }
+})

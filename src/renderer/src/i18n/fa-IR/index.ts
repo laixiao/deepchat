@@ -17,6 +17,7 @@ import chat from './chat.json'
 import contextMenu from './contextMenu.json'
 import promptSetting from './promptSetting.json'
 import appbar from './appbar.json'
+import gpuInfo from './gpuInfo.json'
 
 const others = {
   Silicon: 'SiliconFlow',
@@ -51,5 +52,6 @@ export default {
   contextMenu,
   promptSetting,
   appbar,
+  gpuInfo,
   ...others
 }

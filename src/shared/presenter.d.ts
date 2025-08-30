@@ -4,6 +4,7 @@ import { MessageFile } from './chat'
 import { ShowResponse } from 'ollama'
 import { ShortcutKeySetting } from '@/presenter/configPresenter/shortcutKeySettings'
 import { ModelType } from '@shared/model'
+import { GpuInfo } from './types/gpu'
 
 export type SQLITE_MESSAGE = {
   id: string
@@ -330,8 +331,14 @@ export interface IPresenter {
   oauthPresenter: IOAuthPresenter
   dialogPresenter: IDialogPresenter
   knowledgePresenter: IKnowledgePresenter
+  gpuPresenter: IGpuPresenter
   init(): void
   destroy(): void
+}
+
+export interface IGpuPresenter {
+  getNvidiaGpuInfo(): Promise<GpuInfo[]>
+  isGpuMonitoringSupported(): Promise<boolean>
 }
 
 export interface INotificationPresenter {
@@ -822,6 +829,9 @@ export interface IDevicePresenter {
   getCPUUsage(): Promise<number>
   getMemoryUsage(): Promise<MemoryInfo>
   getDiskSpace(): Promise<DiskInfo>
+  getDisksSpace(): Promise<
+    Array<{ drive: string; total: number; free: number; used: number; utilization: number }>
+  >
   resetData(): Promise<void>
   resetDataByType(resetType: 'chat' | 'knowledge' | 'config' | 'all'): Promise<void>
 

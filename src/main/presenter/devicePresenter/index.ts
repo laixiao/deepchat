@@ -107,6 +107,84 @@ export class DevicePresenter implements IDevicePresenter {
   }
 
   /**
+   * 获取各个磁盘驱动器的空间信息
+   */
+  async getDisksSpace(): Promise<
+    Array<{ drive: string; total: number; free: number; used: number; utilization: number }>
+  > {
+    if (process.platform === 'win32') {
+      // Windows implementation
+      const { stdout } = await execAsync('wmic logicaldisk get caption,size,freespace')
+      const lines = stdout.trim().split('\n').slice(1)
+      const disks: Array<{
+        drive: string
+        total: number
+        free: number
+        used: number
+        utilization: number
+      }> = []
+
+      lines.forEach((line) => {
+        const parts = line.trim().split(/\s+/)
+        if (parts.length >= 3) {
+          const drive = parts[0]
+          const freeSpace = parseInt(parts[1])
+          const size = parseInt(parts[2])
+
+          if (!isNaN(size) && !isNaN(freeSpace) && size > 0) {
+            const used = size - freeSpace
+            const utilization = (used / size) * 100
+
+            disks.push({
+              drive,
+              total: size,
+              free: freeSpace,
+              used,
+              utilization
+            })
+          }
+        }
+      })
+
+      return disks
+    } else {
+      // Unix-like systems implementation
+      const { stdout } = await execAsync('df -k')
+      const lines = stdout.trim().split('\n').slice(1)
+      const disks: Array<{
+        drive: string
+        total: number
+        free: number
+        used: number
+        utilization: number
+      }> = []
+
+      lines.forEach((line) => {
+        const parts = line.trim().split(/\s+/)
+        if (parts.length >= 5) {
+          const drive = parts[5] // Mount point
+          const total = parseInt(parts[1]) * 1024
+          const used = parseInt(parts[2]) * 1024
+          const free = parseInt(parts[3]) * 1024
+          const utilization = parseInt(parts[4])
+
+          if (!isNaN(total) && !isNaN(used) && !isNaN(free) && !isNaN(utilization)) {
+            disks.push({
+              drive,
+              total,
+              free,
+              used,
+              utilization
+            })
+          }
+        }
+      })
+
+      return disks
+    }
+  }
+
+  /**
    * 缓存图片到本地文件系统
    * @param imageData 图片数据，可以是URL或Base64编码
    * @returns 返回以imgcache://协议的图片URL或原始URL（下载失败时）

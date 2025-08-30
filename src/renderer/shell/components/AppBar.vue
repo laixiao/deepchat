@@ -69,6 +69,14 @@
       <Button
         variant="ghost"
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        @click="openGpuInfo"
+      >
+        <Icon icon="lucide:monitor" class="w-4 h-4 mr-1" />
+        <span>{{ t('appbar.gpu') }}</span>
+      </Button>
+      <Button
+        variant="ghost"
+        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="openMcp"
       >
         <Icon icon="lucide:cpu" class="w-4 h-4 mr-1" />
@@ -524,6 +532,23 @@ const closeWindow = () => {
   const id = window.api.getWindowId()
   if (id != null) {
     windowPresenter.close(id)
+  }
+}
+
+const openGpuInfo = () => {
+  // 检查是否已经存在GPU信息标签页
+  const existingGpuTab = tabStore.tabs.find((tab) => tab.url.includes('#/gpu'))
+  
+  if (existingGpuTab) {
+    // 如果已经存在GPU信息标签页，切换到该标签页
+    tabStore.setCurrentTabId(existingGpuTab.id)
+  } else {
+    // 如果不存在GPU信息标签页，创建新的
+    tabStore.addTab({
+      name: t('routes.gpu'),
+      icon: 'lucide:chip',
+      viewType: 'gpu'
+    })
   }
 }
 

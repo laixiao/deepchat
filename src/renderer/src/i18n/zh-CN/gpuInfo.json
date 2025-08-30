@@ -1,0 +1,23 @@
+{
+  "title": "显卡信息",
+  "loading": "正在加载显卡信息...",
+  "error": "获取显卡信息失败",
+  "retry": "重试",
+  "gpu": "显卡",
+  "memory": "显存",
+  "gpuUtilization": "GPU使用率",
+  "cpuUtilization": "CPU使用率",
+  "utilization": "使用率",
+  "temperature": "温度",
+  "fanSpeed": "风扇转速",
+  "power": "功耗",
+  "powerUtilization": "功耗使用率",
+  "details": "详细信息",
+  "pcie": "PCIe连接",
+  "clock": "核心频率",
+  "memoryClock": "显存频率",
+  "processes": "进程数",
+  "refresh": "刷新",
+  "notSupported": "未检测到NVIDIA显卡或未安装NVIDIA驱动程序",
+  "diskUsage": "硬盘使用情况"
+}
