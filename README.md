@@ -1,10 +1,10 @@
 <p align='center'>
-<img src='./build/icon.png' width="150" height="150" alt="DeepChat AI Assistant Icon" />
+<img src='./build/icon.png' width="150" height="150" alt="QinCore AI Assistant Icon" />
 </p>
 
-<h1 align="center">DeepChat - Powerful Open-Source Multi-Model AI Chat Platform</h1>
+<h1 align="center">QinCore - Powerful Open-Source Multi-Model AI Chat Platform</h1>
 
-<p align="center">DeepChat is a feature-rich open-source AI chat platform supporting multiple cloud and local large language models with powerful search enhancement and tool calling capabilities.</p>
+<p align="center">QinCore is a feature-rich open-source AI chat platform supporting multiple cloud and local large language models with powerful search enhancement and tool calling capabilities.</p>
 
 <p align="center">
   <a href="https://github.com/ThinkInAIXYZ/deepchat/stargazers"><img src="https://img.shields.io/github/stars/ThinkInAIXYZ/deepchat" alt="Stars Badge"/></a>
@@ -43,9 +43,9 @@
 
 ## 🚀 Project Introduction
 
-DeepChat is a powerful open-source AI chat platform providing a unified interface for interacting with various large language models. Whether you're using cloud APIs like OpenAI, Gemini, Anthropic, or locally deployed Ollama models, DeepChat delivers a smooth user experience.
+QinCore is a powerful open-source AI chat platform providing a unified interface for interacting with various large language models. Whether you're using cloud APIs like OpenAI, Gemini, Anthropic, or locally deployed Ollama models, QinCore delivers a smooth user experience.
 
-As a cross-platform AI assistant application, DeepChat not only supports basic chat functionality but also offers advanced features such as search enhancement, tool calling, and multimodal interaction, making AI capabilities more accessible and efficient.
+As a cross-platform AI assistant application, QinCore not only supports basic chat functionality but also offers advanced features such as search enhancement, tool calling, and multimodal interaction, making AI capabilities more accessible and efficient.
 
 <table align="center">
   <tr>
@@ -60,9 +60,9 @@ As a cross-platform AI assistant application, DeepChat not only supports basic c
   </tr>
 </table>
 
-## 💡 Why Choose DeepChat
+## 💡 Why Choose QinCore
 
-Compared to other AI tools, DeepChat offers the following unique advantages:
+Compared to other AI tools, QinCore offers the following unique advantages:
 
 - **Unified Multi-Model Management**: One application supports almost all mainstream LLMs, eliminating the need to switch between multiple apps
 - **Seamless Local Model Integration**: Built-in Ollama support allows you to manage and use local models without command-line operations
@@ -220,7 +220,7 @@ For more details on how to use these features, see the [User Guide](./docs/user-
 
 ## 🔍 Use Cases
 
-DeepChat is suitable for various AI application scenarios:
+QinCore is suitable for various AI application scenarios:
 
 - **Daily Assistant**: Answering questions, providing suggestions, assisting with writing and creation
 - **Development Aid**: Code generation, debugging, technical problem solving
@@ -240,7 +240,7 @@ Download the latest version for your system from the [GitHub Releases](https://g
 
 ### Configure Models
 
-1. Launch the DeepChat application
+1. Launch the QinCore application
 2. Click the settings icon
 3. Select the "Model Providers" tab
 4. Add your API keys or configure local Ollama
@@ -302,7 +302,7 @@ For a more detailed guide on development, project structure, and architecture, p
 
 ## 👥 Community & Contribution
 
-DeepChat is an active open-source community project, and we welcome various forms of contribution:
+QinCore is an active open-source community project, and we welcome various forms of contribution:
 
 - 🐛 [Report issues](https://github.com/ThinkInAIXYZ/deepchat/issues)
 - 💡 [Submit feature suggestions](https://github.com/ThinkInAIXYZ/deepchat/issues)

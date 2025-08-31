@@ -63,7 +63,7 @@ const PLATFORM_SPECIFIC_SERVERS: Record<string, MCPServerConfig> = {
     ? {
         'deepchat/apple-server': {
           args: [],
-          descriptions: 'DeepChat内置Apple系统集成服务 (仅macOS)',
+          descriptions: 'QinCore内置Apple系统集成服务 (仅macOS)',
           icons: '🍎',
           autoApprove: ['all'],
           type: 'inmemory' as MCPServerType,
@@ -111,7 +111,7 @@ const PLATFORM_SPECIFIC_SERVERS: Record<string, MCPServerConfig> = {
 const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   buildInFileSystem: {
     args: [app.getPath('home')],
-    descriptions: 'DeepChat内置文件系统mcp服务',
+    descriptions: 'QinCore内置文件系统mcp服务',
     icons: '📁',
     autoApprove: ['read'],
     type: 'inmemory' as MCPServerType,
@@ -121,7 +121,7 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   },
   Artifacts: {
     args: [],
-    descriptions: 'DeepChat内置 artifacts mcp服务',
+    descriptions: 'QinCore内置 artifacts mcp服务',
     icons: '🎨',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,
@@ -131,7 +131,7 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   },
   bochaSearch: {
     args: [],
-    descriptions: 'DeepChat内置博查搜索服务',
+    descriptions: 'QinCore内置博查搜索服务',
     icons: '🔍',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,
@@ -143,7 +143,7 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   },
   braveSearch: {
     args: [],
-    descriptions: 'DeepChat内置Brave搜索服务',
+    descriptions: 'QinCore内置Brave搜索服务',
     icons: '🦁',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,
@@ -155,7 +155,7 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   },
   difyKnowledge: {
     args: [],
-    descriptions: 'DeepChat内置Dify知识库检索服务',
+    descriptions: 'QinCore内置Dify知识库检索服务',
     icons: '📚',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,
@@ -184,7 +184,7 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   },
   powerpack: {
     args: [],
-    descriptions: 'DeepChat内置增强工具包',
+    descriptions: 'QinCore内置增强工具包',
     icons: '🛠️',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,
@@ -194,7 +194,7 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   },
   ragflowKnowledge: {
     args: [],
-    descriptions: 'DeepChat内置RAGFlow知识库检索服务',
+    descriptions: 'QinCore内置RAGFlow知识库检索服务',
     icons: '📚',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,
@@ -213,7 +213,7 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   },
   fastGptKnowledge: {
     args: [],
-    descriptions: 'DeepChat内置FastGPT知识库检索服务',
+    descriptions: 'QinCore内置FastGPT知识库检索服务',
     icons: '📚',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,
@@ -232,7 +232,7 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   },
   builtinKnowledge: {
     args: [],
-    descriptions: 'DeepChat内置知识库检索服务',
+    descriptions: 'QinCore内置知识库检索服务',
     icons: '📚',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,

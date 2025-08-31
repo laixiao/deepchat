@@ -1,10 +1,10 @@
 <p align='center'>
-<img src='./build/icon.png' width="150" height="150" alt="DeepChat AI アシスタントアイコン" />
+<img src='./build/icon.png' width="150" height="150" alt="QinCore AI アシスタントアイコン" />
 </p>
 
-<h1 align="center">DeepChat - 強力なオープンソースマルチモデルAIチャットプラットフォーム</h1>
+<h1 align="center">QinCore - 強力なオープンソースマルチモデルAIチャットプラットフォーム</h1>
 
-<p align="center">DeepChatは、複数のクラウドおよびローカル大規模言語モデルをサポートする機能豊富なオープンソースAIチャットプラットフォームです。強力な検索強化機能とツール呼び出し機能を提供します。</p>
+<p align="center">QinCoreは、複数のクラウドおよびローカル大規模言語モデルをサポートする機能豊富なオープンソースAIチャットプラットフォームです。強力な検索強化機能とツール呼び出し機能を提供します。</p>
 
 <p align="center">
   <a href="https://github.com/ThinkInAIXYZ/deepchat/stargazers"><img src="https://img.shields.io/github/stars/ThinkInAIXYZ/deepchat" alt="Stars Badge"/></a>

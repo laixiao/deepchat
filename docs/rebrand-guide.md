@@ -173,7 +173,7 @@ Here's an example configuration for "Demo Company":
     "appId": "com.banana.ai-assistant",
     "description": "Demo AI Assistant, your intelligent work partner",
     "author": "Demo Technology Ltd.",
-    "website": "https://banana.com",
+    "website": "https://openaistore.cn",
     "copyright": "© 2025 Demo Technology Ltd.",
     "executableName": "BananaAI"
   },
@@ -430,7 +430,7 @@ pnpm run build:linux:x64    # Linux x64
     "appId": "com.banana.ai-assistant",
     "description": "DemoAI助手，您的智能工作伙伴",
     "author": "Demo科技有限公司",
-    "website": "https://banana.com",
+    "website": "https://openaistore.cn",
     "copyright": "© 2025 Demo科技有限公司",
     "executableName": "BananaAI"
   },

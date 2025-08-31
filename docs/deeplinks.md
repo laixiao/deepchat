@@ -1,8 +1,8 @@
-# DeepChat DeepLinks 文档 / DeepChat DeepLinks Documentation
+# 大秦重器 DeepLinks 文档 / QinCore DeepLinks Documentation
 
-DeepChat支持通过深度链接(Deeplinks)进行外部调用。本文档介绍了DeepChat支持的深度链接类型、参数及使用方法。
+大秦重器支持通过深度链接(Deeplinks)进行外部调用。本文档介绍了大秦重器支持的深度链接类型、参数及使用方法。
 
-DeepChat supports external invocation through deeplinks. This documentation introduces the types of deeplinks supported by DeepChat, their parameters, and usage methods.
+QinCore supports external invocation through deeplinks. This documentation introduces the types of deeplinks supported by QinCore, their parameters, and usage methods.
 
 ## 开始聊天 / Start Chat
 

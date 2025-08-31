@@ -1,5 +1,5 @@
-appId: com.wefonk.deepchat
-productName: DeepChat
+appId: com.dilu.daqinzhongqi
+productName: QinCore
 directories:
   buildResources: build
 files:
@@ -50,7 +50,7 @@ electronLanguages:
   - fa-IR
   - fa
 win:
-  executableName: DeepChat
+  executableName: QinCore
 nsis:
   artifactName: ${name}-${version}-windows-${arch}.${ext}
   shortcutName: ${productName}
@@ -80,7 +80,7 @@ linux:
   target:
     - AppImage
     - tar.gz
-  maintainer: ThinkInAIXYZ
+  maintainer: Dilu
   category: Utility
   artifactName: ${name}-${version}-linux-${arch}.${ext}
   mimeTypes:

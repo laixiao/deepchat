@@ -1,5 +1,5 @@
-appId: com.wefonk.deepchat
-productName: DeepChat
+appId: com.dilu.daqinzhongqi
+productName: QinCore
 directories:
   buildResources: build
 files:

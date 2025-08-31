@@ -1,6 +1,6 @@
-# DeepChat Developer Guide
+# QinCore Developer Guide
 
-This guide provides information for developers looking to understand, build, and contribute to the DeepChat project.
+This guide provides information for developers looking to understand, build, and contribute to the QinCore project.
 
 ## 📑 Table of Contents
 

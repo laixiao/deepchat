@@ -33,7 +33,7 @@ presenter.deeplinkPresenter.init()
 // 等待 Electron 初始化完成
 app.whenReady().then(async () => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.wefonk.deepchat')
+  electronApp.setAppUserModelId('com.dilu.daqinzhongqi')
 
   // 从配置中读取日志设置并应用
   const loggingEnabled = presenter.configPresenter.getLoggingEnabled()

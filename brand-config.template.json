@@ -1,40 +1,40 @@
 {
   "_comment": "请修改以下配置为您的品牌信息",
   "app": {
-    "name": "DeepChat",
-    "productName": "DeepChat",
-    "appId": "com.wefonk.deepchat",
-    "description": "DeepChat，一个简单易用的AI客户端",
-    "author": "ThinkInAIXYZ",
-    "website": "https://deepchatai.cn",
-    "copyright": "© 2025 ThinkInAIXYZ",
-    "executableName": "DeepChat"
+    "name": "QinCore",
+    "productName": "QinCore",
+    "appId": "com.dilu.daqinzhongqi",
+    "description": "QinCore，一个强大的AI重器。",
+    "author": "Dilu",
+    "website": "https://openaistore.cn",
+    "copyright": "© 2025 Dilu",
+    "executableName": "QinCore"
   },
   "update": {
     "baseUrl": "https://cdn.deepchatai.cn/upgrade/"
   },
   "i18n": {
     "appTitle": {
-      "en-US": "DeepChat",
-      "zh-CN": "DeepChat",
-      "zh-TW": "DeepChat",
-      "zh-HK": "DeepChat",
-      "ja-JP": "DeepChat",
-      "ko-KR": "DeepChat",
-      "ru-RU": "DeepChat",
-      "fr-FR": "DeepChat",
-      "fa-IR": "DeepChat"
+      "en-US": "QinCore",
+      "zh-CN": "大秦重器",
+      "zh-TW": "大秦重器",
+      "zh-HK": "大秦重器",
+      "ja-JP": "QinCore",
+      "ko-KR": "QinCore",
+      "ru-RU": "QinCore",
+      "fr-FR": "QinCore",
+      "fa-IR": "QinCore"
     },
     "appDescription": {
-      "en-US": "DeepChat is a cross-platform AI client, dedicated to making AI accessible to more people.",
-      "zh-CN": "DeepChat是一个跨平台AI客户端，致力于让更多人便捷地使用AI。",
-      "zh-TW": "DeepChat 是一款跨平台 AI 應用程式，致力於讓更多人輕鬆使用 AI。",
-      "zh-HK": "DeepChat是一個跨平台AI客戶端，致力於讓更多人便捷地使用AI。",
-      "ja-JP": "DeepChatは、より多くの人々にAIへのアクセスを提供することを目的としたクロスプラットフォームAIクライアントです。",
-      "ko-KR": "DeepChat은 더 많은 사람들이 AI에 접근할 수 있도록 하는 크로스 플랫폼 AI 클라이언트입니다。",
-      "ru-RU": "DeepChat - это кроссплатформенный AI-клиент, предназначенный для того, чтобы сделать AI доступным для большего количества людей.",
-      "fr-FR": "DeepChat est un client IA multiplateforme, dédié à rendre l'IA accessible à plus de personnes.",
-      "fa-IR": "دیپ چت یک کلاینت هوش مصنوعی چندپلتفرمه که هدفش در دسترس قرار دادن هوش مصنوعی برای افراد بیشتری است."
+      "en-US": "QinCore is a powerful AI tool.",
+      "zh-CN": "QinCore，一个强大的AI重器。",
+      "zh-TW": "QinCore，一個強大的AI重器。",
+      "zh-HK": "QinCore，一個強大的AI重器。",
+      "ja-JP": "QinCoreは強力なAIツールです。",
+      "ko-KR": "QinCore는 강력한 AI 도구입니다.",
+      "ru-RU": "QinCore - это мощный инструмент искусственного интеллекта.",
+      "fr-FR": "QinCore est un outil d'IA puissant.",
+      "fa-IR": "QinCore یک ابزار قدرتمند هوش مصنوعی است."
     },
     "websiteText": {
       "en-US": "Visit Our Website",
@@ -48,33 +48,33 @@
       "fa-IR": "وبسایت ما را ببینید"
     },
     "welcomeTitle": {
-      "en-US": "Welcome to MyApp",
-      "zh-CN": "欢迎使用 MyApp",
-      "zh-TW": "歡迎使用 MyApp",
-      "zh-HK": "歡迎使用 MyApp",
-      "ja-JP": "MyAppへようこそ",
-      "ko-KR": "MyApp에 오신 것을 환영합니다",
-      "ru-RU": "Добро пожаловать в MyApp",
-      "fr-FR": "Bienvenue sur MyApp",
-      "fa-IR": "به MyApp خوش آمدید"
+      "en-US": "Welcome to QinCore",
+      "zh-CN": "欢迎使用大秦重器",
+      "zh-TW": "歡迎使用大秦重器",
+      "zh-HK": "歡迎使用大秦重器",
+      "ja-JP": "QinCoreへようこそ",
+      "ko-KR": "QinCore에 오신 것을 환영합니다",
+      "ru-RU": "Добро пожаловать в QinCore",
+      "fr-FR": "Bienvenue sur QinCore",
+      "fa-IR": "به QinCore خوش آمدید"
     },
     "welcomeSetupDescription": {
-      "en-US": "Let's start setting up MyApp",
-      "zh-CN": "让我们开始设置 MyApp",
-      "zh-TW": "讓我們開始設定 MyApp",
-      "zh-HK": "讓我們開始設置 MyApp",
-      "ja-JP": "MyAppの設定を始めましょう",
-      "ko-KR": "MyApp 설정을 시작합시다",
-      "ru-RU": "Начнем настройку MyApp",
-      "fr-FR": "Commençons la configuration de MyApp",
-      "fa-IR": "بیایید تنظیم MyApp را شروع کنیم"
+      "en-US": "Let's start setting up QinCore",
+      "zh-CN": "让我们开始设置大秦重器",
+      "zh-TW": "讓我們開始設定大秦重器",
+      "zh-HK": "讓我們開始設置大秦重器",
+      "ja-JP": "QinCoreの設定を始めましょう",
+      "ko-KR": "QinCore 설정을 시작합시다",
+      "ru-RU": "Начнем настройку QinCore",
+      "fr-FR": "Commençons la configuration de QinCore",
+      "fa-IR": "بیایید تنظیم QinCore را شروع کنیم"
     }
   },
   "github": {
     "repository": "ThinkInAIXYZ/deepchat"
   },
   "mcp": {
-    "serverDescriptionSuffix": "DeepChat内置",
-    "serverDescriptionSuffixEn": "DeepChat built-in"
+    "serverDescriptionSuffix": "QinCore内置",
+    "serverDescriptionSuffixEn": "QinCore built-in"
   }
 }

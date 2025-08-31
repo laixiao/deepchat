@@ -1,8 +1,8 @@
-# DeepChat Docker 快速部署
+# 大秦重器 Docker 快速部署
 
 ## 🚀 快速开始
 
-DeepChat的Docker部署文件现在位于 `server` 目录下。
+大秦重器的Docker部署文件现在位于 `server` 目录下。
 
 ### 部署步骤
 
