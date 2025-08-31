@@ -30,13 +30,13 @@ jobs:
       - name: Get version number
         id: get_version
         run: |
-          VERSION_FILE=$(find artifacts/deepchat-linux-x64 -name "DeepChat-*.tar.gz" | head -n 1)
+          VERSION_FILE=$(find artifacts/deepchat-linux-x64 -name "QinCore-*.tar.gz" | head -n 1)
           if [ -n "$VERSION_FILE" ]; then
-            VERSION=$(echo $VERSION_FILE | grep -o 'DeepChat-[0-9]\+\.[0-9]\+\.[0-9]\+' | sed 's/DeepChat-//')
+            VERSION=$(echo $VERSION_FILE | grep -o 'QinCore-[0-9]\+\.[0-9]\+\.[0-9]\+' | sed 's/QinCore-//')
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "Found version: $VERSION"
           else
-            echo "Error: DeepChat tar.gz file not found"
+            echo "Error: QinCore tar.gz file not found"
             exit 1
           fi
 
@@ -84,13 +84,13 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: workflow-${{ github.event.inputs.workflow_id }}
-          name: DeepChat V${{ steps.get_version.outputs.version }}
+          name: QinCore V${{ steps.get_version.outputs.version }}
           draft: true
           prerelease: ${{ github.event.inputs.prerelease }}
           files: |
             release_assets/*
           body: |
-            # 🚀 DeepChat ${{ steps.get_version.outputs.version }} 正式发布 | 重新定义你的 AI 对话体验！
+            # 🚀 QinCore ${{ steps.get_version.outputs.version }} 正式发布 | 重新定义你的 AI 对话体验！
             —— 不再是简单的 ChatBot，而是你的自然语言 Agent  工具🌟
 
             📦 **构建信息**
@@ -99,7 +99,7 @@ jobs:
             - 预发布: `${{ github.event.inputs.prerelease }}`
             - 构建时间: `${{ github.run_id }}`
 
-            🔥 为什么选择 DeepChat？
+            🔥 为什么选择 QinCore？
 
             ✅ **商业友好**：基于原版 [Apache License 2.0](https://github.com/ThinkInAIXYZ/deepchat/blob/main/LICENSE) 开源，无任何协议外的额外约束，面向开源。
             ✅ **开箱即用**：极简配置，即刻开启你的智能对话之旅。
@@ -109,7 +109,7 @@ jobs:
 
             📥 立即体验未来
 
-            💬 反馈有礼：欢迎提交你的宝贵建议，加入 VIP 用户社群，与我们一同塑造 DeepChat 的未来！
+            💬 反馈有礼：欢迎提交你的宝贵建议，加入 VIP 用户社群，与我们一同塑造 QinCore 的未来！
             <img width="400px" src="https://github.com/user-attachments/assets/2ebc21e8-3eef-4a11-b3ab-de28e8f9d9c0"/>
 
         env:

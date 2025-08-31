@@ -17,6 +17,36 @@ export const DEFAULT_PROVIDERS: LLM_PROVIDER_BASE[] = [
     }
   },
   {
+    id: 'modelscope',
+    name: 'ModelScope',
+    apiType: 'openai',
+    apiKey: '',
+    baseUrl: 'https://api-inference.modelscope.cn/v1/',
+    enable: false,
+    websites: {
+      official: 'https://modelscope.cn/',
+      apiKey: 'https://modelscope.cn/my/myaccesstoken',
+      docs: 'https://modelscope.cn/docs/modelscope_agent/api_service',
+      models: 'https://modelscope.cn/models',
+      defaultBaseUrl: 'https://api-inference.modelscope.cn/v1/'
+    }
+  },
+  {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    apiType: 'openai',
+    apiKey: '',
+    baseUrl: 'https://openrouter.ai/api/v1/',
+    enable: false,
+    websites: {
+      official: 'https://openrouter.ai/',
+      apiKey: 'https://openrouter.ai/settings/keys',
+      docs: 'https://openrouter.ai/docs/quick-start',
+      models: 'https://openrouter.ai/docs/models',
+      defaultBaseUrl: 'https://openrouter.ai/api/v1/'
+    }
+  },
+  {
     id: 'deepseek',
     name: 'Deepseek',
     apiType: 'deepseek',
@@ -29,21 +59,6 @@ export const DEFAULT_PROVIDERS: LLM_PROVIDER_BASE[] = [
       docs: 'https://platform.deepseek.com/api-docs/',
       models: 'https://platform.deepseek.com/api-docs/',
       defaultBaseUrl: 'https://api.deepseek.com/v1'
-    }
-  },
-  {
-    id: 'qiniu',
-    name: 'Qiniu',
-    apiType: 'openai',
-    apiKey: '',
-    baseUrl: 'https://api.qnaigc.com/v1',
-    enable: false,
-    websites: {
-      official: 'https://www.qiniu.com',
-      apiKey: 'https://developer.qiniu.com/aitokenapi/12884/how-to-get-api-key',
-      docs: 'https://developer.qiniu.com/aitokenapi',
-      models: 'https://developer.qiniu.com/aitokenapi/12883/model-list',
-      defaultBaseUrl: 'https://api.qnaigc.com/v1'
     }
   },
   {
@@ -61,38 +76,6 @@ export const DEFAULT_PROVIDERS: LLM_PROVIDER_BASE[] = [
       defaultBaseUrl: 'https://api.siliconflow.cn/v1'
     }
   },
-  // {
-  //   id: 'qwenlm',
-  //   name: 'QwenLM',
-  //   apiType: 'qwenlm',
-  //   apiKey: '',
-  //   baseUrl: 'https://chat.qwenlm.ai/api',
-  //   enable: false,
-  //   websites: {
-  //     official: 'https://chat.qwenlm.ai',
-  //     apiKey: 'https://chat.qwenlm.ai',
-  //     docs: 'https://chat.qwenlm.ai',
-  //     models: 'https://chat.qwenlm.ai',
-  //     defaultBaseUrl: 'https://chat.qwenlm.ai/api'
-  //   }
-  // },
-
-  {
-    id: 'ppio',
-    name: 'PPIO',
-    apiType: 'openai',
-    apiKey: '',
-    baseUrl: 'https://api.ppinfra.com/v3/openai',
-    enable: false,
-    websites: {
-      official: 'https://ppinfra.com/',
-      apiKey: 'https://ppinfra.com/settings/key-management',
-      docs: 'https://ppinfra.com/docs/get-started/quickstart.html',
-      models: 'https://ppinfra.com/model-api/console',
-      defaultBaseUrl: 'https://api.ppinfra.com/v3/openai'
-    }
-  },
-
   {
     id: 'openai-responses',
     name: 'OpenAI Responses',
@@ -154,20 +137,82 @@ export const DEFAULT_PROVIDERS: LLM_PROVIDER_BASE[] = [
     }
   },
   {
-    id: 'openrouter',
-    name: 'OpenRouter',
-    apiType: 'openai',
+    id: 'doubao',
+    name: 'Doubao',
+    apiType: 'doubao',
     apiKey: '',
-    baseUrl: 'https://openrouter.ai/api/v1/',
+    baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
     enable: false,
     websites: {
-      official: 'https://openrouter.ai/',
-      apiKey: 'https://openrouter.ai/settings/keys',
-      docs: 'https://openrouter.ai/docs/quick-start',
-      models: 'https://openrouter.ai/docs/models',
-      defaultBaseUrl: 'https://openrouter.ai/api/v1/'
+      official: 'https://console.volcengine.com/ark/',
+      apiKey: 'https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey',
+      docs: 'https://www.volcengine.com/docs/82379/1182403',
+      models: 'https://console.volcengine.com/ark/region:ark+cn-beijing/endpoint',
+      defaultBaseUrl: 'https://ark.cn-beijing.volces.com/api/v3'
     }
   },
+  {
+    id: 'grok',
+    name: 'Grok',
+    apiType: 'grok',
+    apiKey: '',
+    baseUrl: 'https://api.x.ai/v1',
+    enable: false,
+    websites: {
+      official: 'https://x.ai/',
+      apiKey: 'https://console.x.ai',
+      docs: 'https://docs.x.ai/',
+      models: 'https://docs.x.ai/docs#getting-started',
+      defaultBaseUrl: 'https://api.x.ai/v1'
+    }
+  },
+
+  {
+    id: 'zhipu',
+    name: 'Zhipu',
+    apiType: 'zhipu',
+    apiKey: '',
+    baseUrl: 'https://open.bigmodel.cn/api/paas/v4/',
+    enable: false,
+    websites: {
+      official: 'https://open.bigmodel.cn/',
+      apiKey: 'https://open.bigmodel.cn/usercenter/apikeys',
+      docs: 'https://docs.bigmodel.cn',
+      models: 'https://open.bigmodel.cn/modelcenter/square',
+      defaultBaseUrl: 'https://open.bigmodel.cn/api/paas/v4/'
+    }
+  },
+  {
+    id: 'moonshot',
+    name: 'Moonshot',
+    apiType: 'openai',
+    apiKey: '',
+    baseUrl: 'https://api.moonshot.cn/v1',
+    enable: false,
+    websites: {
+      official: 'https://moonshot.ai/',
+      apiKey: 'https://platform.moonshot.cn/console/api-keys',
+      docs: 'https://platform.moonshot.cn/docs/',
+      models: 'https://platform.moonshot.cn/docs/intro#%E6%A8%A1%E5%9E%8B%E5%88%97%E8%A1%A8',
+      defaultBaseUrl: 'https://api.moonshot.cn/v1'
+    }
+  },
+  {
+    id: 'minimax',
+    name: 'MiniMax',
+    apiType: 'openai',
+    apiKey: '',
+    baseUrl: 'https://api.minimax.chat/v1',
+    enable: false,
+    websites: {
+      official: 'https://platform.minimaxi.com/',
+      apiKey: 'https://platform.minimaxi.com/user-center/basic-information/interface-key',
+      docs: 'https://platform.minimaxi.com/document/Announcement',
+      models: 'https://platform.minimaxi.com/document/Models',
+      defaultBaseUrl: 'https://api.minimax.chat/v1'
+    }
+  },
+
   {
     id: '302ai',
     name: '302.AI',
@@ -274,36 +319,7 @@ export const DEFAULT_PROVIDERS: LLM_PROVIDER_BASE[] = [
   //     defaultBaseUrl: 'https://api.lingyiwanwu.com'
   //   }
   // },
-  {
-    id: 'doubao',
-    name: 'Doubao',
-    apiType: 'doubao',
-    apiKey: '',
-    baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
-    enable: false,
-    websites: {
-      official: 'https://console.volcengine.com/ark/',
-      apiKey: 'https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey',
-      docs: 'https://www.volcengine.com/docs/82379/1182403',
-      models: 'https://console.volcengine.com/ark/region:ark+cn-beijing/endpoint',
-      defaultBaseUrl: 'https://ark.cn-beijing.volces.com/api/v3'
-    }
-  },
-  {
-    id: 'minimax',
-    name: 'MiniMax',
-    apiType: 'openai',
-    apiKey: '',
-    baseUrl: 'https://api.minimax.chat/v1',
-    enable: false,
-    websites: {
-      official: 'https://platform.minimaxi.com/',
-      apiKey: 'https://platform.minimaxi.com/user-center/basic-information/interface-key',
-      docs: 'https://platform.minimaxi.com/document/Announcement',
-      models: 'https://platform.minimaxi.com/document/Models',
-      defaultBaseUrl: 'https://api.minimax.chat/v1'
-    }
-  },
+
   {
     id: 'fireworks',
     name: 'Fireworks',
@@ -319,36 +335,7 @@ export const DEFAULT_PROVIDERS: LLM_PROVIDER_BASE[] = [
       defaultBaseUrl: 'https://api.fireworks.ai/inference'
     }
   },
-  {
-    id: 'zhipu',
-    name: 'Zhipu',
-    apiType: 'zhipu',
-    apiKey: '',
-    baseUrl: 'https://open.bigmodel.cn/api/paas/v4/',
-    enable: false,
-    websites: {
-      official: 'https://open.bigmodel.cn/',
-      apiKey: 'https://open.bigmodel.cn/usercenter/apikeys',
-      docs: 'https://docs.bigmodel.cn',
-      models: 'https://open.bigmodel.cn/modelcenter/square',
-      defaultBaseUrl: 'https://open.bigmodel.cn/api/paas/v4/'
-    }
-  },
-  {
-    id: 'moonshot',
-    name: 'Moonshot',
-    apiType: 'openai',
-    apiKey: '',
-    baseUrl: 'https://api.moonshot.cn/v1',
-    enable: false,
-    websites: {
-      official: 'https://moonshot.ai/',
-      apiKey: 'https://platform.moonshot.cn/console/api-keys',
-      docs: 'https://platform.moonshot.cn/docs/',
-      models: 'https://platform.moonshot.cn/docs/intro#%E6%A8%A1%E5%9E%8B%E5%88%97%E8%A1%A8',
-      defaultBaseUrl: 'https://api.moonshot.cn/v1'
-    }
-  },
+
   // {
   //   id: 'baichuan',
   //   name: 'Baichuan',
@@ -426,21 +413,6 @@ export const DEFAULT_PROVIDERS: LLM_PROVIDER_BASE[] = [
     }
   },
 
-  {
-    id: 'grok',
-    name: 'Grok',
-    apiType: 'grok',
-    apiKey: '',
-    baseUrl: 'https://api.x.ai/v1',
-    enable: false,
-    websites: {
-      official: 'https://x.ai/',
-      apiKey: 'https://console.x.ai',
-      docs: 'https://docs.x.ai/',
-      models: 'https://docs.x.ai/docs#getting-started',
-      defaultBaseUrl: 'https://api.x.ai/v1'
-    }
-  },
   // {
   //   id: 'hyperbolic',
   //   name: 'Hyperbolic',
@@ -578,21 +550,7 @@ export const DEFAULT_PROVIDERS: LLM_PROVIDER_BASE[] = [
         'https://your-resource-name.openai.azure.com/openai/deployments/your-deployment-name'
     }
   },
-  {
-    id: 'modelscope',
-    name: 'ModelScope',
-    apiType: 'openai',
-    apiKey: '',
-    baseUrl: 'https://api-inference.modelscope.cn/v1/',
-    enable: false,
-    websites: {
-      official: 'https://modelscope.cn/',
-      apiKey: 'https://modelscope.cn/my/myaccesstoken',
-      docs: 'https://modelscope.cn/docs/modelscope_agent/api_service',
-      models: 'https://modelscope.cn/models',
-      defaultBaseUrl: 'https://api-inference.modelscope.cn/v1/'
-    }
-  },
+
   {
     id: 'aws-bedrock',
     name: 'AWS Bedrock',
@@ -606,6 +564,51 @@ export const DEFAULT_PROVIDERS: LLM_PROVIDER_BASE[] = [
       docs: 'https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html',
       models: 'https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html',
       defaultBaseUrl: ''
+    }
+  },
+  {
+    id: 'qiniu',
+    name: 'Qiniu',
+    apiType: 'openai',
+    apiKey: '',
+    baseUrl: 'https://api.qnaigc.com/v1',
+    enable: false,
+    websites: {
+      official: 'https://www.qiniu.com',
+      apiKey: 'https://developer.qiniu.com/aitokenapi/12884/how-to-get-api-key',
+      docs: 'https://developer.qiniu.com/aitokenapi',
+      models: 'https://developer.qiniu.com/aitokenapi/12883/model-list',
+      defaultBaseUrl: 'https://api.qnaigc.com/v1'
+    }
+  },
+  // {
+  //   id: 'qwenlm',
+  //   name: 'QwenLM',
+  //   apiType: 'qwenlm',
+  //   apiKey: '',
+  //   baseUrl: 'https://chat.qwenlm.ai/api',
+  //   enable: false,
+  //   websites: {
+  //     official: 'https://chat.qwenlm.ai',
+  //     apiKey: 'https://chat.qwenlm.ai',
+  //     docs: 'https://chat.qwenlm.ai',
+  //     models: 'https://chat.qwenlm.ai',
+  //     defaultBaseUrl: 'https://chat.qwenlm.ai/api'
+  //   }
+  // },
+  {
+    id: 'ppio',
+    name: 'PPIO',
+    apiType: 'openai',
+    apiKey: '',
+    baseUrl: 'https://api.ppinfra.com/v3/openai',
+    enable: false,
+    websites: {
+      official: 'https://ppinfra.com/',
+      apiKey: 'https://ppinfra.com/settings/key-management',
+      docs: 'https://ppinfra.com/docs/get-started/quickstart.html',
+      models: 'https://ppinfra.com/model-api/console',
+      defaultBaseUrl: 'https://api.ppinfra.com/v3/openai'
     }
   }
 ]

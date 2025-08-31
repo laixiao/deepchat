@@ -3,7 +3,7 @@ import { vi, beforeEach, afterEach } from 'vitest'
 // Mock Electron modules for testing
 vi.mock('electron', () => ({
   app: {
-    getName: vi.fn(() => 'DeepChat'),
+    getName: vi.fn(() => 'QinCore'),
     getVersion: vi.fn(() => '0.2.3'),
     getPath: vi.fn(() => '/mock/path'),
     on: vi.fn(),

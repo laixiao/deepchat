@@ -57,7 +57,7 @@ app.use('/api', routes)
 // 基础路由
 app.get('/', (req: Request, res: Response) => {
   res.json({
-    message: 'DeepChat Backend Server',
+    message: 'QinCore Backend Server',
     version: '1.0.0'
   })
 })
@@ -76,7 +76,7 @@ app.get('/status', (req: Request, res: Response) => {
   res.status(200).json({
     status: 'operational',
     timestamp: new Date().toISOString(),
-    service: 'DeepChat API'
+    service: 'QinCore API'
   })
 })
 

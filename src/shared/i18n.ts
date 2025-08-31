@@ -6,6 +6,13 @@ export interface TranslationMap {
 // 定义支持的语言
 export const supportedLocales = ['zh-CN', 'zh-TW', 'en-US', 'ja', 'ko', 'fr', 'de', 'es']
 
+// 应用标题翻译（用于主进程等无法直接使用 vue-i18n 的场景）
+export const appTitleTranslations: Record<string, TranslationMap> = {
+  'zh-CN': { appTitle: '大秦重器' },
+  'zh-TW': { appTitle: '大秦重器' },
+  'en-US': { appTitle: 'QinCore' }
+}
+
 // 上下文菜单翻译
 export const contextMenuTranslations: Record<string, TranslationMap> = {
   'zh-CN': {
@@ -359,6 +366,16 @@ export function getBestMatchTranslation(
  */
 export function getContextMenuLabels(locale: string): TranslationMap {
   return getBestMatchTranslation(locale, contextMenuTranslations)
+}
+
+/**
+ * 获取应用标题翻译
+ * @param locale 语言代码
+ * @returns 应用标题
+ */
+export function getAppTitle(locale: string): string {
+  const labels = getBestMatchTranslation(locale, appTitleTranslations)
+  return labels.appTitle || 'QinCore'
 }
 
 /**

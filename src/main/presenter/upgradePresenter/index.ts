@@ -38,7 +38,7 @@ const getPlatformInfo = () => {
 
 // 获取版本检查的基础URL
 const getVersionCheckBaseUrl = () => {
-  return 'https://cdn.deepchatai.cn/upgrade'
+  return 'https://cdn.qincore.cn/upgrade'
 }
 
 // 获取自动更新状态文件路径

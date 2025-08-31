@@ -54,10 +54,10 @@
       "newChat": "新建聊天"
     },
     "contentProtection": "投屏保护",
-    "contentProtectionDesc": "防止屏幕共享软件捕获DeepChat窗口，保护聊天内容隐私，需要重启生效",
+    "contentProtectionDesc": "防止屏幕共享软件捕获QinCore窗口，保护聊天内容隐私，需要重启生效",
     "contentProtectionDialogTitle": "投屏保护切换确认",
-    "contentProtectionEnableDesc": "开启投屏保护可以防止投屏软件捕获DeepChat主窗口，用来保护您的内容隐私。请注意，此功能不会彻底隐藏所有界面，请合理合规使用。并且，并不是所有投屏软件都遵守用户隐私设定，该功能可能会在一些不遵守隐私设定的投屏软件上失效，且部分环境中可能会残留一个黑色窗体。",
-    "contentProtectionDisableDesc": "关闭投屏保护将允许投屏软件捕获DeepChat窗口。",
+    "contentProtectionEnableDesc": "开启投屏保护可以防止投屏软件捕获QinCore主窗口，用来保护您的内容隐私。请注意，此功能不会彻底隐藏所有界面，请合理合规使用。并且，并不是所有投屏软件都遵守用户隐私设定，该功能可能会在一些不遵守隐私设定的投屏软件上失效，且部分环境中可能会残留一个黑色窗体。",
+    "contentProtectionDisableDesc": "关闭投屏保护将允许投屏软件捕获QinCore窗口。",
     "contentProtectionRestartNotice": "切换此设置将导致程序重启，请确认是否继续？",
     "soundEnabled": "启用音效",
     "soundEnabledDesc": "启用消息接收、错误提示等系统音效，提供更好的交互体验",

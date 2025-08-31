@@ -378,7 +378,7 @@ ${ARTIFACT_INSTRUCTIONS_TAIL}
     </section>
 
     <footer>
-      Generated with <a href="https://github.com/ThinkInAIXYZ/deepchat">DeepChat</a> | All page content is AI-generated and for reference only
+      Generated with <a href="https://openaistore.cn/">QinCore</a> | All page content is AI-generated and for reference only
     </footer>
 </body>
 </html>

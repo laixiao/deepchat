@@ -17,7 +17,7 @@ export class DevicePresenter implements IDevicePresenter {
   static getDefaultHeaders(): Record<string, string> {
     return {
       'HTTP-Referer': 'https://openaistore.cn',
-      'X-Title': 'DeepChat'
+      'X-Title': 'QinCore'
     }
   }
   async getAppVersion(): Promise<string> {

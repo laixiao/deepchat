@@ -1,9 +1,9 @@
 import { Tray, Menu, app, nativeImage, NativeImage } from 'electron'
 import * as path from 'path'
-import { getContextMenuLabels } from '@shared/i18n'
+import { getContextMenuLabels, getAppTitle } from '@shared/i18n'
 import { presenter } from '.'
 import { eventBus } from '@/eventbus'
-import { TRAY_EVENTS } from '@/events'
+import { CONFIG_EVENTS, TRAY_EVENTS } from '@/events'
 
 export class TrayPresenter {
   private tray: Tray | null = null
@@ -33,10 +33,11 @@ export class TrayPresenter {
     }
 
     this.tray = new Tray(image)
-    this.tray.setToolTip('DeepChat')
 
-    // 获取当前系统语言
+    // 获取当前系统语言并设置提示
     const locale = presenter.configPresenter.getLanguage?.() || 'zh-CN'
+    this.tray.setToolTip(getAppTitle(locale))
+
     const labels = getContextMenuLabels(locale)
     const contextMenu = Menu.buildFromTemplate([
       {
@@ -65,6 +66,40 @@ export class TrayPresenter {
     ])
 
     this.tray.setContextMenu(contextMenu)
+
+    // 监听语言变化，动态更新托盘提示与菜单
+    eventBus.on(CONFIG_EVENTS.SETTING_CHANGED, (key: string) => {
+      if (!this.tray) return
+      if (key === 'language') {
+        const newLocale = presenter.configPresenter.getLanguage?.() || 'zh-CN'
+        this.tray.setToolTip(getAppTitle(newLocale))
+        const newLabels = getContextMenuLabels(newLocale)
+        const newMenu = Menu.buildFromTemplate([
+          {
+            label: newLabels.open || '打开/隐藏',
+            click: () => {
+              eventBus.sendToMain(TRAY_EVENTS.SHOW_HIDDEN_WINDOW)
+            }
+          },
+          {
+            label: newLabels.checkForUpdates || '检查更新',
+            click: () => {
+              eventBus.sendToMain(TRAY_EVENTS.CHECK_FOR_UPDATES)
+            }
+          },
+          {
+            label: newLabels.quit || '退出',
+            click: async () => {
+              const confirmed = await presenter.knowledgePresenter.beforeDestroy()
+              if (confirmed) {
+                app.quit()
+              }
+            }
+          }
+        ])
+        this.tray.setContextMenu(newMenu)
+      }
+    })
 
     // 点击托盘图标时显示窗口
     this.tray.on('click', () => {

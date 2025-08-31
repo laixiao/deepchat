@@ -1,7 +1,7 @@
 {
-  "name": "deepchat-server",
+  "name": "qincore-server",
   "version": "1.0.0",
-  "description": "DeepChat Backend Server",
+  "description": "QinCore Backend Server",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {

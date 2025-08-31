@@ -79,7 +79,7 @@ const PLATFORM_SPECIFIC_SERVERS: Record<string, MCPServerConfig> = {
     ? {
         // 'deepchat-inmemory/windows-server': {
         //   args: [],
-        //   descriptions: 'DeepChat内置Windows系统集成服务 (仅Windows)',
+        //   descriptions: 'QinCore内置Windows系统集成服务 (仅Windows)',
         //   icons: '🪟',
         //   autoApprove: ['all'],
         //   type: 'inmemory' as MCPServerType,
@@ -95,7 +95,7 @@ const PLATFORM_SPECIFIC_SERVERS: Record<string, MCPServerConfig> = {
     ? {
         // 'deepchat-inmemory/linux-server': {
         //   args: [],
-        //   descriptions: 'DeepChat内置Linux系统集成服务 (仅Linux)',
+        //   descriptions: 'QinCore内置Linux系统集成服务 (仅Linux)',
         //   icons: '🐧',
         //   autoApprove: ['all'],
         //   type: 'inmemory' as MCPServerType,

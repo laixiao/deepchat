@@ -40,7 +40,7 @@ export abstract class BaseLLMProvider {
 
   protected defaultHeaders: Record<string, string> = {
     'HTTP-Referer': 'https://openaistore.cn',
-    'X-Title': 'DeepChat'
+    'X-Title': 'QinCore'
   }
 
   constructor(provider: LLM_PROVIDER, configPresenter: ConfigPresenter) {

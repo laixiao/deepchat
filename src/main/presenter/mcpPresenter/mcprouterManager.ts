@@ -47,7 +47,7 @@ export class McpRouterManager {
     return {
       'Content-Type': 'application/json',
       'HTTP-Referer': 'deepchatai.cn',
-      'X-Title': 'DeepChat'
+      'X-Title': 'QinCore'
     }
   }
 
@@ -112,7 +112,7 @@ export class McpRouterManager {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
         'HTTP-Referer': 'deepchatai.cn',
-        'X-Title': 'DeepChat'
+        'X-Title': 'QinCore'
       },
       source: 'mcprouter',
       sourceId: serverKey
