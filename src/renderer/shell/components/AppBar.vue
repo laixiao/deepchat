@@ -68,7 +68,7 @@
 
       <Button
         variant="ghost"
-        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="openMcp"
       >
         <Icon icon="lucide:cpu" class="w-4 h-4 mr-1" />
@@ -76,7 +76,7 @@
       </Button>
       <Button
         variant="ghost"
-        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         :class="{ 'animate-pulse bg-red-500/20': systemAlert }"
         @click="openGpuInfo"
       >
@@ -86,7 +86,7 @@
       
       <Button
         variant="ghost"
-        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="onThemeClick"
       >
         <Icon v-if="themeStore.themeMode === 'dark'" icon="lucide:moon" class="w-4 h-4 mr-1" />
@@ -96,7 +96,7 @@
       </Button>
       <Button
         variant="ghost"
-        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="openSettings"
       >
         <Icon icon="lucide:settings" class="w-4 h-4 mr-1" />
