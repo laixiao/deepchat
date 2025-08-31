@@ -38,6 +38,20 @@
             font-size: 24px;
         }
 
+        .api-docs-link {
+            background: #28a745;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .api-docs-link:hover {
+            background: #218838;
+        }
+
         .tabs {
             display: flex;
             gap: 10px;
@@ -372,9 +386,12 @@
     <div class="container">
         <div class="header">
             <h1>QinCore 管理后台</h1>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="搜索...">
-                <button id="searchBtn">搜索</button>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <a href="/api-docs" class="api-docs-link" target="_blank">API 文档</a>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索...">
+                    <button id="searchBtn">搜索</button>
+                </div>
             </div>
         </div>
 

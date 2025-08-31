@@ -1,5 +1,9 @@
 import swaggerJsdoc from 'swagger-jsdoc'
 
+// 从环境变量获取配置
+const PORT = process.env.PORT || '3010'
+const DOMAIN = process.env.DOMAIN || `http://localhost:${PORT}`
+
 const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
@@ -10,8 +14,8 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:3002/api',
-        description: '开发服务器'
+        url: `${DOMAIN}/api`,
+        description: '服务器'
       }
     ],
     components: {
