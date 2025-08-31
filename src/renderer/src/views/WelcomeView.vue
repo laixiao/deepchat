@@ -172,6 +172,11 @@ const nextStep = async () => {
   }
 }
 
+const skipGuide = () => {
+  configPresenter.setSetting('init_complete', true)
+  router.push({ name: 'chat' })
+}
+
 const previousStep = () => {
   if (currentStep.value > 0) {
     currentStep.value--
@@ -239,6 +244,15 @@ const isFirstStep = computed(() => currentStep.value === 0)
               {{ t(steps[currentStep].description) }}
             </p>
           </div>
+          <div class="flex-grow"></div>
+          <Button
+            variant="outline"
+            class="rounded-lg"
+            size="sm"
+            @click="skipGuide"
+          >
+            {{ t('welcome.buttons.skip') }}
+          </Button>
         </div>
       </CardHeader>
 
@@ -393,16 +407,18 @@ const isFirstStep = computed(() => currentStep.value === 0)
       </CardContent>
 
       <CardFooter class="flex justify-between">
-        <Button
-          variant="outline"
-          class="rounded-lg"
-          size="sm"
-          :class="{ 'opacity-0': isFirstStep }"
-          @click="previousStep"
-        >
-          <Icon icon="lucide:arrow-left" class="w-4 h-4 mr-2" />
-          {{ t('welcome.buttons.back') }}
-        </Button>
+        <div class="flex space-x-2">
+          <Button
+            variant="outline"
+            class="rounded-lg"
+            size="sm"
+            :class="{ 'opacity-0': isFirstStep }"
+            @click="previousStep"
+          >
+            <Icon icon="lucide:arrow-left" class="w-4 h-4 mr-2" />
+            {{ t('welcome.buttons.back') }}
+          </Button>
+        </div>
 
         <Button class="rounded-lg" size="sm" @click="nextStep">
           <span>{{
