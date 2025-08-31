@@ -78,6 +78,7 @@ const FileManagement = {
 
             <!-- 文件表格 -->
             <el-table
+                id="file-table"
                 :data="files"
                 v-loading="loading"
                 element-loading-text="加载中..."
@@ -448,9 +449,25 @@ const FileManagement = {
       return new Date(dateString).toLocaleString('zh-CN')
     }
 
+    // 监听主题变化
+    const handleThemeChange = () => {
+      // 强制重新渲染表格
+      setTimeout(() => {
+        const table = document.querySelector('#file-table .el-table')
+        if (table) {
+          table.style.display = 'none'
+          table.offsetHeight // 触发重排
+          table.style.display = ''
+        }
+      }, 0)
+    }
+
     // 组件挂载时获取数据
     onMounted(() => {
       fetchFiles()
+
+      // 监听主题变化
+      document.addEventListener('el-theme-change', handleThemeChange)
     })
 
     // 暴露方法给父组件

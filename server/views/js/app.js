@@ -274,6 +274,33 @@ const app = createApp({
       }
     }
 
+    // 处理Element Plus主题变化
+    const handleElementThemeChange = (event) => {
+      const theme = event.detail.theme
+
+      // 强制更新所有Vue组件
+      if (userManagement.value) {
+        userManagement.value.$forceUpdate?.()
+      }
+      if (fileManagement.value) {
+        fileManagement.value.$forceUpdate?.()
+      }
+      if (projectManagement.value) {
+        projectManagement.value.$forceUpdate?.()
+      }
+
+      // 触发Element Plus组件重新渲染
+      setTimeout(() => {
+        const tables = document.querySelectorAll('.el-table')
+        tables.forEach((table) => {
+          const instance = table.__vue__
+          if (instance && instance.doLayout) {
+            instance.doLayout()
+          }
+        })
+      }, 100)
+    }
+
     // 组件挂载时初始化
     onMounted(() => {
       // 初始化主题状态
@@ -281,6 +308,9 @@ const app = createApp({
 
       // 监听主题变化
       window.addEventListener('themechange', handleThemeChange)
+
+      // 监听Element Plus主题变化
+      document.addEventListener('el-theme-change', handleElementThemeChange)
 
       loadSettings()
       initApp()
@@ -303,6 +333,7 @@ const app = createApp({
       openSettings,
       toggleTheme,
       handleThemeChange,
+      handleElementThemeChange,
       testOpenAIConnection,
       loadAvailableModels,
       saveSettings,

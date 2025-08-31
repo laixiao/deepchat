@@ -44,6 +44,7 @@ const ProjectManagement = {
 
             <!-- 项目表格 -->
             <el-table
+                id="project-table"
                 :data="projects"
                 v-loading="loading"
                 element-loading-text="加载中..."
@@ -181,61 +182,70 @@ const ProjectManagement = {
                     </el-form-item>
                     
                     <el-form-item label="所属用户" prop="userId" v-if="!projectDialog.form.id">
-                        <div style="display: flex; gap: 10px; align-items: flex-start;">
-                            <el-select
-                                v-model="projectDialog.form.userId"
-                                placeholder="请选择用户"
-                                style="flex: 1;"
-                                filterable
-                                remote
-                                reserve-keyword
-                                :remote-method="searchUsers"
-                                :loading="userSearchLoading"
-                                clearable
-                                @focus="loadInitialUsers"
+                        <el-select
+                            v-model="projectDialog.form.userId"
+                            placeholder="请选择用户"
+                            style="width: 100%;"
+                            filterable
+                            remote
+                            reserve-keyword
+                            :remote-method="searchUsers"
+                            :loading="userSearchLoading"
+                            clearable
+                            @focus="loadInitialUsers"
+                        >
+                            <el-option
+                                v-for="user in userOptions"
+                                :key="user._id"
+                                :label="user.username + ' (' + user.email + ')'"
+                                :value="user._id"
                             >
-                                <el-option
-                                    v-for="user in userOptions"
-                                    :key="user._id"
-                                    :label="user.username + ' (' + user.email + ')'"
-                                    :value="user._id"
-                                >
-                                    <div style="display: flex; align-items: center;">
-                                        <el-avatar :size="24" style="margin-right: 8px;">
-                                            {{ user.username.charAt(0).toUpperCase() }}
-                                        </el-avatar>
-                                        <div>
-                                            <div style="font-weight: 500;">{{ user.username }}</div>
-                                            <div style="font-size: 12px; color: #909399;">{{ user.email }}</div>
-                                        </div>
+                                <div style="display: flex; align-items: center;">
+                                    <el-avatar :size="24" style="margin-right: 8px;">
+                                        {{ user.username.charAt(0).toUpperCase() }}
+                                    </el-avatar>
+                                    <div>
+                                        <div style="font-weight: 500;">{{ user.username }}</div>
+                                        <div style="font-size: 12px; color: #909399;">{{ user.email }}</div>
                                     </div>
-                                </el-option>
-                            </el-select>
+                                </div>
+                            </el-option>
+                        </el-select>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                            <div style="font-size: 12px; color: #909399;">
+                                输入用户名或邮箱进行搜索，或点击刷新按钮加载所有用户
+                            </div>
                             <el-button
                                 type="primary"
                                 :icon="Refresh"
                                 @click="refreshUserList"
                                 :loading="userSearchLoading"
                                 title="刷新用户列表"
+                                size="small"
                             />
                         </div>
-                        <div style="font-size: 12px; color: #909399; margin-top: 5px;">
-                            输入用户名或邮箱进行搜索，或点击刷新按钮加载所有用户
-                        </div>
                     </el-form-item>
-                    
-                    <el-form-item label="服务器地址" prop="serverAddress">
-                        <el-input v-model="projectDialog.form.serverAddress" placeholder="例如: 192.168.1.100 或 example.com" />
-                    </el-form-item>
-                    
-                    <el-form-item label="端口" prop="port">
-                        <el-input-number
-                            v-model="projectDialog.form.port"
-                            :min="1"
-                            :max="65535"
-                            style="width: 100%"
-                        />
-                    </el-form-item>
+
+                    <el-row :gutter="16">
+                        <el-col :span="16">
+                            <el-form-item label="服务器地址" prop="serverAddress">
+                                <el-input v-model="projectDialog.form.serverAddress" placeholder="例如: 192.168.1.100 或 example.com" />
+                                <div style="font-size: 12px; color: #909399; margin-top: 5px;">
+                                    默认输入http://localhost:8188
+                                </div>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="8">
+                            <el-form-item label="端口" prop="port">
+                                <el-input-number
+                                    v-model="projectDialog.form.port"
+                                    :min="1"
+                                    :max="65535"
+                                    style="width: 100%"
+                                />
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
                     
                     <el-form-item label="项目状态" prop="status">
                         <el-select v-model="projectDialog.form.status" style="width: 100%">
@@ -668,9 +678,25 @@ const ProjectManagement = {
       return new Date(dateString).toLocaleString('zh-CN')
     }
 
+    // 监听主题变化
+    const handleThemeChange = () => {
+      // 强制重新渲染表格
+      setTimeout(() => {
+        const table = document.querySelector('#project-table .el-table')
+        if (table) {
+          table.style.display = 'none'
+          table.offsetHeight // 触发重排
+          table.style.display = ''
+        }
+      }, 0)
+    }
+
     // 组件挂载时获取数据
     onMounted(() => {
       fetchProjects()
+
+      // 监听主题变化
+      document.addEventListener('el-theme-change', handleThemeChange)
     })
 
     // 暴露方法给父组件

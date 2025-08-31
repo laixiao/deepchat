@@ -42,16 +42,62 @@ class ThemeManager {
       document.documentElement.setAttribute('data-theme', 'dark')
       document.body.classList.add('dark-theme')
       document.body.classList.remove('light-theme')
+
+      // 更新Element Plus主题
+      this.updateElementPlusTheme('dark')
     } else {
       document.documentElement.removeAttribute('data-theme')
       document.body.classList.add('light-theme')
       document.body.classList.remove('dark-theme')
+
+      // 更新Element Plus主题
+      this.updateElementPlusTheme('light')
     }
 
     this.currentTheme = actualTheme
 
     // 触发主题变化事件
     this.dispatchThemeChange(actualTheme)
+  }
+
+  // 更新Element Plus主题
+  updateElementPlusTheme(theme) {
+    // 等待下一个tick确保DOM已更新
+    setTimeout(() => {
+      // 强制重新渲染Element Plus组件
+      const event = new CustomEvent('el-theme-change', {
+        detail: { theme }
+      })
+      document.dispatchEvent(event)
+
+      // 更新所有表格的样式
+      this.updateTableStyles()
+
+      // 更新所有对话框的样式
+      this.updateDialogStyles()
+    }, 0)
+  }
+
+  // 更新表格样式
+  updateTableStyles() {
+    const tables = document.querySelectorAll('.el-table')
+    tables.forEach((table) => {
+      // 强制重新计算样式
+      table.style.display = 'none'
+      table.offsetHeight // 触发重排
+      table.style.display = ''
+    })
+  }
+
+  // 更新对话框样式
+  updateDialogStyles() {
+    const dialogs = document.querySelectorAll('.el-dialog')
+    dialogs.forEach((dialog) => {
+      // 强制重新计算样式
+      dialog.style.display = 'none'
+      dialog.offsetHeight // 触发重排
+      dialog.style.display = ''
+    })
   }
 
   // 设置主题

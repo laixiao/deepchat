@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeepChat 管理后台</title>
+    <title>大秦重器 管理后台</title>
     
     <!-- Element Plus CSS -->
     <link rel="stylesheet" href="https://unpkg.com/element-plus@2.4.4/dist/index.css">
@@ -183,6 +183,13 @@
             --text-secondary: #909399;
             --border-color: #dcdfe6;
             --header-bg: linear-gradient(90deg, #409eff 0%, #67c23a 100%);
+            --table-header-bg: #f8f9fa;
+            --table-row-hover: #f5f7fa;
+            --table-stripe-bg: #fafafa;
+            --input-bg: #ffffff;
+            --input-border: #dcdfe6;
+            --modal-bg: #ffffff;
+            --modal-overlay: rgba(0, 0, 0, 0.5);
         }
 
         [data-theme="dark"] {
@@ -193,6 +200,13 @@
             --text-secondary: #a8abb2;
             --border-color: #4c4d4f;
             --header-bg: linear-gradient(90deg, #337ecc 0%, #529b2e 100%);
+            --table-header-bg: #363636;
+            --table-row-hover: #404040;
+            --table-stripe-bg: #333333;
+            --input-bg: #2d2d2d;
+            --input-border: #4c4d4f;
+            --modal-bg: #2d2d2d;
+            --modal-overlay: rgba(0, 0, 0, 0.7);
         }
 
         body {
@@ -212,6 +226,184 @@
         .content-card {
             background: var(--card-bg);
             transition: background-color 0.3s ease;
+        }
+
+        /* Element Plus 组件主题适配 */
+        [data-theme="dark"] .el-table {
+            --el-table-bg-color: var(--card-bg);
+            --el-table-tr-bg-color: var(--card-bg);
+            --el-table-header-bg-color: var(--table-header-bg);
+            --el-table-row-hover-bg-color: var(--table-row-hover);
+            --el-table-current-row-bg-color: var(--table-row-hover);
+            --el-table-stripe-bg-color: var(--table-stripe-bg);
+            --el-table-border-color: var(--border-color);
+            --el-table-text-color: var(--text-primary);
+            --el-table-header-text-color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-card {
+            --el-card-bg-color: var(--card-bg);
+            --el-card-border-color: var(--border-color);
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .el-card__header {
+            background-color: var(--table-header-bg);
+            border-bottom-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-card__body {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-input {
+            --el-input-bg-color: var(--input-bg);
+            --el-input-border-color: var(--input-border);
+            --el-input-text-color: var(--text-primary);
+            --el-input-placeholder-color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .el-input__wrapper {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+        }
+
+        [data-theme="dark"] .el-textarea {
+            --el-input-bg-color: var(--input-bg);
+            --el-input-border-color: var(--input-border);
+            --el-input-text-color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-textarea__inner {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-select {
+            --el-select-input-color: var(--text-primary);
+            --el-select-input-focus-border-color: #409eff;
+        }
+
+        [data-theme="dark"] .el-select-dropdown {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .el-select-dropdown__item {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-select-dropdown__item:hover {
+            background-color: var(--table-row-hover);
+        }
+
+        [data-theme="dark"] .el-dialog {
+            --el-dialog-bg-color: var(--modal-bg);
+            --el-dialog-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.24);
+            background-color: var(--modal-bg);
+        }
+
+        [data-theme="dark"] .el-dialog__header {
+            background-color: var(--table-header-bg);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-dialog__body {
+            background-color: var(--modal-bg);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-dialog__footer {
+            background-color: var(--modal-bg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .el-overlay {
+            background-color: var(--modal-overlay);
+        }
+
+        [data-theme="dark"] .el-form-item__label {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-tabs__header {
+            background-color: var(--card-bg);
+        }
+
+        [data-theme="dark"] .el-tabs__nav-wrap::after {
+            background-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .el-tabs__item {
+            color: var(--text-regular);
+        }
+
+        [data-theme="dark"] .el-tabs__item.is-active {
+            color: #409eff;
+        }
+
+        [data-theme="dark"] .el-tabs__content {
+            background-color: var(--card-bg);
+        }
+
+        [data-theme="dark"] .el-pagination {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-pagination button {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .el-pagination button:hover {
+            background-color: var(--table-row-hover);
+        }
+
+        [data-theme="dark"] .el-pager li {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .el-pager li:hover {
+            background-color: var(--table-row-hover);
+        }
+
+        [data-theme="dark"] .el-pager li.is-active {
+            background-color: #409eff;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .el-dropdown-menu {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .el-dropdown-menu__item {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-dropdown-menu__item:hover {
+            background-color: var(--table-row-hover);
+        }
+
+        [data-theme="dark"] .el-alert {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .el-alert__title {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-alert__description {
+            color: var(--text-regular);
         }
 
         /* 动画效果 */
@@ -252,7 +444,7 @@
                 <div class="header-content">
                     <div class="logo">
                         <i class="el-icon-setting"></i>
-                        DeepChat 管理后台
+                        大秦重器 管理后台
                     </div>
                     <div class="user-info">
                         <el-button type="primary" link @click="openApiDocs">
