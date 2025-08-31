@@ -54,7 +54,7 @@
                 </div>
               </div>
               
-              <!-- GPU使用率 -->
+              <!-- GPU负载 -->
               <div class="mb-3">
                 <div class="flex justify-between items-center mb-1">
                   <div class="flex items-center">
@@ -125,10 +125,47 @@
                   ></div>
                 </div>
               </div>
+              
             </div>
           </div>
         </div>
         
+        <!-- CPU和内存使用情况 -->
+        <div class="mt-8 pt-4 border-t">
+          <h3 class="font-medium mb-3">{{ t('gpuInfo.cpuAndMemoryUsage') }}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- CPU使用情况 -->
+            <div class="bg-muted/50 rounded-lg p-4">
+              <div class="flex justify-between items-center mb-2">
+                <h4 class="font-medium">{{ t('gpuInfo.cpuUtilization') }}</h4>
+                <span class="text-sm font-mono">{{ cpuUsage.toFixed(1) }}%</span>
+              </div>
+              <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                <div 
+                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
+                  :class="{ 'bg-red-500 animate-pulse': cpuUsage >= CPU_UTILIZATION_THRESHOLD }"
+                  :style="{ width: cpuUsage + '%' }"
+                ></div>
+              </div>
+            </div>
+            
+            <!-- 内存使用情况 -->
+            <div class="bg-muted/50 rounded-lg p-4">
+              <div class="flex justify-between items-center mb-2">
+                <h4 class="font-medium">{{ t('gpuInfo.memoryUtilization') }}</h4>
+                <span class="text-sm font-mono">{{ formatBytes(getUsedMemory()) }} / {{ formatBytes(getTotalMemory()) }}</span>
+              </div>
+              <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                <div
+                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out"
+                  :class="{ 'bg-red-500 animate-pulse': memoryUsage >= MEMORY_UTILIZATION_THRESHOLD }"
+                  :style="{ width: memoryUsage + '%' }"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- 硬盘使用情况 -->
         <div class="mt-8 pt-4 border-t">
           <h3 class="font-medium mb-3">{{ t('gpuInfo.diskUsage') }}</h3>
@@ -166,47 +203,6 @@
                   <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
                   <span>{{ t('gpuInfo.highDiskPerformanceWarning', { threshold: disk.performance, drive: disk.drive }) }}</span>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-        <!-- CPU使用情况 -->
-        <div class="mt-8 pt-4 border-t">
-          <h3 class="font-medium mb-3">{{ t('gpuInfo.cpuUsage') }}</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-muted/50 rounded-lg p-4">
-              <div class="flex justify-between items-center mb-2">
-                <h4 class="font-medium">{{ t('gpuInfo.utilization') }}</h4>
-                <span class="text-sm font-mono">{{ cpuUsage.toFixed(1) }}%</span>
-              </div>
-              <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
-                <div 
-                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
-                  :class="{ 'bg-red-500 animate-pulse': cpuUsage >= CPU_UTILIZATION_THRESHOLD }"
-                  :style="{ width: cpuUsage + '%' }"
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 内存使用情况 -->
-        <div class="mt-8 pt-4 border-t">
-          <h3 class="font-medium mb-3">{{ t('gpuInfo.memoryUsage') }}</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-muted/50 rounded-lg p-4">
-              <div class="flex justify-between items-center mb-2">
-                <h4 class="font-medium">{{ t('gpuInfo.utilization') }}</h4>
-                <span class="text-sm font-mono">{{ formatBytes(getUsedMemory()) }} / {{ formatBytes(getTotalMemory()) }}</span>
-              </div>
-              <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
-                <div
-                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out"
-                  :class="{ 'bg-red-500 animate-pulse': memoryUsage >= MEMORY_UTILIZATION_THRESHOLD }"
-                  :style="{ width: memoryUsage + '%' }"
-                ></div>
               </div>
             </div>
           </div>

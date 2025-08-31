@@ -7,8 +7,8 @@
 export const GPU_MEMORY_THRESHOLD = 95
 
 /**
- * GPU使用率警告阈值 (%)
- * 当GPU使用率超过此值时，将触发警告
+ * GPU负载警告阈值 (%)
+ * 当GPU负载超过此值时，将触发警告
  */
 export const GPU_UTILIZATION_THRESHOLD = 95
 
@@ -25,8 +25,8 @@ export const GPU_TEMPERATURE_THRESHOLD = 80
 export const POWER_UTILIZATION_THRESHOLD = 90
 
 /**
- * CPU使用率警告阈值 (%)
- * 当CPU使用率超过此值时，将触发警告
+ * CPU负载警告阈值 (%)
+ * 当CPU负载超过此值时，将触发警告
  */
 export const CPU_UTILIZATION_THRESHOLD = 90
 

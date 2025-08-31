@@ -709,7 +709,7 @@
     "resetConfirmDescription": "This will restore all default servers while keeping your custom servers. Any modifications to default servers will be lost.",
     "resetConfirm": "Reset",
     "builtInServers": "Built-in Servers",
-    "customServers": "Custom Servers",
+    "customServers": "Extension Services",
     "builtIn": "Built-in",
     "cannotRemoveBuiltIn": "Cannot Remove Built-in Server",
     "builtInServerCannotBeRemoved": "Built-in servers cannot be removed, only parameters and environment variables can be modified",
