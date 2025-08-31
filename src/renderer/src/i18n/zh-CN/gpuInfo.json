@@ -14,6 +14,7 @@
   "power": "功耗",
   "powerUtilization": "功耗使用率",
   "details": "详细信息",
+  "driverVersion": "驱动版本",
   "pcie": "PCIe连接",
   "clock": "核心频率",
   "memoryClock": "显存频率",

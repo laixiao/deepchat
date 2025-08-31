@@ -24,46 +24,6 @@
       <div v-else>
         
         
-        <div v-for="index in gpuCount" :key="index" class="bg-card border rounded-lg p-5 mb-6 shadow-sm">
-          <div v-if="gpuData[index - 1]" class="gpu-item" :data-gpu-index="index - 1">
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center">
-                <div class="bg-primary/10 p-2 rounded-lg mr-3">
-                  <Icon icon="lucide:chip" class="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h2 class="font-bold text-lg">{{ gpuData[index - 1].name || t('gpuInfo.gpu') + ' ' + (index + 1) }}</h2>
-                  <p class="text-sm text-muted-foreground">{{ gpuData[index - 1].driverVersion }}</p>
-                </div>
-              </div>
-              <Badge variant="secondary">{{ gpuData[index - 1].status }}</Badge>
-            </div>
-          </div>
-          
-          <!-- 详细信息 -->
-          <div class="mt-6 pt-4 border-t">
-            <h3 class="font-medium mb-3">{{ t('gpuInfo.details') }}</h3>
-            <div class="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <span class="text-muted-foreground">{{ t('gpuInfo.pcie') }}:</span>
-                <span class="ml-2">{{ gpuData[index - 1].pcieLink }}</span>
-              </div>
-              <div>
-                <span class="text-muted-foreground">{{ t('gpuInfo.clock') }}:</span>
-                <span class="ml-2">{{ gpuData[index - 1].graphicsClock }} MHz</span>
-              </div>
-              <div>
-                <span class="text-muted-foreground">{{ t('gpuInfo.memoryClock') }}:</span>
-                <span class="ml-2">{{ gpuData[index - 1].memoryClock }} MHz</span>
-              </div>
-              <div>
-                <span class="text-muted-foreground">{{ t('gpuInfo.processes') }}:</span>
-                <span class="ml-2">{{ gpuData[index - 1].processes.length }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
         <!-- 显卡使用情况 -->
         <div class="mt-8 pt-4 border-t">
           <h3 class="font-medium mb-3">{{ t('gpuInfo.gpuUsage') }}</h3>
@@ -71,22 +31,53 @@
             <div v-for="index in gpuCount" :key="index" class="bg-muted/50 rounded-lg p-4">
               <div class="flex justify-between items-center mb-2">
                 <h4 class="font-medium">{{ gpuData[index - 1].name || t('gpuInfo.gpu') + ' ' + (index + 1) }}</h4>
-                <span class="text-sm font-mono">{{ gpuData[index - 1].gpuUtilization }}%</span>
+                <Badge variant="secondary">{{ gpuData[index - 1].status }}</Badge>
               </div>
-              <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
-                <div 
-                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
-                  :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].gpuUtilization >= GPU_UTILIZATION_THRESHOLD }"
-                  :style="{ width: gpuData[index - 1].gpuUtilization + '%' }"
-                ></div>
+              
+              <!-- 显卡基本信息 -->
+              <div class="grid grid-cols-2 gap-2 text-sm mt-2 mb-3">
+                <div>
+                  <span class="text-muted-foreground">{{ t('gpuInfo.driverVersion') }}:</span>
+                  <span class="ml-1">{{ gpuData[index - 1].driverVersion }}</span>
+                </div>
+                <div>
+                  <span class="text-muted-foreground">{{ t('gpuInfo.pcie') }}:</span>
+                  <span class="ml-1">{{ gpuData[index - 1].pcieLink }}</span>
+                </div>
+                <div>
+                  <span class="text-muted-foreground">{{ t('gpuInfo.clock') }}:</span>
+                  <span class="ml-1">{{ gpuData[index - 1].graphicsClock }} MHz</span>
+                </div>
+                <div>
+                  <span class="text-muted-foreground">{{ t('gpuInfo.memoryClock') }}:</span>
+                  <span class="ml-1">{{ gpuData[index - 1].memoryClock }} MHz</span>
+                </div>
+              </div>
+              
+              <!-- GPU使用率 -->
+              <div class="mb-3">
+                <div class="flex justify-between items-center mb-1">
+                  <div class="flex items-center">
+                    <Icon icon="lucide:cpu" class="w-4 h-4 mr-2 text-muted-foreground" />
+                    <h5 class="font-medium text-sm">{{ t('gpuInfo.gpuUtilization') }}</h5>
+                  </div>
+                  <span class="text-sm font-mono">{{ gpuData[index - 1].gpuUtilization }}%</span>
+                </div>
+                <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                  <div 
+                    class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
+                    :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].gpuUtilization >= GPU_UTILIZATION_THRESHOLD }"
+                    :style="{ width: gpuData[index - 1].gpuUtilization + '%' }"
+                  ></div>
+                </div>
               </div>
               
               <!-- 显存使用情况 -->
-              <div class="mt-3 pt-3 border-t border-muted">
-                <div class="flex justify-between items-center mb-2">
+              <div class="mb-3">
+                <div class="flex justify-between items-center mb-1">
                   <div class="flex items-center">
                     <Icon icon="lucide:memory-stick" class="w-4 h-4 mr-2 text-muted-foreground" />
-                    <h4 class="font-medium text-sm">{{ t('gpuInfo.memory') }}</h4>
+                    <h5 class="font-medium text-sm">{{ t('gpuInfo.memory') }}</h5>
                   </div>
                   <span class="text-sm font-mono">{{ formatBytes(gpuData[index - 1].memoryUsed) }} / {{ formatBytes(gpuData[index - 1].memoryTotal) }}</span>
                 </div>
@@ -100,11 +91,11 @@
               </div>
               
               <!-- 温度 -->
-              <div class="mt-3 pt-3 border-t border-muted">
-                <div class="flex justify-between items-center mb-2">
+              <div class="mb-3">
+                <div class="flex justify-between items-center mb-1">
                   <div class="flex items-center">
                     <Icon icon="lucide:thermometer" class="w-4 h-4 mr-2 text-muted-foreground" />
-                    <h4 class="font-medium text-sm">{{ t('gpuInfo.temperature') }}</h4>
+                    <h5 class="font-medium text-sm">{{ t('gpuInfo.temperature') }}</h5>
                   </div>
                   <span class="text-sm font-mono">{{ gpuData[index - 1].temperature }}°C</span>
                 </div>
@@ -113,6 +104,24 @@
                     class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out"
                     :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].temperature >= GPU_TEMPERATURE_THRESHOLD }"
                     :style="{ width: (gpuData[index - 1].temperature / 100) * 100 + '%' }"
+                  ></div>
+                </div>
+              </div>
+              
+              <!-- 功耗 -->
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <div class="flex items-center">
+                    <Icon icon="lucide:zap" class="w-4 h-4 mr-2 text-muted-foreground" />
+                    <h5 class="font-medium text-sm">{{ t('gpuInfo.power') }}</h5>
+                  </div>
+                  <span class="text-sm font-mono">{{ gpuData[index - 1].powerDraw }}W / {{ gpuData[index - 1].powerLimit }}W</span>
+                </div>
+                <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                  <div
+                    class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out"
+                    :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].powerUtilization >= POWER_UTILIZATION_THRESHOLD }"
+                    :style="{ width: gpuData[index - 1].powerUtilization + '%' }"
                   ></div>
                 </div>
               </div>
