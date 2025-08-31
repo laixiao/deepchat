@@ -245,7 +245,7 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   'deepchat-inmemory/deep-research-server': {
     args: [],
     descriptions:
-      'DeepChat内置深度研究服务，使用博查搜索(注意该服务需要较长的上下文模型，请勿在短上下文的模型中使用)',
+      'QinCore内置深度研究服务，使用博查搜索(注意该服务需要较长的上下文模型，请勿在短上下文的模型中使用)',
     icons: '🔬',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,
@@ -257,7 +257,7 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   },
   'deepchat-inmemory/auto-prompting-server': {
     args: [],
-    descriptions: 'DeepChat内置自动模板提示词服务',
+    descriptions: 'QinCore内置自动模板提示词服务',
     icons: '📜',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,
@@ -267,7 +267,7 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   },
   'deepchat-inmemory/conversation-search-server': {
     args: [],
-    descriptions: 'DeepChat built-in conversation history search service',
+    descriptions: 'QinCore built-in conversation history search service',
     icons: '🔍',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,
@@ -277,7 +277,7 @@ const DEFAULT_INMEMORY_SERVERS: Record<string, MCPServerConfig> = {
   },
   'deepchat-inmemory/meeting-server': {
     args: [],
-    descriptions: 'DeepChat内置会议服务，用于组织多Agent讨论',
+    descriptions: 'QinCore内置会议服务，用于组织多Agent讨论',
     icons: '👥',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,
@@ -310,7 +310,7 @@ const DEFAULT_MCP_SERVERS = {
     // 根据平台添加默认启用的平台特有服务
     ...(isMacOS() ? ['deepchat/apple-server'] : [])
   ],
-  mcpEnabled: false // 默认关闭MCP功能
+  mcpEnabled: true // 默认启用MCP功能
 }
 // 这部分mcp有系统逻辑判断是否启用，不受用户配置控制，受软件环境控制
 export const SYSTEM_INMEM_MCP_SERVERS: Record<string, MCPServerConfig> = {
@@ -318,7 +318,7 @@ export const SYSTEM_INMEM_MCP_SERVERS: Record<string, MCPServerConfig> = {
     command: 'deepchat-inmemory/custom-prompts-server',
     args: [],
     env: {},
-    descriptions: 'DeepChat内置自定义提示词服务',
+    descriptions: 'QinCore内置自定义提示词服务',
     icons: '📝',
     autoApprove: ['all'],
     type: 'inmemory' as MCPServerType,
