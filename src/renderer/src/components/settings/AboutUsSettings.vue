@@ -12,14 +12,14 @@
           <div class="flex gap-2">
             <a
               class="text-xs text-muted-foreground hover:text-primary flex items-center"
-              href="https://deepchat.thinkinai.xyz/"
+              href="https://www.openaistore.cn/"
               target="_blank"
               rel="noopener noreferrer"
             >
               <Icon icon="lucide:globe" class="mr-1 h-3 w-3" />
               {{ t('about.website') }}</a
             >
-            <a
+            <!-- <a
               class="text-xs text-muted-foreground hover:text-primary flex items-center"
               href="https://github.com/ThinkInAIXYZ/deepchat"
               target="_blank"
@@ -36,7 +36,7 @@
             >
               <Icon icon="lucide:scale" class="mr-1 h-3 w-3" />
               Apache License 2.0
-            </a>
+            </a> -->
           </div>
         </div>
 

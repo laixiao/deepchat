@@ -92,8 +92,8 @@
       Your system: $1$\r$\n\
       App architecture: $3$\r$\n$\r$\n\
       Please download the correct version from:$\r$\n\
-      https://deepchat.thinkinai.xyz/"
-    ExecShell "open" "https://deepchat.thinkinai.xyz/"
+      https://www.openaistore.cn/"
+    ExecShell "open" "https://www.openaistore.cn/"
     Abort
   ${EndIf}
 

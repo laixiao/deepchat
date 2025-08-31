@@ -51,7 +51,7 @@ const template = {
   releaseDate: params.date || new Date().toISOString().split('T')[0],
   releaseNotes: params.notes || '测试版本',
   githubUrl: `https://github.com/ThinkInAIXYZ/deepchat/releases/tag/v${params.version}`,
-  downloadUrl: `https://deepchat.thinkinai.xyz/#/download`
+  downloadUrl: `https://www.openaistore.cn/#/download`
 }
 
 // 为每个平台生成版本信息文件
