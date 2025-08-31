@@ -1,0 +1,728 @@
+// 项目管理组件
+const ProjectManagement = {
+  template: `
+        <div class="project-management">
+            <!-- 搜索和操作栏 -->
+            <div class="table-toolbar">
+                <div class="toolbar-left">
+                    <el-input
+                        v-model="searchQuery"
+                        placeholder="搜索项目名称、描述或服务器地址..."
+                        style="width: 350px"
+                        clearable
+                        @input="handleSearch"
+                    >
+                        <template #prefix>
+                            <el-icon><Search /></el-icon>
+                        </template>
+                    </el-input>
+                    <el-select
+                        v-model="statusFilter"
+                        placeholder="项目状态"
+                        style="width: 150px"
+                        @change="handleFilterChange"
+                    >
+                        <el-option label="所有状态" value="all" />
+                        <el-option label="草稿" value="draft" />
+                        <el-option label="审核中" value="reviewing" />
+                        <el-option label="已驳回" value="rejected" />
+                        <el-option label="已上线" value="online" />
+                        <el-option label="已下架" value="offline" />
+                    </el-select>
+                </div>
+                <div class="toolbar-right">
+                    <el-button type="success" @click="addProject">
+                        <el-icon><Plus /></el-icon>
+                        新增项目
+                    </el-button>
+                    <el-button type="primary" @click="refreshData" :loading="loading">
+                        <el-icon><Refresh /></el-icon>
+                        刷新
+                    </el-button>
+                </div>
+            </div>
+
+            <!-- 项目表格 -->
+            <el-table
+                :data="projects"
+                v-loading="loading"
+                element-loading-text="加载中..."
+                style="width: 100%"
+                height="500"
+                stripe
+                border
+            >
+                <el-table-column prop="name" label="项目名称" min-width="150" show-overflow-tooltip>
+                    <template #default="{ row }">
+                        <div style="display: flex; align-items: center;">
+                            <el-icon style="margin-right: 8px; color: #409eff;"><Box /></el-icon>
+                            <div>
+                                <div style="font-weight: 500;">{{ row.name }}</div>
+                                <div v-if="row.description" style="font-size: 12px; color: #909399;">
+                                    {{ row.description }}
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </el-table-column>
+                
+                <el-table-column prop="userId" label="所属用户" width="150">
+                    <template #default="{ row }">
+                        <div v-if="row.userId">
+                            <div style="font-weight: 500;">{{ row.userId.username }}</div>
+                            <div style="font-size: 12px; color: #909399;">{{ row.userId.email }}</div>
+                        </div>
+                        <span v-else style="color: #909399;">未知用户</span>
+                    </template>
+                </el-table-column>
+                
+                <el-table-column label="服务器信息" width="180">
+                    <template #default="{ row }">
+                        <div>
+                            <div style="font-weight: 500;">{{ row.serverAddress }}</div>
+                            <div style="font-size: 12px; color: #409eff;">端口: {{ row.port }}</div>
+                        </div>
+                    </template>
+                </el-table-column>
+                
+                <el-table-column prop="workflows" label="工作流" width="100">
+                    <template #default="{ row }">
+                        <el-tag v-if="row.workflows && row.workflows.length > 0" type="info" size="small">
+                            {{ row.workflows.length }} 个
+                        </el-tag>
+                        <span v-else style="color: #909399;">无</span>
+                    </template>
+                </el-table-column>
+                
+                <el-table-column prop="status" label="状态" width="100">
+                    <template #default="{ row }">
+                        <el-tag :type="getStatusType(row.status)" size="small">
+                            {{ getStatusText(row.status) }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
+                
+                <el-table-column prop="createdAt" label="创建时间" width="180">
+                    <template #default="{ row }">
+                        <el-icon style="margin-right: 5px;"><Calendar /></el-icon>
+                        {{ formatDate(row.createdAt) }}
+                    </template>
+                </el-table-column>
+                
+                <el-table-column label="操作" width="200" fixed="right">
+                    <template #default="{ row }">
+                        <el-button
+                            type="primary"
+                            size="small"
+                            @click="editProject(row)"
+                            :icon="Edit"
+                        >
+                            编辑
+                        </el-button>
+                        <el-popconfirm
+                            title="确定要删除这个项目吗？"
+                            @confirm="deleteProject(row)"
+                            confirm-button-text="确定"
+                            cancel-button-text="取消"
+                        >
+                            <template #reference>
+                                <el-button
+                                    type="danger"
+                                    size="small"
+                                    :icon="Delete"
+                                >
+                                    删除
+                                </el-button>
+                            </template>
+                        </el-popconfirm>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <!-- 分页 -->
+            <div style="margin-top: 20px; text-align: center;">
+                <el-pagination
+                    v-model:current-page="pagination.page"
+                    v-model:page-size="pagination.limit"
+                    :page-sizes="[10, 20, 50, 100]"
+                    :total="pagination.total"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                />
+            </div>
+
+            <!-- 项目编辑对话框 -->
+            <el-dialog
+                v-model="projectDialog.visible"
+                :title="projectDialog.title"
+                width="800px"
+                @close="resetProjectForm"
+                :close-on-click-modal="false"
+            >
+                <el-form
+                    ref="projectFormRef"
+                    :model="projectDialog.form"
+                    :rules="projectDialog.rules"
+                    label-width="100px"
+                    style="max-height: 60vh; overflow-y: auto;"
+                >
+                    <el-form-item label="项目名称" prop="name">
+                        <el-input v-model="projectDialog.form.name" />
+                    </el-form-item>
+                    
+                    <el-form-item label="项目描述" prop="description">
+                        <el-input
+                            v-model="projectDialog.form.description"
+                            type="textarea"
+                            :rows="3"
+                            placeholder="可选"
+                        />
+                    </el-form-item>
+                    
+                    <el-form-item label="所属用户" prop="userId" v-if="!projectDialog.form.id">
+                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                            <el-select
+                                v-model="projectDialog.form.userId"
+                                placeholder="请选择用户"
+                                style="flex: 1;"
+                                filterable
+                                remote
+                                reserve-keyword
+                                :remote-method="searchUsers"
+                                :loading="userSearchLoading"
+                                clearable
+                                @focus="loadInitialUsers"
+                            >
+                                <el-option
+                                    v-for="user in userOptions"
+                                    :key="user._id"
+                                    :label="user.username + ' (' + user.email + ')'"
+                                    :value="user._id"
+                                >
+                                    <div style="display: flex; align-items: center;">
+                                        <el-avatar :size="24" style="margin-right: 8px;">
+                                            {{ user.username.charAt(0).toUpperCase() }}
+                                        </el-avatar>
+                                        <div>
+                                            <div style="font-weight: 500;">{{ user.username }}</div>
+                                            <div style="font-size: 12px; color: #909399;">{{ user.email }}</div>
+                                        </div>
+                                    </div>
+                                </el-option>
+                            </el-select>
+                            <el-button
+                                type="primary"
+                                :icon="Refresh"
+                                @click="refreshUserList"
+                                :loading="userSearchLoading"
+                                title="刷新用户列表"
+                            />
+                        </div>
+                        <div style="font-size: 12px; color: #909399; margin-top: 5px;">
+                            输入用户名或邮箱进行搜索，或点击刷新按钮加载所有用户
+                        </div>
+                    </el-form-item>
+                    
+                    <el-form-item label="服务器地址" prop="serverAddress">
+                        <el-input v-model="projectDialog.form.serverAddress" placeholder="例如: 192.168.1.100 或 example.com" />
+                    </el-form-item>
+                    
+                    <el-form-item label="端口" prop="port">
+                        <el-input-number
+                            v-model="projectDialog.form.port"
+                            :min="1"
+                            :max="65535"
+                            style="width: 100%"
+                        />
+                    </el-form-item>
+                    
+                    <el-form-item label="项目状态" prop="status">
+                        <el-select v-model="projectDialog.form.status" style="width: 100%">
+                            <el-option label="草稿" value="draft" />
+                            <el-option label="审核中" value="reviewing" />
+                            <el-option label="已驳回" value="rejected" />
+                            <el-option label="已上线" value="online" />
+                            <el-option label="已下架" value="offline" />
+                        </el-select>
+                    </el-form-item>
+                    
+                    <el-form-item label="工作流配置">
+                        <div style="width: 100%;">
+                            <div v-for="(workflow, index) in projectDialog.form.workflows" :key="index" class="workflow-container">
+                                <div class="workflow-header">
+                                    <span class="workflow-title">工作流 {{ index + 1 }}</span>
+                                    <el-button
+                                        type="danger"
+                                        size="small"
+                                        @click="removeWorkflow(index)"
+                                        :icon="Delete"
+                                    >
+                                        删除
+                                    </el-button>
+                                </div>
+                                
+                                <el-form-item label="名称" :prop="'workflows.' + index + '.name'" style="margin-bottom: 10px;">
+                                    <el-input v-model="workflow.name" placeholder="工作流名称" />
+                                </el-form-item>
+                                
+                                <el-form-item label="描述" :prop="'workflows.' + index + '.description'" style="margin-bottom: 10px;">
+                                    <el-input
+                                        v-model="workflow.description"
+                                        type="textarea"
+                                        :rows="2"
+                                        placeholder="工作流作用描述"
+                                    />
+                                </el-form-item>
+                                
+                                <el-form-item label="API配置" :prop="'workflows.' + index + '.apiConfig'" style="margin-bottom: 0;">
+                                    <el-input
+                                        v-model="workflow.apiConfigText"
+                                        type="textarea"
+                                        :autosize="{ minRows: 4, maxRows: 12 }"
+                                        placeholder='例如: {"url": "https://api.example.com", "method": "POST", "headers": {"Content-Type": "application/json"}}'
+                                        class="json-editor"
+                                        @blur="validateWorkflowJson(workflow, index)"
+                                        @input="formatJsonInput(workflow)"
+                                    />
+                                    <div style="font-size: 12px; color: #909399; margin-top: 5px;">
+                                        支持JSON格式，输入框会自动调整高度
+                                    </div>
+                                </el-form-item>
+                            </div>
+                            
+                            <el-button
+                                type="success"
+                                @click="addWorkflow"
+                                :icon="Plus"
+                                style="width: 100%; margin-top: 10px;"
+                            >
+                                添加工作流
+                            </el-button>
+                        </div>
+                    </el-form-item>
+                </el-form>
+                
+                <template #footer>
+                    <el-button @click="projectDialog.visible = false">取消</el-button>
+                    <el-button type="primary" @click="saveProject" :loading="projectDialog.saving">
+                        保存
+                    </el-button>
+                </template>
+            </el-dialog>
+        </div>
+    `,
+
+  setup() {
+    const { ref, reactive, onMounted } = Vue
+    const { ElMessage, ElMessageBox } = ElementPlus
+
+    // 响应式数据
+    const loading = ref(false)
+    const projects = ref([])
+    const searchQuery = ref('')
+    const statusFilter = ref('all')
+    const projectFormRef = ref(null)
+    const userOptions = ref([])
+    const userSearchLoading = ref(false)
+
+    // 分页数据
+    const pagination = reactive({
+      page: 1,
+      limit: 10,
+      total: 0
+    })
+
+    // 项目对话框数据
+    const projectDialog = reactive({
+      visible: false,
+      title: '新增项目',
+      saving: false,
+      form: {
+        id: '',
+        name: '',
+        description: '',
+        userId: '',
+        serverAddress: '',
+        port: 3000,
+        status: 'draft',
+        workflows: []
+      },
+      rules: {
+        name: [
+          { required: true, message: '请输入项目名称', trigger: 'blur' },
+          { min: 1, max: 100, message: '项目名称长度在 1 到 100 个字符', trigger: 'blur' }
+        ],
+        userId: [{ required: true, message: '请选择所属用户', trigger: 'change' }],
+        serverAddress: [{ required: true, message: '请输入服务器地址', trigger: 'blur' }],
+        port: [
+          { required: true, message: '请输入端口', trigger: 'blur' },
+          { type: 'number', min: 1, max: 65535, message: '端口范围为 1-65535', trigger: 'blur' }
+        ],
+        status: [{ required: true, message: '请选择项目状态', trigger: 'change' }]
+      }
+    })
+
+    // 状态映射
+    const statusMap = {
+      draft: { text: '草稿', type: 'info' },
+      reviewing: { text: '审核中', type: 'warning' },
+      rejected: { text: '已驳回', type: 'danger' },
+      online: { text: '已上线', type: 'success' },
+      offline: { text: '已下架', type: 'info' }
+    }
+
+    const getStatusText = (status) => statusMap[status]?.text || status
+    const getStatusType = (status) => statusMap[status]?.type || 'info'
+
+    // 获取项目列表
+    const fetchProjects = async () => {
+      loading.value = true
+      try {
+        const params = {
+          page: pagination.page,
+          limit: pagination.limit,
+          search: searchQuery.value,
+          status: statusFilter.value
+        }
+
+        const response = await window.apiClient.projects.getList(params)
+
+        if (response.success) {
+          projects.value = response.data.projects
+          pagination.total = response.data.pagination.total
+        } else {
+          ElMessage.error(response.message || '获取项目列表失败')
+        }
+      } catch (error) {
+        console.error('获取项目列表失败:', error)
+        ElMessage.error('获取项目列表失败: ' + error.message)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // 搜索处理
+    let searchTimeout
+    const handleSearch = () => {
+      clearTimeout(searchTimeout)
+      searchTimeout = setTimeout(() => {
+        pagination.page = 1
+        fetchProjects()
+      }, 300)
+    }
+
+    // 筛选处理
+    const handleFilterChange = () => {
+      pagination.page = 1
+      fetchProjects()
+    }
+
+    // 分页处理
+    const handleSizeChange = (size) => {
+      pagination.limit = size
+      pagination.page = 1
+      fetchProjects()
+    }
+
+    const handleCurrentChange = (page) => {
+      pagination.page = page
+      fetchProjects()
+    }
+
+    // 刷新数据
+    const refreshData = () => {
+      fetchProjects()
+    }
+
+    // 搜索用户
+    const searchUsers = async (query) => {
+      if (!query) {
+        // 如果没有查询条件，加载前20个用户
+        await loadInitialUsers()
+        return
+      }
+
+      userSearchLoading.value = true
+      try {
+        const response = await window.apiClient.users.getList({
+          page: 1,
+          limit: 20,
+          search: query
+        })
+
+        if (response.success) {
+          userOptions.value = response.data.users
+        }
+      } catch (error) {
+        console.error('搜索用户失败:', error)
+      } finally {
+        userSearchLoading.value = false
+      }
+    }
+
+    // 加载初始用户列表
+    const loadInitialUsers = async () => {
+      if (userOptions.value.length > 0) {
+        return // 已经有数据，不重复加载
+      }
+
+      userSearchLoading.value = true
+      try {
+        const response = await window.apiClient.users.getList({
+          page: 1,
+          limit: 50 // 加载更多用户供选择
+        })
+
+        if (response.success) {
+          userOptions.value = response.data.users
+        }
+      } catch (error) {
+        console.error('加载用户列表失败:', error)
+      } finally {
+        userSearchLoading.value = false
+      }
+    }
+
+    // 刷新用户列表
+    const refreshUserList = async () => {
+      userOptions.value = [] // 清空现有列表
+      await loadInitialUsers()
+    }
+
+    // 新增项目
+    const addProject = () => {
+      projectDialog.title = '新增项目'
+      projectDialog.form = {
+        id: '',
+        name: '',
+        description: '',
+        userId: '',
+        serverAddress: '',
+        port: 3000,
+        status: 'draft',
+        workflows: []
+      }
+      // 不清空用户选项，保持已加载的用户列表
+      // userOptions.value = [];
+      projectDialog.visible = true
+    }
+
+    // 编辑项目
+    const editProject = async (project) => {
+      projectDialog.title = '编辑项目'
+      projectDialog.form = {
+        id: project._id,
+        name: project.name,
+        description: project.description || '',
+        userId: project.userId._id || project.userId,
+        serverAddress: project.serverAddress,
+        port: project.port,
+        status: project.status,
+        workflows: (project.workflows || []).map((w) => ({
+          name: w.name,
+          description: w.description,
+          apiConfig: w.apiConfig,
+          apiConfigText: JSON.stringify(w.apiConfig, null, 2)
+        }))
+      }
+
+      // 设置用户选项
+      if (project.userId && typeof project.userId === 'object') {
+        userOptions.value = [project.userId]
+      }
+
+      projectDialog.visible = true
+    }
+
+    // 添加工作流
+    const addWorkflow = () => {
+      projectDialog.form.workflows.push({
+        name: '',
+        description: '',
+        apiConfig: {},
+        apiConfigText: ''
+      })
+    }
+
+    // 删除工作流
+    const removeWorkflow = (index) => {
+      projectDialog.form.workflows.splice(index, 1)
+    }
+
+    // 验证工作流JSON
+    const validateWorkflowJson = (workflow, index) => {
+      if (!workflow.apiConfigText.trim()) {
+        workflow.apiConfig = {}
+        return
+      }
+
+      try {
+        workflow.apiConfig = JSON.parse(workflow.apiConfigText)
+      } catch (error) {
+        ElMessage.error(`工作流 ${index + 1} 的API配置不是有效的JSON格式`)
+        workflow.apiConfig = {}
+      }
+    }
+
+    // 格式化JSON输入
+    const formatJsonInput = (workflow) => {
+      // 简单的JSON格式化提示
+      if (workflow.apiConfigText.trim()) {
+        try {
+          JSON.parse(workflow.apiConfigText)
+          // 如果解析成功，可以选择性地格式化
+          // workflow.apiConfigText = JSON.stringify(JSON.parse(workflow.apiConfigText), null, 2);
+        } catch (error) {
+          // 输入过程中的错误不需要提示
+        }
+      }
+    }
+
+    // 保存项目
+    const saveProject = async () => {
+      try {
+        await projectFormRef.value.validate()
+
+        // 验证所有工作流的JSON
+        for (let i = 0; i < projectDialog.form.workflows.length; i++) {
+          const workflow = projectDialog.form.workflows[i]
+          if (workflow.apiConfigText.trim()) {
+            try {
+              workflow.apiConfig = JSON.parse(workflow.apiConfigText)
+            } catch (error) {
+              ElMessage.error(`工作流 ${i + 1} 的API配置不是有效的JSON格式`)
+              return
+            }
+          }
+        }
+
+        projectDialog.saving = true
+
+        const { id, workflows, ...formData } = projectDialog.form
+
+        // 处理工作流数据
+        const processedWorkflows = workflows
+          .map((w) => ({
+            name: w.name,
+            description: w.description,
+            apiConfig: w.apiConfig
+          }))
+          .filter((w) => w.name && w.description)
+
+        const requestData = {
+          ...formData,
+          workflows: processedWorkflows
+        }
+
+        let response
+        if (id) {
+          response = await window.apiClient.projects.update(id, requestData)
+        } else {
+          response = await window.apiClient.projects.create(requestData)
+        }
+
+        if (response.success) {
+          ElMessage.success(id ? '项目更新成功' : '项目创建成功')
+          projectDialog.visible = false
+          fetchProjects()
+        } else {
+          ElMessage.error(response.message || '操作失败')
+        }
+      } catch (error) {
+        if (error !== false) {
+          console.error('保存项目失败:', error)
+          ElMessage.error('保存项目失败: ' + error.message)
+        }
+      } finally {
+        projectDialog.saving = false
+      }
+    }
+
+    // 删除项目
+    const deleteProject = async (project) => {
+      try {
+        const response = await window.apiClient.projects.delete(project._id)
+
+        if (response.success) {
+          ElMessage.success('项目删除成功')
+          fetchProjects()
+        } else {
+          ElMessage.error(response.message || '删除失败')
+        }
+      } catch (error) {
+        console.error('删除项目失败:', error)
+        ElMessage.error('删除项目失败: ' + error.message)
+      }
+    }
+
+    // 重置项目表单
+    const resetProjectForm = () => {
+      if (projectFormRef.value) {
+        projectFormRef.value.resetFields()
+      }
+    }
+
+    // 格式化日期
+    const formatDate = (dateString) => {
+      return new Date(dateString).toLocaleString('zh-CN')
+    }
+
+    // 组件挂载时获取数据
+    onMounted(() => {
+      fetchProjects()
+    })
+
+    // 暴露方法给父组件
+    const refresh = () => {
+      fetchProjects()
+    }
+
+    return {
+      loading,
+      projects,
+      searchQuery,
+      statusFilter,
+      pagination,
+      projectDialog,
+      projectFormRef,
+      userOptions,
+      userSearchLoading,
+      getStatusText,
+      getStatusType,
+      fetchProjects,
+      handleSearch,
+      handleFilterChange,
+      handleSizeChange,
+      handleCurrentChange,
+      refreshData,
+      searchUsers,
+      loadInitialUsers,
+      refreshUserList,
+      addProject,
+      editProject,
+      addWorkflow,
+      removeWorkflow,
+      validateWorkflowJson,
+      formatJsonInput,
+      saveProject,
+      deleteProject,
+      resetProjectForm,
+      formatDate,
+      refresh,
+      // Element Plus Icons
+      Search: ElementPlusIconsVue.Search,
+      Refresh: ElementPlusIconsVue.Refresh,
+      Plus: ElementPlusIconsVue.Plus,
+      Edit: ElementPlusIconsVue.Edit,
+      Delete: ElementPlusIconsVue.Delete,
+      Box: ElementPlusIconsVue.Box,
+      Calendar: ElementPlusIconsVue.Calendar
+    }
+  }
+}
+
+// 注册组件
+if (typeof window !== 'undefined') {
+  window.ProjectManagement = ProjectManagement
+}

@@ -15,11 +15,16 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #f5f5f5;
             padding: 20px;
+            min-height: 100vh;
+            overflow-x: auto;
+            overflow-y: auto;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            min-height: calc(100vh - 40px);
+            overflow: visible;
         }
 
         .header {
@@ -134,7 +139,8 @@
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
+            overflow: auto;
+            max-height: 70vh;
         }
 
         table {
@@ -152,6 +158,9 @@
             background: #f8f9fa;
             font-weight: 600;
             color: #555;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         tr:hover {
@@ -204,6 +213,88 @@
             color: #28a745 !important;
         }
 
+        .text-primary {
+            color: #007bff !important;
+        }
+
+        .text-danger {
+            color: #dc3545 !important;
+        }
+
+        .text-secondary {
+            color: #6c757d !important;
+        }
+
+        .workflow-item {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+        }
+
+        #workflowsContainer {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            background: #fff;
+        }
+
+        .workflow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .workflow-remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            .modal-content {
+                margin: 20px auto;
+                max-width: 95%;
+                max-height: 95vh;
+            }
+
+            .table-container {
+                overflow-x: auto;
+                max-height: 60vh;
+            }
+
+            table {
+                min-width: 600px;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .tab-button {
+                flex: 1;
+                min-width: 80px;
+            }
+        }
+
         .pagination {
             background: white;
             padding: 15px 20px;
@@ -251,11 +342,13 @@
 
         .modal-content {
             background: white;
-            margin: 100px auto;
+            margin: 50px auto;
             padding: 20px;
             border-radius: 8px;
             max-width: 500px;
+            max-height: 90vh;
             position: relative;
+            overflow-y: auto;
         }
 
         .close {
@@ -396,55 +489,15 @@
         </div>
 
         <div class="tabs">
-            <button class="tab-button active" data-tab="files">文件管理</button>
-            <button class="tab-button" data-tab="users">用户管理</button>
-            <button class="tab-button" data-tab="upload">文件上传</button>
+            <button class="tab-button active" data-tab="users">用户管理</button>
+            <button class="tab-button" data-tab="files">文件管理</button>
+            <button class="tab-button" data-tab="projects">项目管理</button>
         </div>
 
         <div id="alertContainer"></div>
 
-        <!-- 文件管理页面 -->
-        <div id="filesTab" class="tab-content">
-            <div class="controls">
-                <button class="btn-primary" id="refreshFilesBtn">刷新列表</button>
-                <button class="btn-danger" id="cleanupTempFilesBtn">清理临时文件</button>
-                <select id="fileTypeFilter" style="margin-left: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    <option value="all">所有文件</option>
-                    <option value="permanent">正式文件</option>
-                    <option value="temporary">临时文件</option>
-                </select>
-            </div>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>文件名</th>
-                            <th>类型</th>
-                            <th>大小</th>
-                            <th>上传时间</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="filesTableBody">
-                        <!-- 文件列表将通过JavaScript动态填充 -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="pagination">
-                <div class="pagination-info" id="filesPaginationInfo">
-                    显示第 1 到 10 项，共 0 项
-                </div>
-                <div class="pagination-controls">
-                    <button id="filesPrevBtn" disabled>上一页</button>
-                    <button id="filesNextBtn" disabled>下一页</button>
-                </div>
-            </div>
-        </div>
-
         <!-- 用户管理页面 -->
-        <div id="usersTab" class="tab-content hidden">
+        <div id="usersTab" class="tab-content">
             <div class="controls">
                 <button class="btn-primary" id="refreshUsersBtn">刷新列表</button>
             </div>
@@ -476,10 +529,21 @@
             </div>
         </div>
 
-        <!-- 文件上传页面 -->
-        <div id="uploadTab" class="tab-content hidden">
-            <div class="upload-section">
-                <h2>上传文件</h2>
+        <!-- 文件管理页面 -->
+        <div id="filesTab" class="tab-content hidden">
+            <div class="controls">
+                <button class="btn-primary" id="refreshFilesBtn">刷新列表</button>
+                <button class="btn-danger" id="cleanupTempFilesBtn">清理临时文件</button>
+                <select id="fileTypeFilter" style="margin-left: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="all">所有文件</option>
+                    <option value="permanent">正式文件</option>
+                    <option value="temporary">临时文件</option>
+                </select>
+            </div>
+
+            <!-- 文件上传区域 -->
+            <div class="upload-section" style="margin-top: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+                <h3 style="margin-bottom: 20px;">文件上传</h3>
 
                 <!-- 上传类型选择 -->
                 <div class="upload-type-selector" style="margin-bottom: 20px;">
@@ -490,7 +554,7 @@
                     </label>
                     <label>
                         <input type="radio" name="uploadType" value="temporary" style="margin-right: 5px;">
-                        临时文件（免认证）
+                        临时文件
                     </label>
                 </div>
 
@@ -502,7 +566,83 @@
                 </div>
                 <div class="file-list" id="fileList"></div>
             </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>文件名</th>
+                            <th>类型</th>
+                            <th>大小</th>
+                            <th>上传时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filesTableBody">
+                        <!-- 文件列表将通过JavaScript动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <div class="pagination-info" id="filesPaginationInfo">
+                    显示第 1 到 10 项，共 0 项
+                </div>
+                <div class="pagination-controls">
+                    <button id="filesPrevBtn" disabled>上一页</button>
+                    <button id="filesNextBtn" disabled>下一页</button>
+                </div>
+            </div>
+
+
         </div>
+
+        <!-- 项目管理页面 -->
+        <div id="projectsTab" class="tab-content hidden">
+            <div class="controls">
+                <button class="btn-primary" id="refreshProjectsBtn">刷新列表</button>
+                <button class="btn-success" id="addProjectBtn">新增项目</button>
+                <select id="projectStatusFilter" style="margin-left: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="all">所有状态</option>
+                    <option value="draft">草稿</option>
+                    <option value="reviewing">审核中</option>
+                    <option value="rejected">已驳回</option>
+                    <option value="online">已上线</option>
+                    <option value="offline">已下架</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>项目名称</th>
+                            <th>所属用户</th>
+                            <th>服务器地址</th>
+                            <th>端口</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsTableBody">
+                        <!-- 项目列表将通过JavaScript动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <div class="pagination-info" id="projectsPaginationInfo">
+                    显示第 1 到 10 项，共 0 项
+                </div>
+                <div class="pagination-controls">
+                    <button id="projectsPrevBtn" disabled>上一页</button>
+                    <button id="projectsNextBtn" disabled>下一页</button>
+                </div>
+            </div>
+        </div>
+
+
     </div>
 
     <!-- 编辑文件模态框 -->
@@ -551,14 +691,74 @@
         </div>
     </div>
 
+    <!-- 新增/编辑项目模态框 -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content" style="max-width: 600px; max-height: 95vh; overflow-y: auto;">
+            <span class="close">&times;</span>
+            <h2 id="projectModalTitle">新增项目</h2>
+            <form id="projectForm">
+                <input type="hidden" id="projectId">
+                <div class="form-group">
+                    <label for="projectName">项目名称:</label>
+                    <input type="text" id="projectName" required maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="projectDescription">项目描述:</label>
+                    <textarea id="projectDescription" rows="3" maxlength="500"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="projectUserId">所属用户:</label>
+                    <div style="position: relative;">
+                        <input type="text" id="userSearchInput" placeholder="搜索用户..." style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 5px;">
+                        <select id="projectUserId" required style="width: 100%;">
+                            <option value="">请选择用户</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="projectServerAddress">服务器地址:</label>
+                    <input type="text" id="projectServerAddress" required placeholder="例如: 192.168.1.100 或 example.com">
+                </div>
+                <div class="form-group">
+                    <label for="projectPort">端口:</label>
+                    <input type="number" id="projectPort" required min="1" max="65535" placeholder="例如: 3000">
+                </div>
+                <div class="form-group">
+                    <label>工作流配置 (可选):</label>
+                    <div id="workflowsContainer">
+                        <!-- 工作流列表将动态生成 -->
+                    </div>
+                    <button type="button" id="addWorkflowBtn" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+                        + 添加工作流
+                    </button>
+                </div>
+                <div class="form-group">
+                    <label for="projectStatus">状态:</label>
+                    <select id="projectStatus" required>
+                        <option value="draft">草稿</option>
+                        <option value="reviewing">审核中</option>
+                        <option value="rejected">已驳回</option>
+                        <option value="online">已上线</option>
+                        <option value="offline">已下架</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancelProjectBtn">取消</button>
+                    <button type="submit" class="btn-success">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // 全局变量
-        let currentTab = 'files';
-        let currentPage = { files: 1, users: 1 };
+        let currentTab = 'users';
+        let currentPage = { files: 1, users: 1, projects: 1 };
         let currentSearch = '';
         let currentFileType = 'all';
-        let totalPages = { files: 0, users: 0 };
-        let totalItems = { files: 0, users: 0 };
+        let currentProjectStatus = 'all';
+        let totalPages = { files: 0, users: 0, projects: 0 };
+        let totalItems = { files: 0, users: 0, projects: 0 };
 
         // DOM元素
         const tabButtons = document.querySelectorAll('.tab-button');
@@ -583,6 +783,15 @@
         const usersNextBtn = document.getElementById('usersNextBtn');
         const refreshUsersBtn = document.getElementById('refreshUsersBtn');
 
+        // 项目管理相关元素
+        const projectsTableBody = document.getElementById('projectsTableBody');
+        const projectsPaginationInfo = document.getElementById('projectsPaginationInfo');
+        const projectsPrevBtn = document.getElementById('projectsPrevBtn');
+        const projectsNextBtn = document.getElementById('projectsNextBtn');
+        const refreshProjectsBtn = document.getElementById('refreshProjectsBtn');
+        const addProjectBtn = document.getElementById('addProjectBtn');
+        const projectStatusFilter = document.getElementById('projectStatusFilter');
+
         // 文件上传相关元素
         const uploadArea = document.getElementById('uploadArea');
         const selectFileBtn = document.getElementById('selectFileBtn');
@@ -596,9 +805,13 @@
         const editFileForm = document.getElementById('editFileForm');
         const editUserModal = document.getElementById('editUserModal');
         const editUserForm = document.getElementById('editUserForm');
+        const projectModal = document.getElementById('projectModal');
+        const projectForm = document.getElementById('projectForm');
+        const projectModalTitle = document.getElementById('projectModalTitle');
         const closeButtons = document.querySelectorAll('.close');
         const cancelEditFileBtn = document.getElementById('cancelEditFileBtn');
         const cancelEditUserBtn = document.getElementById('cancelEditUserBtn');
+        const cancelProjectBtn = document.getElementById('cancelProjectBtn');
 
         // 显示提示信息
         function showAlert(message, type) {
@@ -654,6 +867,8 @@
                 fetchFiles(currentPage.files, currentSearch, currentFileType);
             } else if (tabName === 'users') {
                 fetchUsers(currentPage.users, currentSearch);
+            } else if (tabName === 'projects') {
+                fetchProjects(currentPage.projects, currentSearch, currentProjectStatus);
             }
         }
 
@@ -799,11 +1014,108 @@
         function updateUsersPagination() {
             const start = totalItems.users > 0 ? (currentPage.users - 1) * 10 + 1 : 0;
             const end = Math.min(currentPage.users * 10, totalItems.users);
-            
+
             usersPaginationInfo.textContent = `显示第 ${start} 到 ${end} 项，共 ${totalItems.users} 项`;
-            
+
             usersPrevBtn.disabled = currentPage.users <= 1;
             usersNextBtn.disabled = currentPage.users >= totalPages.users;
+        }
+
+        // 获取项目列表
+        async function fetchProjects(page = 1, search = '', status = 'all') {
+            try {
+                const params = new URLSearchParams({
+                    page: page.toString(),
+                    limit: '10',
+                    search: search,
+                    status: status
+                });
+
+                const response = await fetch(`/api/admin/projects?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('获取项目列表失败');
+                }
+
+                const result = await response.json();
+                const projects = result.data.projects;
+                totalPages.projects = result.data.pagination.pages;
+                totalItems.projects = result.data.pagination.total;
+
+                renderProjects(projects);
+                updateProjectsPagination();
+            } catch (error) {
+                showAlert('获取项目列表失败: ' + error.message, 'error');
+            }
+        }
+
+        // 渲染项目列表
+        function renderProjects(projects) {
+            projectsTableBody.innerHTML = '';
+
+            if (projects.length === 0) {
+                projectsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: #666;">暂无项目</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            projects.forEach(project => {
+                const row = document.createElement('tr');
+                const statusText = {
+                    'draft': '草稿',
+                    'reviewing': '审核中',
+                    'rejected': '已驳回',
+                    'online': '已上线',
+                    'offline': '已下架'
+                }[project.status] || project.status;
+
+                const statusClass = {
+                    'draft': 'text-warning',
+                    'reviewing': 'text-primary',
+                    'rejected': 'text-danger',
+                    'online': 'text-success',
+                    'offline': 'text-secondary'
+                }[project.status] || '';
+
+                const userName = project.userId ? (project.userId.username || '未知用户') : '未知用户';
+
+                row.innerHTML = `
+                    <td>
+                        <div class="file-name">${project.name}</div>
+                        ${project.description ? `<div class="file-size">${project.description}</div>` : ''}
+                    </td>
+                    <td>${userName}</td>
+                    <td>${project.serverAddress}</td>
+                    <td>${project.port}</td>
+                    <td>
+                        <span class="${statusClass}" style="font-weight: 500;">${statusText}</span>
+                    </td>
+                    <td>${formatDate(project.createdAt)}</td>
+                    <td class="actions">
+                        <button class="btn-sm-warning" onclick="editProject('${project._id}')">编辑</button>
+                        <button class="btn-sm-danger" onclick="deleteProject('${project._id}', '${project.name}')">删除</button>
+                    </td>
+                `;
+                projectsTableBody.appendChild(row);
+            });
+        }
+
+        // 更新项目分页信息
+        function updateProjectsPagination() {
+            const start = totalItems.projects > 0 ? (currentPage.projects - 1) * 10 + 1 : 0;
+            const end = Math.min(currentPage.projects * 10, totalItems.projects);
+
+            projectsPaginationInfo.textContent = `显示第 ${start} 到 ${end} 项，共 ${totalItems.projects} 项`;
+
+            projectsPrevBtn.disabled = currentPage.projects <= 1;
+            projectsNextBtn.disabled = currentPage.projects >= totalPages.projects;
         }
 
         // 查看文件
@@ -864,7 +1176,7 @@
             if (!confirm(`确定要删除用户 "${username}" 吗？`)) {
                 return;
             }
-            
+
             try {
                 const response = await fetch(`/api/admin/users/${userId}`, {
                     method: 'DELETE',
@@ -872,16 +1184,199 @@
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
                 });
-                
+
                 if (!response.ok) {
                     throw new Error('删除用户失败');
                 }
-                
+
                 showAlert('用户删除成功', 'success');
                 fetchUsers(currentPage.users, currentSearch);
             } catch (error) {
                 showAlert('删除用户失败: ' + error.message, 'error');
             }
+        }
+
+        // 新增项目
+        function addProject() {
+            projectModalTitle.textContent = '新增项目';
+            document.getElementById('projectId').value = '';
+            document.getElementById('projectForm').reset();
+            clearWorkflows();
+            loadUsersForSelect();
+            projectModal.style.display = 'block';
+        }
+
+        // 编辑项目
+        async function editProject(projectId) {
+            try {
+                const response = await fetch(`/api/admin/projects/${projectId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('获取项目信息失败');
+                }
+
+                const result = await response.json();
+                const project = result.data.project;
+
+                projectModalTitle.textContent = '编辑项目';
+                document.getElementById('projectId').value = project._id;
+                document.getElementById('projectName').value = project.name;
+                document.getElementById('projectDescription').value = project.description || '';
+                document.getElementById('projectServerAddress').value = project.serverAddress;
+                document.getElementById('projectPort').value = project.port;
+                document.getElementById('projectStatus').value = project.status;
+
+                // 清空并重新加载工作流
+                clearWorkflows();
+                if (project.workflows && project.workflows.length > 0) {
+                    project.workflows.forEach(workflow => {
+                        addWorkflow(workflow);
+                    });
+                }
+
+                await loadUsersForSelect();
+                document.getElementById('projectUserId').value = project.userId._id || project.userId;
+
+                projectModal.style.display = 'block';
+            } catch (error) {
+                showAlert('获取项目信息失败: ' + error.message, 'error');
+            }
+        }
+
+        // 删除项目
+        async function deleteProject(projectId, projectName) {
+            if (!confirm(`确定要删除项目 "${projectName}" 吗？`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/projects/${projectId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('删除项目失败');
+                }
+
+                showAlert('项目删除成功', 'success');
+                fetchProjects(currentPage.projects, currentSearch, currentProjectStatus);
+            } catch (error) {
+                showAlert('删除项目失败: ' + error.message, 'error');
+            }
+        }
+
+        // 加载用户列表到选择框
+        async function loadUsersForSelect(searchTerm = '') {
+            try {
+                const response = await fetch(`/api/admin/users?page=1&limit=1000&search=${encodeURIComponent(searchTerm)}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('获取用户列表失败');
+                }
+
+                const result = await response.json();
+                const users = result.data.users;
+                const select = document.getElementById('projectUserId');
+
+                // 清空现有选项（保留第一个默认选项）
+                select.innerHTML = '<option value="">请选择用户</option>';
+
+                // 添加用户选项
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user._id;
+                    option.textContent = `${user.username} (${user.email})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                showAlert('加载用户列表失败: ' + error.message, 'error');
+            }
+        }
+
+        // 添加工作流
+        function addWorkflow(workflow = null) {
+            const container = document.getElementById('workflowsContainer');
+            const workflowIndex = container.children.length;
+
+            const workflowDiv = document.createElement('div');
+            workflowDiv.className = 'workflow-item';
+            workflowDiv.innerHTML = `
+                <div class="workflow-header">
+                    <h4>工作流 ${workflowIndex + 1}</h4>
+                    <button type="button" class="workflow-remove-btn" onclick="removeWorkflow(this)">删除</button>
+                </div>
+                <div class="form-group">
+                    <label>工作流名称:</label>
+                    <input type="text" class="workflow-name" value="${workflow ? workflow.name : ''}" required maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>作用描述:</label>
+                    <textarea class="workflow-description" rows="2" required maxlength="500">${workflow ? workflow.description : ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>API配置 (JSON格式):</label>
+                    <textarea class="workflow-api-config" rows="4" required placeholder='例如: {"url": "https://api.example.com", "method": "POST"}'>${workflow ? JSON.stringify(workflow.apiConfig, null, 2) : ''}</textarea>
+                </div>
+            `;
+
+            container.appendChild(workflowDiv);
+        }
+
+        // 删除工作流
+        function removeWorkflow(button) {
+            const workflowItem = button.closest('.workflow-item');
+            workflowItem.remove();
+
+            // 重新编号
+            const container = document.getElementById('workflowsContainer');
+            Array.from(container.children).forEach((item, index) => {
+                const header = item.querySelector('.workflow-header h4');
+                header.textContent = `工作流 ${index + 1}`;
+            });
+        }
+
+        // 获取所有工作流数据
+        function getWorkflowsData() {
+            const container = document.getElementById('workflowsContainer');
+            const workflows = [];
+
+            Array.from(container.children).forEach(item => {
+                const name = item.querySelector('.workflow-name').value.trim();
+                const description = item.querySelector('.workflow-description').value.trim();
+                const apiConfigText = item.querySelector('.workflow-api-config').value.trim();
+
+                if (name && description && apiConfigText) {
+                    try {
+                        const apiConfig = JSON.parse(apiConfigText);
+                        workflows.push({
+                            name,
+                            description,
+                            apiConfig
+                        });
+                    } catch (error) {
+                        throw new Error(`工作流 "${name}" 的API配置不是有效的JSON格式`);
+                    }
+                }
+            });
+
+            return workflows;
+        }
+
+        // 清空工作流
+        function clearWorkflows() {
+            const container = document.getElementById('workflowsContainer');
+            container.innerHTML = '';
         }
 
         // 上传文件
@@ -940,10 +1435,8 @@
                         if (response.success) {
                             statusElement.textContent = '上传成功';
                             statusElement.style.color = 'green';
-                            // 刷新文件列表
-                            if (currentTab === 'files') {
-                                fetchFiles(currentPage.files, currentSearch, currentFileType);
-                            }
+                            // 刷新文件列表（文件上传在文件管理页面内）
+                            fetchFiles(currentPage.files, currentSearch, currentFileType);
                         } else {
                             statusElement.textContent = '上传失败: ' + response.message;
                             statusElement.style.color = 'red';
@@ -1026,6 +1519,8 @@
                 fetchFiles(currentPage.files, currentSearch, currentFileType);
             } else if (currentTab === 'users') {
                 fetchUsers(currentPage.users, currentSearch);
+            } else if (currentTab === 'projects') {
+                fetchProjects(currentPage.projects, currentSearch, currentProjectStatus);
             }
         });
 
@@ -1045,6 +1540,20 @@
 
         refreshUsersBtn.addEventListener('click', () => {
             fetchUsers(currentPage.users, currentSearch);
+        });
+
+        refreshProjectsBtn.addEventListener('click', () => {
+            fetchProjects(currentPage.projects, currentSearch, currentProjectStatus);
+        });
+
+        addProjectBtn.addEventListener('click', () => {
+            addProject();
+        });
+
+        projectStatusFilter.addEventListener('change', () => {
+            currentProjectStatus = projectStatusFilter.value;
+            currentPage.projects = 1;
+            fetchProjects(currentPage.projects, currentSearch, currentProjectStatus);
         });
 
         filesPrevBtn.addEventListener('click', () => {
@@ -1072,6 +1581,20 @@
             if (currentPage.users < totalPages.users) {
                 currentPage.users++;
                 fetchUsers(currentPage.users, currentSearch);
+            }
+        });
+
+        projectsPrevBtn.addEventListener('click', () => {
+            if (currentPage.projects > 1) {
+                currentPage.projects--;
+                fetchProjects(currentPage.projects, currentSearch, currentProjectStatus);
+            }
+        });
+
+        projectsNextBtn.addEventListener('click', () => {
+            if (currentPage.projects < totalPages.projects) {
+                currentPage.projects++;
+                fetchProjects(currentPage.projects, currentSearch, currentProjectStatus);
             }
         });
 
@@ -1105,12 +1628,12 @@
 
         editUserForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const userId = document.getElementById('editUserId').value;
             const username = document.getElementById('editUsername').value;
             const email = document.getElementById('editUserEmail').value;
             const avatar = document.getElementById('editUserAvatar').value;
-            
+
             try {
                 const response = await fetch(`/api/admin/users/${userId}`, {
                     method: 'PUT',
@@ -1120,11 +1643,11 @@
                     },
                     body: JSON.stringify({ username, email, avatar })
                 });
-                
+
                 if (!response.ok) {
                     throw new Error('更新用户信息失败');
                 }
-                
+
                 showAlert('用户信息更新成功', 'success');
                 editUserModal.style.display = 'none';
                 fetchUsers(currentPage.users, currentSearch);
@@ -1133,10 +1656,72 @@
             }
         });
 
+        projectForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const projectId = document.getElementById('projectId').value;
+            const name = document.getElementById('projectName').value;
+            const description = document.getElementById('projectDescription').value;
+            const userId = document.getElementById('projectUserId').value;
+            const serverAddress = document.getElementById('projectServerAddress').value;
+            const port = parseInt(document.getElementById('projectPort').value);
+            const status = document.getElementById('projectStatus').value;
+
+            // 获取工作流数据
+            let workflows = [];
+            try {
+                workflows = getWorkflowsData();
+            } catch (error) {
+                showAlert(error.message, 'error');
+                return;
+            }
+
+            const requestData = {
+                name,
+                description,
+                serverAddress,
+                port,
+                workflows,
+                status
+            };
+
+            // 新增项目时需要userId
+            if (!projectId) {
+                requestData.userId = userId;
+            }
+
+            try {
+                const url = projectId ? `/api/admin/projects/${projectId}` : '/api/admin/projects';
+                const method = projectId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    const result = await response.json();
+                    throw new Error(result.message || '操作失败');
+                }
+
+                const action = projectId ? '更新' : '创建';
+                showAlert(`项目${action}成功`, 'success');
+                projectModal.style.display = 'none';
+                fetchProjects(currentPage.projects, currentSearch, currentProjectStatus);
+            } catch (error) {
+                showAlert('操作失败: ' + error.message, 'error');
+            }
+        });
+
         closeButtons.forEach(button => {
             button.addEventListener('click', () => {
                 editFileModal.style.display = 'none';
                 editUserModal.style.display = 'none';
+                projectModal.style.display = 'none';
             });
         });
 
@@ -1148,12 +1733,19 @@
             editUserModal.style.display = 'none';
         });
 
+        cancelProjectBtn.addEventListener('click', () => {
+            projectModal.style.display = 'none';
+        });
+
         window.addEventListener('click', (e) => {
             if (e.target === editFileModal) {
                 editFileModal.style.display = 'none';
             }
             if (e.target === editUserModal) {
                 editUserModal.style.display = 'none';
+            }
+            if (e.target === projectModal) {
+                projectModal.style.display = 'none';
             }
         });
 
@@ -1248,8 +1840,8 @@
                 return;
             }
 
-            // token有效，加载数据
-            fetchFiles(1, '', 'all');
+            // token有效，加载用户数据（默认显示用户管理）
+            fetchUsers(1, '');
 
             // 添加上传类型切换事件监听器
             uploadTypeRadios.forEach(radio => {
@@ -1262,6 +1854,21 @@
                         uploadTypeHint.style.color = '';
                     }
                 });
+            });
+
+            // 添加工作流按钮事件监听器
+            document.getElementById('addWorkflowBtn').addEventListener('click', () => {
+                addWorkflow();
+            });
+
+            // 添加用户搜索事件监听器
+            const userSearchInput = document.getElementById('userSearchInput');
+            let searchTimeout;
+            userSearchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    loadUsersForSelect(e.target.value);
+                }, 300);
             });
         });
     </script>

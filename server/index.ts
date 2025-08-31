@@ -8,6 +8,7 @@ import specs from './config/swagger.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { getUploadDir, initializeDirectories } from './utils/paths.js'
+import open from 'open'
 
 // 加载环境变量
 dotenv.config()
@@ -42,6 +43,11 @@ app.get('/admin/login', (req: Request, res: Response) => {
 
 // 管理后台页面路由（客户端认证）
 app.get('/admin', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, 'views', 'admin-new.html'))
+})
+
+// 旧版管理后台（保留兼容性）
+app.get('/admin/legacy', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, 'views', 'admin.html'))
 })
 
@@ -102,6 +108,9 @@ app.listen(PORT, () => {
   console.log(`服务器运行在端口 ${PORT}`)
   console.log(`访问地址: http://localhost:${PORT}/admin`)
   console.log(`Swagger UI: http://localhost:${PORT}/api-docs`)
+
+  // 自动打开浏览器访问管理后台
+  open(`http://localhost:${PORT}/admin`)
 })
 
 export default app
