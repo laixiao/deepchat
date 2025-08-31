@@ -137,6 +137,32 @@
             font-size: 13px;
         }
 
+        /* 拖拽上传区域样式 */
+        .workflow-upload-area {
+            transition: all 0.3s ease;
+        }
+
+        .workflow-upload-area:hover {
+            border-color: #409eff !important;
+            background-color: #f0f9ff;
+        }
+
+        .workflow-upload-area.is-dragover {
+            border-color: #67c23a !important;
+            background-color: #f0f9ff;
+            transform: scale(1.02);
+        }
+
+        [data-theme="dark"] .workflow-upload-area:hover {
+            border-color: #409eff !important;
+            background-color: #1a2332;
+        }
+
+        [data-theme="dark"] .workflow-upload-area.is-dragover {
+            border-color: #67c23a !important;
+            background-color: #1a2332;
+        }
+
         /* 响应式设计 */
         @media (max-width: 768px) {
             .main-content {

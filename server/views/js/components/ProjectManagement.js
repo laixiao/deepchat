@@ -157,7 +157,8 @@ const ProjectManagement = {
             <el-dialog
                 v-model="projectDialog.visible"
                 :title="projectDialog.title"
-                width="800px"
+                width="90%"
+                max-width="1000px"
                 @close="resetProjectForm"
                 :close-on-click-modal="false"
             >
@@ -166,7 +167,7 @@ const ProjectManagement = {
                     :model="projectDialog.form"
                     :rules="projectDialog.rules"
                     label-width="100px"
-                    style="max-height: 60vh; overflow-y: auto;"
+                    style="max-height: 70vh; overflow-y: auto; padding-right: 10px;"
                 >
                     <el-form-item label="项目名称" prop="name">
                         <el-input v-model="projectDialog.form.name" />
@@ -281,6 +282,32 @@ const ProjectManagement = {
                     
                     <el-form-item label="工作流配置">
                         <div style="width: 100%;">
+                            <!-- 拖拽上传区域 -->
+                            <div
+                                class="workflow-upload-area"
+                                :class="{ 'is-dragover': isDragOver }"
+                                @drop="handleFileDrop"
+                                @dragover.prevent="handleDragOver"
+                                @dragleave="handleDragLeave"
+                                @click="triggerFileInput"
+                                style="border: 2px dashed #dcdfe6; border-radius: 6px; padding: 20px; text-align: center; margin-bottom: 15px; cursor: pointer; transition: all 0.3s;"
+                            >
+                                <input
+                                    ref="fileInputRef"
+                                    type="file"
+                                    accept=".json,.txt"
+                                    @change="handleFileSelect"
+                                    style="display: none;"
+                                />
+                                <el-icon style="font-size: 28px; color: #8c939d; margin-bottom: 8px;"><Upload /></el-icon>
+                                <div style="color: #606266; font-size: 14px; margin-bottom: 4px;">
+                                    拖拽工作流文件到此处，或点击选择文件
+                                </div>
+                                <div style="color: #909399; font-size: 12px;">
+                                    支持 JSON 格式的工作流配置文件
+                                </div>
+                            </div>
+
                             <div v-for="(workflow, index) in projectDialog.form.workflows" :key="index" class="workflow-container theme-workflow">
                                 <div class="workflow-header">
                                     <span class="workflow-title">工作流 {{ index + 1 }}</span>
@@ -293,11 +320,11 @@ const ProjectManagement = {
                                         删除
                                     </el-button>
                                 </div>
-                                
+
                                 <el-form-item label="名称" :prop="'workflows.' + index + '.name'" style="margin-bottom: 10px;">
                                     <el-input v-model="workflow.name" placeholder="工作流名称" />
                                 </el-form-item>
-                                
+
                                 <el-form-item label="描述" :prop="'workflows.' + index + '.description'" style="margin-bottom: 10px;">
                                     <el-input
                                         v-model="workflow.description"
@@ -306,7 +333,7 @@ const ProjectManagement = {
                                         placeholder="工作流作用描述"
                                     />
                                 </el-form-item>
-                                
+
                                 <el-form-item label="API配置" :prop="'workflows.' + index + '.apiConfig'" style="margin-bottom: 0;">
                                     <el-input
                                         v-model="workflow.apiConfigText"
@@ -322,7 +349,7 @@ const ProjectManagement = {
                                     </div>
                                 </el-form-item>
                             </div>
-                            
+
                             <el-button
                                 type="success"
                                 @click="addWorkflow"
@@ -336,10 +363,22 @@ const ProjectManagement = {
                 </el-form>
                 
                 <template #footer>
-                    <el-button @click="projectDialog.visible = false">取消</el-button>
-                    <el-button type="primary" @click="saveProject" :loading="projectDialog.saving">
-                        保存
-                    </el-button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <el-button
+                            type="warning"
+                            @click="aiAutoFillProject"
+                            :icon="Magic"
+                            :loading="aiAutoFillLoading"
+                        >
+                            AI智能填写
+                        </el-button>
+                        <div style="display: flex; gap: 10px;">
+                            <el-button @click="projectDialog.visible = false">取消</el-button>
+                            <el-button type="primary" @click="saveProject" :loading="projectDialog.saving">
+                                保存
+                            </el-button>
+                        </div>
+                    </div>
                 </template>
             </el-dialog>
         </div>
@@ -355,8 +394,11 @@ const ProjectManagement = {
     const searchQuery = ref('')
     const statusFilter = ref('all')
     const projectFormRef = ref(null)
+    const fileInputRef = ref(null)
     const userOptions = ref([])
     const userSearchLoading = ref(false)
+    const isDragOver = ref(false)
+    const aiAutoFillLoading = ref(false)
 
     // 分页数据
     const pagination = reactive({
@@ -629,6 +671,216 @@ const ProjectManagement = {
       }
     }
 
+    // 拖拽处理函数
+    const handleDragOver = (e) => {
+      e.preventDefault()
+      isDragOver.value = true
+    }
+
+    const handleDragLeave = (e) => {
+      e.preventDefault()
+      isDragOver.value = false
+    }
+
+    const handleFileDrop = (e) => {
+      e.preventDefault()
+      isDragOver.value = false
+
+      const files = e.dataTransfer.files
+      if (files.length > 0) {
+        processWorkflowFile(files[0])
+      }
+    }
+
+    const triggerFileInput = () => {
+      fileInputRef.value?.click()
+    }
+
+    const handleFileSelect = (e) => {
+      const files = e.target.files
+      if (files.length > 0) {
+        processWorkflowFile(files[0])
+      }
+      // 清空文件输入，允许重复选择同一文件
+      e.target.value = ''
+    }
+
+    // 处理工作流文件
+    const processWorkflowFile = async (file) => {
+      try {
+        // 检查文件类型
+        if (
+          !file.name.toLowerCase().endsWith('.json') &&
+          !file.name.toLowerCase().endsWith('.txt')
+        ) {
+          ElMessage.warning('请选择 JSON 或 TXT 格式的文件')
+          return
+        }
+
+        // 读取文件内容
+        const text = await readFileAsText(file)
+
+        try {
+          // 尝试解析为JSON
+          const workflowData = JSON.parse(text)
+
+          // 检查是否是单个工作流对象还是工作流数组
+          if (Array.isArray(workflowData)) {
+            // 工作流数组
+            for (const workflow of workflowData) {
+              addWorkflowFromData(workflow)
+            }
+            ElMessage.success(`成功导入 ${workflowData.length} 个工作流`)
+          } else if (workflowData && typeof workflowData === 'object') {
+            // 单个工作流对象
+            addWorkflowFromData(workflowData)
+            ElMessage.success('成功导入 1 个工作流')
+          } else {
+            ElMessage.error('文件格式不正确，请确保是有效的工作流配置')
+          }
+        } catch (error) {
+          ElMessage.error('文件内容不是有效的 JSON 格式')
+        }
+      } catch (error) {
+        console.error('处理文件失败:', error)
+        ElMessage.error('处理文件失败: ' + error.message)
+      }
+    }
+
+    // 从数据添加工作流
+    const addWorkflowFromData = (data) => {
+      const workflow = {
+        name: data.name || data.title || '未命名工作流',
+        description: data.description || data.desc || '从文件导入的工作流',
+        apiConfig: data.apiConfig || data.config || data,
+        apiConfigText: JSON.stringify(data.apiConfig || data.config || data, null, 2)
+      }
+
+      projectDialog.form.workflows.push(workflow)
+    }
+
+    // 读取文件为文本
+    const readFileAsText = (file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = (e) => resolve(e.target.result)
+        reader.onerror = (e) => reject(new Error('读取文件失败'))
+        reader.readAsText(file, 'UTF-8')
+      })
+    }
+
+    // AI自动填写功能
+    const aiAutoFill = async () => {
+      try {
+        // 检查OpenAI配置
+        const openaiConfig = window.settingsManager.getOpenAIConfig()
+        if (!openaiConfig.apiKey) {
+          ElMessage.warning('请先在设置中配置 OpenAI API Key')
+          return
+        }
+
+        if (projectDialog.form.workflows.length === 0) {
+          ElMessage.warning('请先添加至少一个工作流')
+          return
+        }
+
+        aiAutoFillLoading.value = true
+
+        // 构建提示词
+        const workflowsInfo = projectDialog.form.workflows
+          .map((workflow, index) => {
+            return `工作流 ${index + 1}:
+名称: ${workflow.name || '未填写'}
+描述: ${workflow.description || '未填写'}
+API配置: ${workflow.apiConfigText || '未填写'}`
+          })
+          .join('\n\n')
+
+        const prompt = `请分析以下工作流配置，并为每个工作流自动填写或优化名称和描述字段。请根据API配置的内容来推断工作流的用途和功能。
+
+${workflowsInfo}
+
+请返回JSON格式的结果，包含每个工作流的建议名称和描述：
+{
+  "workflows": [
+    {
+      "name": "建议的工作流名称",
+      "description": "详细的工作流描述，说明其功能和用途"
+    }
+  ]
+}
+
+要求：
+1. 名称要简洁明了，体现工作流的核心功能
+2. 描述要详细说明工作流的作用、输入输出和使用场景
+3. 如果API配置包含URL，请根据URL推断服务类型
+4. 如果已有名称和描述，请优化使其更准确和专业
+5. 返回的工作流数量必须与输入的工作流数量一致`
+
+        // 调用OpenAI API
+        const response = await fetch(`${openaiConfig.baseURL}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${openaiConfig.apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: openaiConfig.model,
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 2000
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error(`OpenAI API 请求失败: ${response.status} ${response.statusText}`)
+        }
+
+        const data = await response.json()
+        const aiResponse = data.choices[0]?.message?.content
+
+        if (!aiResponse) {
+          throw new Error('AI 响应为空')
+        }
+
+        // 解析AI响应
+        try {
+          const result = JSON.parse(aiResponse)
+
+          if (result.workflows && Array.isArray(result.workflows)) {
+            // 应用AI建议
+            result.workflows.forEach((suggestion, index) => {
+              if (index < projectDialog.form.workflows.length) {
+                if (suggestion.name) {
+                  projectDialog.form.workflows[index].name = suggestion.name
+                }
+                if (suggestion.description) {
+                  projectDialog.form.workflows[index].description = suggestion.description
+                }
+              }
+            })
+
+            ElMessage.success('AI 自动填写完成！已优化工作流名称和描述')
+          } else {
+            throw new Error('AI 响应格式不正确')
+          }
+        } catch (parseError) {
+          console.error('解析AI响应失败:', parseError)
+          ElMessage.error('AI 响应格式解析失败，请重试')
+        }
+      } catch (error) {
+        console.error('AI自动填写失败:', error)
+        ElMessage.error('AI 自动填写失败: ' + error.message)
+      } finally {
+        aiAutoFillLoading.value = false
+      }
+    }
+
     // 保存项目
     const saveProject = async () => {
       try {
@@ -752,8 +1004,11 @@ const ProjectManagement = {
       pagination,
       projectDialog,
       projectFormRef,
+      fileInputRef,
       userOptions,
       userSearchLoading,
+      isDragOver,
+      aiAutoFillLoading,
       getStatusText,
       getStatusType,
       fetchProjects,
@@ -772,6 +1027,12 @@ const ProjectManagement = {
       removeWorkflow,
       validateWorkflowJson,
       formatJsonInput,
+      handleDragOver,
+      handleDragLeave,
+      handleFileDrop,
+      triggerFileInput,
+      handleFileSelect,
+      aiAutoFill,
       saveProject,
       deleteProject,
       resetProjectForm,
@@ -784,7 +1045,9 @@ const ProjectManagement = {
       Edit: ElementPlusIconsVue.Edit,
       Delete: ElementPlusIconsVue.Delete,
       Box: ElementPlusIconsVue.Box,
-      Calendar: ElementPlusIconsVue.Calendar
+      Calendar: ElementPlusIconsVue.Calendar,
+      Upload: ElementPlusIconsVue.Upload,
+      Magic: ElementPlusIconsVue.Magic
     }
   }
 }
