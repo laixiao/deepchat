@@ -44,15 +44,6 @@ const router = createRouter({
       },
       children: [
         {
-          path: 'provider/:providerId?',
-          name: 'settings-provider',
-          component: () => import('@/components/settings/ModelProviderSettings.vue'),
-          meta: {
-            titleKey: 'routes.settings-provider',
-            icon: 'lucide:cloud-cog'
-          }
-        },
-        {
           path: 'common',
           name: 'settings-common',
           component: () => import('@/components/settings/CommonSettings.vue'),
@@ -61,6 +52,16 @@ const router = createRouter({
             icon: 'lucide:bolt'
           }
         },
+        {
+          path: 'provider/:providerId?',
+          name: 'settings-provider',
+          component: () => import('@/components/settings/ModelProviderSettings.vue'),
+          meta: {
+            titleKey: 'routes.settings-provider',
+            icon: 'lucide:cloud-cog'
+          }
+        },
+
         {
           path: 'mcp-market',
           name: 'settings-mcp-market',

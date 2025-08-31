@@ -40,94 +40,6 @@
             </div>
           </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-            <!-- 显存使用情况 -->
-            <div class="bg-muted/50 rounded-lg p-4">
-              <div class="flex justify-between items-center mb-2">
-                <h3 class="font-medium">{{ t('gpuInfo.memory') }}</h3>
-                <span class="text-sm font-mono">{{ formatBytes(gpuData[index - 1].memoryUsed) }} / {{ formatBytes(gpuData[index - 1].memoryTotal) }}</span>
-              </div>
-              <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
-                <div 
-                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
-                  :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].memoryUtilization >= GPU_MEMORY_THRESHOLD }"
-                  :style="{ width: gpuData[index - 1].memoryUtilization + '%' }"
-                ></div>
-              </div>
-              <!-- 显存使用率警告 -->
-              <div v-if="gpuData[index - 1].memoryUtilization >= GPU_MEMORY_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
-                <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
-                <span>{{ t('gpuInfo.highMemoryUsageWarning', { threshold: gpuData[index - 1].memoryUtilization.toFixed(1) }) }}</span>
-              </div>
-            </div>
-
-            <!-- GPU使用率 -->
-            <div class="bg-muted/50 rounded-lg p-4">
-              <div class="flex justify-between items-center mb-2">
-                <h3 class="font-medium">{{ t('gpuInfo.gpuUtilization') }}</h3>
-                <span class="text-sm font-mono">{{ gpuData[index - 1].gpuUtilization }}%</span>
-              </div>
-              <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
-                <div 
-                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
-                  :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].gpuUtilization >= GPU_UTILIZATION_THRESHOLD }"
-                  :style="{ width: gpuData[index - 1].gpuUtilization + '%' }"
-                ></div>
-              </div>
-              <!-- GPU使用率警告 -->
-              <div v-if="gpuData[index - 1].gpuUtilization >= GPU_UTILIZATION_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
-                <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
-                <span>{{ t('gpuInfo.highGpuUtilizationWarning', { threshold: gpuData[index - 1].gpuUtilization }) }}</span>
-              </div>
-            </div>
-
-            <!-- 温度 -->
-            <div class="bg-muted/50 rounded-lg p-4">
-              <div class="flex justify-between items-center">
-                <div class="flex items-center">
-                  <Icon icon="lucide:thermometer" class="w-4 h-4 mr-2 text-muted-foreground" />
-                  <h3 class="font-medium">{{ t('gpuInfo.temperature') }}</h3>
-                </div>
-                <span class="text-sm font-mono">{{ gpuData[index - 1].temperature }}°C</span>
-              </div>
-              <div class="w-full bg-secondary rounded-full h-2.5 mt-2 overflow-hidden">
-                <div 
-                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
-                  :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].temperature >= GPU_TEMPERATURE_THRESHOLD }"
-                  :style="{ width: (gpuData[index - 1].temperature / 100) * 100 + '%' }"
-                ></div>
-              </div>
-              <!-- 温度警告 -->
-              <div v-if="gpuData[index - 1].temperature >= GPU_TEMPERATURE_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
-                <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
-                <span>{{ t('gpuInfo.highTemperatureWarning', { threshold: gpuData[index - 1].temperature }) }}</span>
-              </div>
-            </div>
-
-            <!-- 功耗 -->
-            <div class="bg-muted/50 rounded-lg p-4">
-              <div class="flex justify-between items-center">
-                <div class="flex items-center">
-                  <Icon icon="lucide:zap" class="w-4 h-4 mr-2 text-muted-foreground" />
-                  <h3 class="font-medium">{{ t('gpuInfo.power') }}</h3>
-                </div>
-                <span class="text-sm font-mono">{{ gpuData[index - 1].powerDraw }}W / {{ gpuData[index - 1].powerLimit }}W</span>
-              </div>
-              <div class="w-full bg-secondary rounded-full h-2.5 mt-2 overflow-hidden">
-                <div 
-                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
-                  :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].powerUtilization >= POWER_UTILIZATION_THRESHOLD }"
-                  :style="{ width: gpuData[index - 1].powerUtilization + '%' }"
-                ></div>
-              </div>
-              <!-- 功耗警告 -->
-              <div v-if="gpuData[index - 1].powerUtilization >= POWER_UTILIZATION_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
-                <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
-                <span>{{ t('gpuInfo.highPowerUsageWarning', { threshold: gpuData[index - 1].powerUtilization.toFixed(1) }) }}</span>
-              </div>
-            </div>
-          </div>
-
           <!-- 详细信息 -->
           <div class="mt-6 pt-4 border-t">
             <h3 class="font-medium mb-3">{{ t('gpuInfo.details') }}</h3>
@@ -152,8 +64,64 @@
           </div>
         </div>
         
+        <!-- 显卡使用情况 -->
+        <div class="mt-8 pt-4 border-t">
+          <h3 class="font-medium mb-3">{{ t('gpuInfo.gpuUsage') }}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div v-for="index in gpuCount" :key="index" class="bg-muted/50 rounded-lg p-4">
+              <div class="flex justify-between items-center mb-2">
+                <h4 class="font-medium">{{ gpuData[index - 1].name || t('gpuInfo.gpu') + ' ' + (index + 1) }}</h4>
+                <span class="text-sm font-mono">{{ gpuData[index - 1].gpuUtilization }}%</span>
+              </div>
+              <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                <div 
+                  class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out" 
+                  :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].gpuUtilization >= GPU_UTILIZATION_THRESHOLD }"
+                  :style="{ width: gpuData[index - 1].gpuUtilization + '%' }"
+                ></div>
+              </div>
+              
+              <!-- 显存使用情况 -->
+              <div class="mt-3 pt-3 border-t border-muted">
+                <div class="flex justify-between items-center mb-2">
+                  <div class="flex items-center">
+                    <Icon icon="lucide:memory-stick" class="w-4 h-4 mr-2 text-muted-foreground" />
+                    <h4 class="font-medium text-sm">{{ t('gpuInfo.memory') }}</h4>
+                  </div>
+                  <span class="text-sm font-mono">{{ formatBytes(gpuData[index - 1].memoryUsed) }} / {{ formatBytes(gpuData[index - 1].memoryTotal) }}</span>
+                </div>
+                <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                  <div
+                    class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out"
+                    :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].memoryUtilization >= GPU_MEMORY_THRESHOLD }"
+                    :style="{ width: gpuData[index - 1].memoryUtilization + '%' }"
+                  ></div>
+                </div>
+              </div>
+              
+              <!-- 温度 -->
+              <div class="mt-3 pt-3 border-t border-muted">
+                <div class="flex justify-between items-center mb-2">
+                  <div class="flex items-center">
+                    <Icon icon="lucide:thermometer" class="w-4 h-4 mr-2 text-muted-foreground" />
+                    <h4 class="font-medium text-sm">{{ t('gpuInfo.temperature') }}</h4>
+                  </div>
+                  <span class="text-sm font-mono">{{ gpuData[index - 1].temperature }}°C</span>
+                </div>
+                <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
+                  <div
+                    class="bg-primary h-2.5 rounded-full transition-all duration-3000 ease-out"
+                    :class="{ 'bg-red-500 animate-pulse': gpuData[index - 1].temperature >= GPU_TEMPERATURE_THRESHOLD }"
+                    :style="{ width: (gpuData[index - 1].temperature / 100) * 100 + '%' }"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <!-- 硬盘使用情况 -->
-        <div class="mt-6 pt-4 border-t">
+        <div class="mt-8 pt-4 border-t">
           <h3 class="font-medium mb-3">{{ t('gpuInfo.diskUsage') }}</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div v-for="(disk, diskIndex) in diskData" :key="diskIndex" class="bg-muted/50 rounded-lg p-4">
@@ -195,23 +163,13 @@
         </div>
 
 
-        <!-- CPU使用率 -->
-        <div class="bg-card border rounded-lg p-5 mt-6 mb-6 shadow-sm">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center">
-              <div class="bg-primary/10 p-2 rounded-lg mr-3">
-                <Icon icon="lucide:cpu" class="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h2 class="font-bold text-lg">{{ t('gpuInfo.cpuUtilization') }}</h2>
-              </div>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-1 gap-4">
+        <!-- CPU使用情况 -->
+        <div class="mt-8 pt-4 border-t">
+          <h3 class="font-medium mb-3">{{ t('gpuInfo.cpuUsage') }}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-muted/50 rounded-lg p-4">
               <div class="flex justify-between items-center mb-2">
-                <h3 class="font-medium">{{ t('gpuInfo.utilization') }}</h3>
+                <h4 class="font-medium">{{ t('gpuInfo.utilization') }}</h4>
                 <span class="text-sm font-mono">{{ cpuUsage.toFixed(1) }}%</span>
               </div>
               <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
@@ -221,37 +179,18 @@
                   :style="{ width: cpuUsage + '%' }"
                 ></div>
               </div>
-              <div class="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>{{ cpuUsage.toFixed(1) }}%</span>
-                <span>{{ t('gpuInfo.utilization') }}</span>
-              </div>
-              <!-- CPU使用率警告 -->
-              <div v-if="cpuUsage >= CPU_UTILIZATION_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
-                <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
-                <span>{{ t('gpuInfo.highCpuUsageWarning', { threshold: cpuUsage.toFixed(1) }) }}</span>
-              </div>
             </div>
           </div>
         </div>
 
-        <!-- 内存使用率 -->
-        <div class="bg-card border rounded-lg p-5 mt-6 mb-6 shadow-sm">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center">
-              <div class="bg-primary/10 p-2 rounded-lg mr-3">
-                <Icon icon="lucide:memory-stick" class="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h2 class="font-bold text-lg">{{ t('gpuInfo.memoryUtilization') }}</h2>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4">
+        <!-- 内存使用情况 -->
+        <div class="mt-8 pt-4 border-t">
+          <h3 class="font-medium mb-3">{{ t('gpuInfo.memoryUsage') }}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-muted/50 rounded-lg p-4">
               <div class="flex justify-between items-center mb-2">
-                <h3 class="font-medium">{{ t('gpuInfo.utilization') }}</h3>
-                <span class="text-sm font-mono">{{ memoryUsage.toFixed(1) }}%</span>
+                <h4 class="font-medium">{{ t('gpuInfo.utilization') }}</h4>
+                <span class="text-sm font-mono">{{ formatBytes(getUsedMemory()) }} / {{ formatBytes(getTotalMemory()) }}</span>
               </div>
               <div class="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
                 <div
@@ -259,15 +198,6 @@
                   :class="{ 'bg-red-500 animate-pulse': memoryUsage >= MEMORY_UTILIZATION_THRESHOLD }"
                   :style="{ width: memoryUsage + '%' }"
                 ></div>
-              </div>
-              <div class="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>{{ memoryUsage.toFixed(1) }}%</span>
-                <span>{{ t('gpuInfo.utilization') }}</span>
-              </div>
-              <!-- 内存使用率警告 -->
-              <div v-if="memoryUsage >= MEMORY_UTILIZATION_THRESHOLD" class="mt-2 p-2 bg-red-500/20 rounded text-red-500 text-sm flex items-center animate-pulse">
-                <Icon icon="lucide:alert-triangle" class="w-4 h-4 mr-1" />
-                <span>{{ t('gpuInfo.highSystemMemoryUsageWarning', { threshold: memoryUsage.toFixed(1) }) }}</span>
               </div>
             </div>
           </div>
@@ -308,6 +238,7 @@ const gpuCount = ref(0)
 // CPU、内存和硬盘监控数据
 const cpuUsage = ref<number>(0)
 const memoryUsage = ref<number>(0)
+const totalMemory = ref<number>(0)
 const diskData = ref<Array<{ drive: string; total: number; free: number; used: number; utilization: number; performance?: number }>>([])
 
 // GPU内存使用率阈值
@@ -320,6 +251,16 @@ const formatBytes = (bytes: number, decimals = 2): string => {
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
+}
+
+// 计算已使用的内存量（字节）
+const getUsedMemory = (): number => {
+  return (memoryUsage.value / 100) * totalMemory.value
+}
+
+// 获取总内存
+const getTotalMemory = (): number => {
+  return totalMemory.value
 }
 
 // 检查GPU支持
@@ -358,6 +299,9 @@ const fetchGPUInfo = async () => {
     // 获取内存使用率
     const memoryUsageResponse = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getMemoryUsage')
 
+    // 获取设备信息（包括总内存）
+    const deviceInfoResponse = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getDeviceInfo')
+
     // 获取各磁盘使用情况
     const diskSpaceResponse = await window.electron.ipcRenderer.invoke('presenter:call', 'devicePresenter', 'getDisksSpace')
 
@@ -369,6 +313,9 @@ const fetchGPUInfo = async () => {
 
     // 更新内存使用率（计算百分比）
     memoryUsage.value = (memoryUsageResponse.used / memoryUsageResponse.total) * 100
+    
+    // 更新总内存
+    totalMemory.value = deviceInfoResponse.totalMemory
     
     // 合并磁盘空间和性能数据
     const mergedDiskData = diskSpaceResponse.map(disk => {

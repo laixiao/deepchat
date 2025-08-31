@@ -248,37 +248,6 @@ const handleViewResources = async (serverName: string) => {
       </div>
 
       <div v-else class="space-y-4 py-3">
-        <!-- 内置服务 -->
-        <div v-if="inMemoryServers.length > 0">
-          <div class="flex items-center space-x-2 mb-3">
-            <Icon icon="lucide:shield-check" class="h-4 w-4 text-blue-600" />
-            <h3 class="text-sm font-semibold text-foreground">
-              {{ t('settings.mcp.builtInServers') }}
-            </h3>
-            <div class="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
-              {{ inMemoryServers.length }}
-            </div>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <McpServerCard
-              v-for="server in inMemoryServers"
-              :key="server.name"
-              :server="server"
-              :is-built-in="true"
-              :is-loading="mcpStore.serverLoadingStates[server.name]"
-              :disabled="mcpStore.configLoading"
-              :tools-count="getServerToolsCount(server.name)"
-              :prompts-count="getServerPromptsCount(server.name)"
-              :resources-count="getServerResourcesCount(server.name)"
-              @toggle="handleToggleServer(server.name)"
-              @toggle-default="handleToggleDefaultServer(server.name)"
-              @edit="openEditServerDialog(server.name)"
-              @view-tools="handleViewTools(server.name)"
-              @view-prompts="handleViewPrompts(server.name)"
-              @view-resources="handleViewResources(server.name)"
-            />
-          </div>
-        </div>
 
         <!-- 自定义服务 -->
         <div v-if="regularServers.length > 0">
@@ -306,6 +275,38 @@ const handleViewResources = async (serverName: string) => {
               @toggle-default="handleToggleDefaultServer(server.name)"
               @edit="openEditServerDialog(server.name)"
               @remove="handleRemoveServer(server.name)"
+              @view-tools="handleViewTools(server.name)"
+              @view-prompts="handleViewPrompts(server.name)"
+              @view-resources="handleViewResources(server.name)"
+            />
+          </div>
+        </div>
+
+        <!-- 内置服务 -->
+        <div v-if="inMemoryServers.length > 0" >
+          <div class="flex items-center space-x-2 mb-3">
+            <Icon icon="lucide:shield-check" class="h-4 w-4 text-blue-600" />
+            <h3 class="text-sm font-semibold text-foreground">
+              {{ t('settings.mcp.builtInServers') }}
+            </h3>
+            <div class="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+              {{ inMemoryServers.length }}
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <McpServerCard
+              v-for="server in inMemoryServers"
+              :key="server.name"
+              :server="server"
+              :is-built-in="true"
+              :is-loading="mcpStore.serverLoadingStates[server.name]"
+              :disabled="mcpStore.configLoading"
+              :tools-count="getServerToolsCount(server.name)"
+              :prompts-count="getServerPromptsCount(server.name)"
+              :resources-count="getServerResourcesCount(server.name)"
+              @toggle="handleToggleServer(server.name)"
+              @toggle-default="handleToggleDefaultServer(server.name)"
+              @edit="openEditServerDialog(server.name)"
               @view-tools="handleViewTools(server.name)"
               @view-prompts="handleViewPrompts(server.name)"
               @view-resources="handleViewResources(server.name)"
