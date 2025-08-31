@@ -1,5 +1,5 @@
 // 主应用
-const { createApp, ref, reactive, onMounted } = Vue
+const { createApp, ref, reactive, computed, onMounted } = Vue
 const { ElMessage, ElMessageBox } = ElementPlus
 
 // 创建Vue应用
@@ -37,6 +37,21 @@ const app = createApp({
 
     // 可用模型列表
     const availableModels = ref([])
+
+    // 模型选择器对话框数据
+    const modelSelectorDialog = reactive({
+      visible: false,
+      loading: false,
+      searchQuery: '',
+      activeTab: 'all',
+      selectedModel: null,
+      owners: [],
+      pagination: {
+        page: 1,
+        limit: 20,
+        total: 0
+      }
+    })
 
     // 处理标签页切换
     const handleTabChange = (tabName) => {
@@ -210,6 +225,219 @@ const app = createApp({
       }
     }
 
+    // 打开模型选择器
+    const openModelSelector = async () => {
+      if (!settingsDialog.form.openaiApiKey) {
+        ElMessage.warning('请先配置OpenAI API Key')
+        return
+      }
+
+      modelSelectorDialog.visible = true
+      await loadModelsForSelector()
+    }
+
+    // 为选择器加载模型
+    const loadModelsForSelector = async () => {
+      modelSelectorDialog.loading = true
+
+      try {
+        const config = {
+          baseURL: settingsDialog.form.openaiBaseUrl,
+          apiKey: settingsDialog.form.openaiApiKey
+        }
+
+        const result = await testOpenAIConnectionWithConfig(config)
+        if (result.success && result.models) {
+          // 不过滤模型，显示所有模型
+          availableModels.value = result.models.sort((a, b) => a.id.localeCompare(b.id))
+
+          // 根据模型前缀分组，添加调试信息
+          console.log('原始模型数据样本:', result.models.slice(0, 5)) // 打印前5个模型的数据结构
+          console.log('模型总数:', result.models.length)
+
+          // 提取所有模型前缀
+          const allPrefixes = result.models
+            .map((m) => {
+              const modelId = m.id || ''
+              // 提取前缀（到第一个 '-' 或 '_' 为止）
+              const prefix = modelId.split(/[-_]/)[0]
+              console.log(`模型 ${modelId} 的前缀:`, prefix) // 详细日志
+              return prefix
+            })
+            .filter(Boolean) // 过滤掉空值
+
+          const uniquePrefixes = [...new Set(allPrefixes)]
+          console.log('所有模型前缀:', allPrefixes.slice(0, 10)) // 显示前10个
+          console.log('去重后的前缀:', uniquePrefixes)
+
+          // 计算每个前缀的模型数量并排序
+          const prefixCounts = uniquePrefixes.map((prefix) => {
+            const count = result.models.filter((model) => {
+              const modelId = model.id || ''
+              const modelPrefix = modelId.split(/[-_]/)[0]
+              return modelPrefix === prefix
+            }).length
+            return { prefix, count }
+          })
+
+          // 按数量降序排序（数量多的在前），数量相同时按字母顺序
+          prefixCounts.sort((a, b) => {
+            if (b.count !== a.count) {
+              return b.count - a.count // 数量降序
+            }
+            return a.prefix.localeCompare(b.prefix) // 字母升序
+          })
+
+          // 提取排序后的前缀列表
+          modelSelectorDialog.owners = prefixCounts.map((item) => item.prefix)
+
+          // 输出排序结果
+          console.log('前缀按数量排序结果:', prefixCounts)
+
+          // 如果没有找到前缀，添加默认选项
+          if (modelSelectorDialog.owners.length === 0) {
+            console.log('没有找到模型前缀，使用默认选项')
+            modelSelectorDialog.owners = ['gpt', 'text', 'davinci']
+          }
+
+          // 更新分页信息
+          modelSelectorDialog.pagination.total = result.models.length
+        } else {
+          ElMessage.error('加载模型失败: ' + (result.message || '未知错误'))
+        }
+      } catch (error) {
+        console.error('加载模型列表失败:', error)
+        ElMessage.error('加载模型列表失败: ' + error.message)
+      } finally {
+        modelSelectorDialog.loading = false
+      }
+    }
+
+    // 计算过滤后的模型列表
+    const filteredModels = computed(() => {
+      let models = availableModels.value
+
+      // 按搜索关键词过滤
+      if (modelSelectorDialog.searchQuery) {
+        const query = modelSelectorDialog.searchQuery.toLowerCase()
+        models = models.filter(
+          (model) =>
+            model.id.toLowerCase().includes(query) ||
+            (model.description && model.description.toLowerCase().includes(query))
+        )
+      }
+
+      // 按选中的tab过滤模型前缀
+      if (modelSelectorDialog.activeTab !== 'all') {
+        models = models.filter((model) => {
+          const modelId = model.id || ''
+          const prefix = modelId.split(/[-_]/)[0]
+          return prefix === modelSelectorDialog.activeTab
+        })
+      }
+
+      // 分页
+      const start = (modelSelectorDialog.pagination.page - 1) * modelSelectorDialog.pagination.limit
+      const end = start + modelSelectorDialog.pagination.limit
+
+      // 更新总数
+      modelSelectorDialog.pagination.total = models.length
+
+      return models.slice(start, end)
+    })
+
+    // 处理模型搜索
+    const handleModelSearch = () => {
+      modelSelectorDialog.pagination.page = 1
+    }
+
+    // 处理模型选择器tab切换
+    const handleModelTabChange = (tabName) => {
+      modelSelectorDialog.activeTab = tabName
+      modelSelectorDialog.pagination.page = 1
+    }
+
+    // 刷新模型列表
+    const refreshModelList = () => {
+      loadModelsForSelector()
+    }
+
+    // 选择模型
+    const selectModel = (model) => {
+      modelSelectorDialog.selectedModel = model
+    }
+
+    // 确认模型选择
+    const confirmModelSelection = () => {
+      if (modelSelectorDialog.selectedModel) {
+        settingsDialog.form.openaiModel = modelSelectorDialog.selectedModel.id
+        modelSelectorDialog.visible = false
+        ElMessage.success(`已选择模型: ${modelSelectorDialog.selectedModel.id}`)
+      }
+    }
+
+    // 重置模型选择器
+    const resetModelSelector = () => {
+      modelSelectorDialog.searchQuery = ''
+      modelSelectorDialog.activeTab = 'all'
+      modelSelectorDialog.selectedModel = null
+      modelSelectorDialog.pagination.page = 1
+    }
+
+    // 获取总模型数量
+    const getTotalModelCount = () => {
+      return availableModels.value.length
+    }
+
+    // 获取指定前缀的模型数量
+    const getModelCountByOwner = (prefix) => {
+      return availableModels.value.filter((model) => {
+        const modelId = model.id || ''
+        const modelPrefix = modelId.split(/[-_]/)[0]
+        return modelPrefix === prefix
+      }).length
+    }
+
+    // 处理模型分页大小变化
+    const handleModelPageSizeChange = (size) => {
+      modelSelectorDialog.pagination.limit = size
+      modelSelectorDialog.pagination.page = 1
+    }
+
+    // 处理模型分页变化
+    const handleModelPageChange = (page) => {
+      modelSelectorDialog.pagination.page = page
+    }
+
+    // 获取模型前缀标签类型
+    const getOwnerTagType = (prefix) => {
+      if (!prefix) return ''
+
+      const typeMap = {
+        gpt: 'success', // GPT系列 - 绿色
+        claude: 'primary', // Claude系列 - 蓝色
+        text: 'info', // Text系列 - 灰色
+        davinci: 'warning', // Davinci系列 - 橙色
+        curie: 'warning', // Curie系列 - 橙色
+        babbage: 'info', // Babbage系列 - 灰色
+        ada: 'info', // Ada系列 - 灰色
+        embedding: 'primary', // 嵌入模型 - 蓝色
+        whisper: 'success', // Whisper系列 - 绿色
+        dall: 'danger', // DALL-E系列 - 红色
+        tts: 'warning' // TTS系列 - 橙色
+      }
+
+      // Element Plus Tag 支持的类型: primary, success, info, warning, danger
+      // 如果没有匹配的类型，返回空字符串（默认样式）
+      return typeMap[prefix.toLowerCase()] || ''
+    }
+
+    // 格式化模型创建时间
+    const formatModelDate = (timestamp) => {
+      if (!timestamp) return '-'
+      return new Date(timestamp * 1000).toLocaleString('zh-CN')
+    }
+
     // 保存设置
     const saveSettings = async () => {
       try {
@@ -323,6 +551,8 @@ const app = createApp({
       settingsDialog,
       settingsFormRef,
       availableModels,
+      modelSelectorDialog,
+      filteredModels,
       userManagement,
       fileManagement,
       projectManagement,
@@ -336,6 +566,20 @@ const app = createApp({
       handleElementThemeChange,
       testOpenAIConnection,
       loadAvailableModels,
+      openModelSelector,
+      loadModelsForSelector,
+      handleModelSearch,
+      handleModelTabChange,
+      refreshModelList,
+      selectModel,
+      confirmModelSelection,
+      resetModelSelector,
+      handleModelPageSizeChange,
+      handleModelPageChange,
+      getTotalModelCount,
+      getModelCountByOwner,
+      getOwnerTagType,
+      formatModelDate,
       saveSettings,
       resetSettingsForm
     }

@@ -75,6 +75,12 @@ class ThemeManager {
 
       // 更新所有对话框的样式
       this.updateDialogStyles()
+
+      // 更新所有下拉框的样式
+      this.updateSelectStyles()
+
+      // 更新所有上传组件的样式
+      this.updateUploadStyles()
     }, 0)
   }
 
@@ -97,6 +103,28 @@ class ThemeManager {
       dialog.style.display = 'none'
       dialog.offsetHeight // 触发重排
       dialog.style.display = ''
+    })
+  }
+
+  // 更新下拉框样式
+  updateSelectStyles() {
+    const selects = document.querySelectorAll('.el-select-dropdown')
+    selects.forEach((select) => {
+      // 强制重新计算样式
+      select.style.display = 'none'
+      select.offsetHeight // 触发重排
+      select.style.display = ''
+    })
+  }
+
+  // 更新上传组件样式
+  updateUploadStyles() {
+    const uploads = document.querySelectorAll('.el-upload-dragger')
+    uploads.forEach((upload) => {
+      // 强制重新计算样式
+      upload.style.display = 'none'
+      upload.offsetHeight // 触发重排
+      upload.style.display = ''
     })
   }
 

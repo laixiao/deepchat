@@ -12,7 +12,7 @@ import { AuthRequest } from '../middleware/auth.middleware.js'
 
 /**
  * @swagger
- * /api/admin/projects:
+ * /admin/projects:
  *   get:
  *     summary: 获取所有项目列表
  *     tags: [Projects]
@@ -152,7 +152,7 @@ export const getProjectInfo = async (req: Request, res: Response): Promise<void>
 
 /**
  * @swagger
- * /api/admin/projects:
+ * /admin/projects:
  *   post:
  *     summary: 创建新项目
  *     tags: [Projects]

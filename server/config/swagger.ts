@@ -8,7 +8,7 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'DeepChat API',
+      title: 'QinCore API',
       version: '1.0.0',
       description: 'DeepChat 后端 API 文档'
     },

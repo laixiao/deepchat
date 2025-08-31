@@ -406,6 +406,231 @@
             color: var(--text-regular);
         }
 
+        /* 文件上传组件主题适配 */
+        [data-theme="dark"] .el-upload {
+            --el-upload-dragger-bg-color: var(--card-bg);
+            --el-upload-dragger-border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .el-upload-dragger {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .el-upload-dragger:hover {
+            border-color: #409eff !important;
+        }
+
+        [data-theme="dark"] .el-upload__text {
+            color: var(--text-regular) !important;
+        }
+
+        [data-theme="dark"] .el-upload__tip {
+            color: var(--text-secondary) !important;
+        }
+
+        [data-theme="dark"] .el-upload-list {
+            background-color: var(--card-bg);
+        }
+
+        [data-theme="dark"] .el-upload-list__item {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-upload-list__item:hover {
+            background-color: var(--table-row-hover);
+        }
+
+        /* 下拉框选项主题适配 */
+        [data-theme="dark"] .el-select-dropdown__item.is-selected {
+            background-color: #409eff;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .el-select-dropdown__item.is-disabled {
+            color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .el-select__input {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .el-select .el-input__wrapper {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+        }
+
+        [data-theme="dark"] .el-select .el-input__wrapper:hover {
+            border-color: #409eff;
+        }
+
+        [data-theme="dark"] .el-select .el-input__wrapper.is-focus {
+            border-color: #409eff;
+        }
+
+        /* 表格间隔行颜色主题适配 */
+        [data-theme="dark"] .el-table--striped .el-table__body tr.el-table__row--striped td {
+            background-color: var(--table-stripe-bg);
+        }
+
+        [data-theme="dark"] .el-table__body tr:hover > td {
+            background-color: var(--table-row-hover) !important;
+        }
+
+        /* 工作流容器主题适配 */
+        [data-theme="dark"] .workflow-container {
+            background-color: var(--table-header-bg);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .workflow-header {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .workflow-title {
+            color: var(--text-primary);
+        }
+
+        /* JSON编辑器主题适配 */
+        [data-theme="dark"] .json-editor {
+            background-color: var(--input-bg) !important;
+            border-color: var(--input-border) !important;
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .json-editor:focus {
+            border-color: #409eff !important;
+        }
+
+        /* 头像组件主题适配 */
+        [data-theme="dark"] .el-avatar {
+            background-color: #409eff;
+            color: #ffffff;
+        }
+
+        /* 用户选择下拉框自定义样式 */
+        .user-select-dropdown {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .user-select-dropdown .el-select-dropdown__item {
+            height: auto;
+            padding: 8px 20px;
+            line-height: 1.4;
+        }
+
+        .user-select-dropdown .el-select-dropdown__item:hover {
+            background-color: var(--table-row-hover);
+        }
+
+        [data-theme="dark"] .user-select-dropdown {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .user-select-dropdown .el-select-dropdown__item {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .user-select-dropdown .el-select-dropdown__item:hover {
+            background-color: var(--table-row-hover);
+        }
+
+        [data-theme="dark"] .user-select-dropdown .el-select-dropdown__item.is-selected {
+            background-color: #409eff;
+            color: #ffffff;
+        }
+
+        /* 文件上传组件样式类 */
+        .theme-upload .upload-icon {
+            font-size: 67px;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .theme-upload .upload-text {
+            color: var(--text-regular);
+            margin-top: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .theme-upload .upload-tip {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-top: 5px;
+            transition: color 0.3s ease;
+        }
+
+        [data-theme="dark"] .theme-upload .upload-icon {
+            color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .theme-upload .upload-text {
+            color: var(--text-regular);
+        }
+
+        [data-theme="dark"] .theme-upload .upload-tip {
+            color: var(--text-secondary);
+        }
+
+        /* 工作流容器主题样式类 */
+        .theme-workflow {
+            background-color: var(--table-header-bg);
+            border-color: var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .theme-workflow .workflow-header {
+            color: var(--text-primary);
+        }
+
+        .theme-workflow .workflow-title {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        [data-theme="dark"] .theme-workflow {
+            background-color: var(--table-header-bg);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .theme-workflow .workflow-header {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .theme-workflow .workflow-title {
+            color: var(--text-primary);
+        }
+
+        /* 模型选择器主题适配 */
+        .model-selector-dialog .el-table {
+            --el-table-bg-color: var(--card-bg);
+            --el-table-tr-bg-color: var(--card-bg);
+            --el-table-header-bg-color: var(--table-header-bg);
+            --el-table-row-hover-bg-color: var(--table-row-hover);
+            --el-table-current-row-bg-color: var(--table-row-hover);
+            --el-table-stripe-bg-color: var(--table-stripe-bg);
+            --el-table-border-color: var(--border-color);
+            --el-table-text-color: var(--text-primary);
+            --el-table-header-text-color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .model-selector-dialog .el-table {
+            background-color: var(--card-bg);
+        }
+
+        [data-theme="dark"] .model-selector-dialog .el-table__body tr:hover > td {
+            background-color: var(--table-row-hover) !important;
+        }
+
+        [data-theme="dark"] .model-selector-dialog .el-table__body tr.current-row > td {
+            background-color: var(--table-row-hover) !important;
+        }
+
         /* 动画效果 */
         .fade-enter-active,
         .fade-leave-active {
@@ -558,41 +783,31 @@
                     </el-form-item>
 
                     <el-form-item label="默认模型" prop="openaiModel">
-                        <el-select
-                            v-model="settingsDialog.form.openaiModel"
-                            placeholder="选择默认模型"
-                            style="width: 100%"
-                            filterable
-                            :loading="settingsDialog.loadingModels"
-                            @focus="loadAvailableModels"
-                            clearable
-                        >
-                            <!-- 动态加载的模型 -->
-                            <el-option-group v-if="availableModels.length > 0" label="可用模型">
-                                <el-option
-                                    v-for="model in availableModels"
-                                    :key="model.id"
-                                    :label="model.id"
-                                    :value="model.id"
-                                >
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span>{{ model.id }}</span>
-                                        <el-tag v-if="model.owned_by" size="small" type="info">{{ model.owned_by }}</el-tag>
-                                    </div>
-                                </el-option>
-                            </el-option-group>
-
-                            <!-- 默认选项 -->
-                            <el-option-group label="常用模型">
-                                <el-option label="gpt-3.5-turbo" value="gpt-3.5-turbo" />
-                                <el-option label="gpt-4" value="gpt-4" />
-                                <el-option label="gpt-4-turbo" value="gpt-4-turbo" />
-                                <el-option label="gpt-4o" value="gpt-4o" />
-                                <el-option label="gpt-4o-mini" value="gpt-4o-mini" />
-                            </el-option-group>
-                        </el-select>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <el-input
+                                v-model="settingsDialog.form.openaiModel"
+                                placeholder="选择或输入模型名称"
+                                style="flex: 1;"
+                                readonly
+                                @click="openModelSelector"
+                            >
+                                <template #suffix>
+                                    <el-icon style="cursor: pointer;" @click="openModelSelector">
+                                        <Search />
+                                    </el-icon>
+                                </template>
+                            </el-input>
+                            <el-button
+                                type="primary"
+                                :icon="List"
+                                @click="openModelSelector"
+                                :loading="settingsDialog.loadingModels"
+                            >
+                                选择模型
+                            </el-button>
+                        </div>
                         <div style="font-size: 12px; color: #909399; margin-top: 5px;">
-                            点击下拉框可自动加载可用模型列表，显示模型所有者信息
+                            点击"选择模型"按钮打开模型选择器，支持搜索和筛选
                         </div>
                     </el-form-item>
 
@@ -633,6 +848,153 @@
                 <el-button @click="settingsDialog.visible = false">取消</el-button>
                 <el-button type="primary" @click="saveSettings" :loading="settingsDialog.saving">
                     保存设置
+                </el-button>
+            </template>
+        </el-dialog>
+
+        <!-- 模型选择器对话框 -->
+        <el-dialog
+            v-model="modelSelectorDialog.visible"
+            title="选择AI模型"
+            width="800px"
+            @close="resetModelSelector"
+            :close-on-click-modal="false"
+            class="model-selector-dialog"
+        >
+            <div style="margin-bottom: 20px;">
+                <el-row :gutter="16" style="margin-bottom: 16px;">
+                    <el-col :span="18">
+                        <el-input
+                            v-model="modelSelectorDialog.searchQuery"
+                            placeholder="搜索模型名称..."
+                            clearable
+                            @input="handleModelSearch"
+                        >
+                            <template #prefix>
+                                <el-icon><Search /></el-icon>
+                            </template>
+                        </el-input>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-button
+                            type="primary"
+                            :icon="Refresh"
+                            @click="refreshModelList"
+                            :loading="modelSelectorDialog.loading"
+                            style="width: 100%;"
+                        >
+                            刷新模型列表
+                        </el-button>
+                    </el-col>
+                </el-row>
+
+                <!-- 提供商标签页 -->
+                <el-tabs
+                    v-model="modelSelectorDialog.activeTab"
+                    @tab-change="handleModelTabChange"
+                    type="card"
+                >
+                    <el-tab-pane label="所有模型" name="all">
+                        <template #label>
+                            <span>
+                                <el-icon><Grid /></el-icon>
+                                所有模型 ({{ getTotalModelCount() }})
+                            </span>
+                        </template>
+                    </el-tab-pane>
+                    <el-tab-pane
+                        v-for="prefix in modelSelectorDialog.owners"
+                        :key="prefix"
+                        :label="prefix"
+                        :name="prefix"
+                    >
+                        <template #label>
+                            <span>
+                                <el-tag :type="getOwnerTagType(prefix)" size="small" style="margin-right: 5px;">
+                                    {{ prefix.toUpperCase() }}
+                                </el-tag>
+                                ({{ getModelCountByOwner(prefix) }})
+                            </span>
+                        </template>
+                    </el-tab-pane>
+                </el-tabs>
+            </div>
+
+            <el-table
+                :data="filteredModels"
+                v-loading="modelSelectorDialog.loading"
+                element-loading-text="加载模型中..."
+                style="width: 100%"
+                height="400"
+                stripe
+                border
+                @row-click="selectModel"
+                highlight-current-row
+            >
+                <el-table-column prop="id" label="模型名称" min-width="200" show-overflow-tooltip>
+                    <template #default="{ row }">
+                        <div style="display: flex; align-items: center;">
+                            <el-icon style="margin-right: 8px; color: #409eff;"><Cpu /></el-icon>
+                            <div>
+                                <div style="font-weight: 500;">{{ row.id }}</div>
+                                <div v-if="row.description" style="font-size: 12px; color: #909399;">
+                                    {{ row.description }}
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </el-table-column>
+
+                <el-table-column prop="prefix" label="模型类型" width="120">
+                    <template #default="{ row }">
+                        <el-tag :type="getOwnerTagType((row.id || '').split(/[-_]/)[0])" size="small">
+                            {{ ((row.id || '').split(/[-_]/)[0] || '未知').toUpperCase() }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
+
+                <el-table-column prop="created" label="创建时间" width="180">
+                    <template #default="{ row }">
+                        <span v-if="row.created">
+                            {{ formatModelDate(row.created) }}
+                        </span>
+                        <span v-else style="color: #909399;">-</span>
+                    </template>
+                </el-table-column>
+
+                <el-table-column label="操作" width="100" fixed="right">
+                    <template #default="{ row }">
+                        <el-button
+                            type="primary"
+                            size="small"
+                            @click.stop="selectModel(row)"
+                        >
+                            选择
+                        </el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <el-pagination
+                    v-model:current-page="modelSelectorDialog.pagination.page"
+                    v-model:page-size="modelSelectorDialog.pagination.limit"
+                    :page-sizes="[10, 20, 50, 100]"
+                    :total="modelSelectorDialog.pagination.total"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    @size-change="handleModelPageSizeChange"
+                    @current-change="handleModelPageChange"
+                />
+            </div>
+
+            <template #footer>
+                <el-button @click="modelSelectorDialog.visible = false">取消</el-button>
+                <el-button
+                    type="primary"
+                    @click="confirmModelSelection"
+                    :disabled="!modelSelectorDialog.selectedModel"
+                >
+                    确认选择
                 </el-button>
             </template>
         </el-dialog>

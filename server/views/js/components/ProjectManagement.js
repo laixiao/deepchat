@@ -193,6 +193,9 @@ const ProjectManagement = {
                             :loading="userSearchLoading"
                             clearable
                             @focus="loadInitialUsers"
+                            @visible-change="handleUserSelectVisibleChange"
+                            popper-class="user-select-dropdown"
+                            :no-data-text="userSearchLoading ? '搜索中...' : '暂无数据'"
                         >
                             <el-option
                                 v-for="user in userOptions"
@@ -200,20 +203,39 @@ const ProjectManagement = {
                                 :label="user.username + ' (' + user.email + ')'"
                                 :value="user._id"
                             >
-                                <div style="display: flex; align-items: center;">
-                                    <el-avatar :size="24" style="margin-right: 8px;">
+                                <div style="display: flex; align-items: center; width: 100%; overflow: hidden;">
+                                    <el-avatar :size="24" style="margin-right: 8px; flex-shrink: 0;">
                                         {{ user.username.charAt(0).toUpperCase() }}
                                     </el-avatar>
-                                    <div>
-                                        <div style="font-weight: 500;">{{ user.username }}</div>
-                                        <div style="font-size: 12px; color: #909399;">{{ user.email }}</div>
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                            {{ user.username }}
+                                        </div>
+                                        <div style="font-size: 12px; color: #909399; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                            {{ user.email }}
+                                        </div>
                                     </div>
                                 </div>
                             </el-option>
+                            <template v-if="userOptions.length === 0 && !userSearchLoading">
+                                <el-option disabled value="" label="暂无用户数据">
+                                    <div style="text-align: center; padding: 10px; color: #909399;">
+                                        <div>暂无用户数据</div>
+                                        <el-button
+                                            type="primary"
+                                            size="small"
+                                            @click="refreshUserList"
+                                            style="margin-top: 8px;"
+                                        >
+                                            点击加载用户
+                                        </el-button>
+                                    </div>
+                                </el-option>
+                            </template>
                         </el-select>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
                             <div style="font-size: 12px; color: #909399;">
-                                输入用户名或邮箱进行搜索，或点击刷新按钮加载所有用户
+                                输入用户名或邮箱进行搜索，已加载 {{ userOptions.length }} 个用户
                             </div>
                             <el-button
                                 type="primary"
@@ -259,7 +281,7 @@ const ProjectManagement = {
                     
                     <el-form-item label="工作流配置">
                         <div style="width: 100%;">
-                            <div v-for="(workflow, index) in projectDialog.form.workflows" :key="index" class="workflow-container">
+                            <div v-for="(workflow, index) in projectDialog.form.workflows" :key="index" class="workflow-container theme-workflow">
                                 <div class="workflow-header">
                                     <span class="workflow-title">工作流 {{ index + 1 }}</span>
                                     <el-button
@@ -447,8 +469,8 @@ const ProjectManagement = {
 
     // 搜索用户
     const searchUsers = async (query) => {
-      if (!query) {
-        // 如果没有查询条件，加载前20个用户
+      if (!query || query.trim() === '') {
+        // 如果没有查询条件，加载初始用户列表
         await loadInitialUsers()
         return
       }
@@ -457,15 +479,20 @@ const ProjectManagement = {
       try {
         const response = await window.apiClient.users.getList({
           page: 1,
-          limit: 20,
-          search: query
+          limit: 50, // 增加搜索结果数量
+          search: query.trim()
         })
 
         if (response.success) {
-          userOptions.value = response.data.users
+          userOptions.value = response.data.users || []
+        } else {
+          userOptions.value = []
+          ElMessage.warning('搜索用户失败: ' + (response.message || '未知错误'))
         }
       } catch (error) {
         console.error('搜索用户失败:', error)
+        userOptions.value = []
+        ElMessage.error('搜索用户失败: ' + error.message)
       } finally {
         userSearchLoading.value = false
       }
@@ -481,14 +508,19 @@ const ProjectManagement = {
       try {
         const response = await window.apiClient.users.getList({
           page: 1,
-          limit: 50 // 加载更多用户供选择
+          limit: 100 // 加载更多用户供选择
         })
 
         if (response.success) {
-          userOptions.value = response.data.users
+          userOptions.value = response.data.users || []
+        } else {
+          userOptions.value = []
+          ElMessage.warning('加载用户列表失败: ' + (response.message || '未知错误'))
         }
       } catch (error) {
         console.error('加载用户列表失败:', error)
+        userOptions.value = []
+        ElMessage.error('加载用户列表失败: ' + error.message)
       } finally {
         userSearchLoading.value = false
       }
@@ -498,6 +530,14 @@ const ProjectManagement = {
     const refreshUserList = async () => {
       userOptions.value = [] // 清空现有列表
       await loadInitialUsers()
+    }
+
+    // 处理用户选择下拉框可见性变化
+    const handleUserSelectVisibleChange = (visible) => {
+      if (visible && userOptions.value.length === 0) {
+        // 下拉框打开时，如果没有数据则自动加载
+        loadInitialUsers()
+      }
     }
 
     // 新增项目
@@ -725,6 +765,7 @@ const ProjectManagement = {
       searchUsers,
       loadInitialUsers,
       refreshUserList,
+      handleUserSelectVisibleChange,
       addProject,
       editProject,
       addWorkflow,

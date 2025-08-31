@@ -63,13 +63,14 @@ const FileManagement = {
                     multiple
                     drag
                     style="width: 100%;"
+                    class="theme-upload"
                 >
-                    <el-icon style="font-size: 67px; color: #c0c4cc;"><UploadFilled /></el-icon>
-                    <div style="color: #606266; margin-top: 10px;">
+                    <el-icon class="upload-icon"><UploadFilled /></el-icon>
+                    <div class="upload-text">
                         将文件拖到此处，或<em>点击上传</em>
                     </div>
                     <template #tip>
-                        <div style="color: #909399; font-size: 12px; margin-top: 5px;">
+                        <div class="upload-tip">
                             {{ uploadType === 'temporary' ? '临时文件上传（免认证，48小时后自动清理）' : '支持多种格式的文件上传' }}
                         </div>
                     </template>
