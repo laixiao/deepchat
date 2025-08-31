@@ -69,20 +69,21 @@
       <Button
         variant="ghost"
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
-        :class="{ 'animate-pulse bg-red-500/20': systemAlert }"
-        @click="openGpuInfo"
-      >
-        <Icon icon="lucide:monitor" class="w-4 h-4 mr-1" />
-        <span>{{ t('appbar.gpu') }}</span>
-      </Button>
-      <Button
-        variant="ghost"
-        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="openMcp"
       >
         <Icon icon="lucide:cpu" class="w-4 h-4 mr-1" />
         <span>{{ t('appbar.mcp') }}</span>
       </Button>
+      <Button
+        variant="ghost"
+        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        :class="{ 'animate-pulse bg-red-500/20': systemAlert }"
+        @click="openGpuInfo"
+      >
+        <Icon icon="lucide:hard-drive" class="w-4 h-4 mr-1" />
+        <span>{{ t('appbar.gpu') }}</span>
+      </Button>
+      
       <Button
         variant="ghost"
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
