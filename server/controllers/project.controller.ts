@@ -103,7 +103,7 @@ export const getAllProjects = async (req: Request, res: Response): Promise<void>
 
 /**
  * @swagger
- * /api/admin/projects/{id}:
+ * /admin/projects/{id}:
  *   get:
  *     summary: 获取项目详情
  *     tags: [Projects]
@@ -310,7 +310,7 @@ export const createProject = async (req: Request, res: Response): Promise<void> 
 
 /**
  * @swagger
- * /api/admin/projects/{id}:
+ * /admin/projects/{id}:
  *   put:
  *     summary: 更新项目信息
  *     tags: [Projects]
@@ -473,7 +473,7 @@ export const updateProjectInfo = async (req: Request, res: Response): Promise<vo
 
 /**
  * @swagger
- * /api/admin/projects/{id}:
+ * /admin/projects/{id}:
  *   delete:
  *     summary: 删除项目
  *     tags: [Projects]
@@ -515,6 +515,144 @@ export const deleteProject = async (req: Request, res: Response): Promise<void> 
     })
   } catch (error) {
     console.error('删除项目错误:', error)
+    res.status(500).json({
+      success: false,
+      message: '服务器内部错误'
+    })
+  }
+}
+
+/**
+ * @swagger
+ * /public/projects/{id}:
+ *   get:
+ *     summary: 获取项目公开信息（无需认证）
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 项目ID
+ *     responses:
+ *       200:
+ *         description: 获取项目公开信息成功
+ *       404:
+ *         description: 项目不存在
+ *       500:
+ *         description: 服务器内部错误
+ */
+export const getPublicProjectInfo = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params
+
+    // 查找项目并排除敏感信息
+    const project = await Project.findById(id).select('-workflows.apiConfig')
+    if (!project) {
+      res.status(404).json({
+        success: false,
+        message: '项目不存在'
+      })
+      return
+    }
+
+    // 脱敏处理：移除敏感信息
+    const sanitizedProject = project.toObject()
+    // 移除用户ID等敏感信息
+    delete sanitizedProject.userId
+    // 移除服务器地址和端口等敏感信息
+    delete sanitizedProject.serverAddress
+    delete sanitizedProject.port
+
+    res.status(200).json({
+      success: true,
+      data: { project: sanitizedProject }
+    })
+  } catch (error) {
+    console.error('获取项目公开信息错误:', error)
+    res.status(500).json({
+      success: false,
+      message: '服务器内部错误'
+    })
+  }
+}
+
+/**
+ * @swagger
+ * /public/projects:
+ *   get:
+ *     summary: 获取公开项目列表（无需认证，仅返回已上线项目）
+ *     tags: [Projects]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: 页码
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: 每页数量
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: 搜索关键词
+ *     responses:
+ *       200:
+ *         description: 获取公开项目列表成功
+ *       500:
+ *         description: 服务器内部错误
+ */
+export const getPublicProjects = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 10
+    const search = (req.query.search as string) || ''
+
+    // 构建查询条件，仅查询已上线的项目
+    const query: any = { status: 'online' }
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ]
+    }
+
+    // 获取项目总数
+    const total = await Project.countDocuments(query)
+
+    // 获取项目列表并排除敏感信息
+    const projects = await Project.find(query)
+      .select('-workflows.apiConfig -userId -serverAddress -port')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+
+    // 脱敏处理项目数据
+    const sanitizedProjects = projects.map((project) => {
+      const projectObj = project.toObject()
+      return projectObj
+    })
+
+    res.status(200).json({
+      success: true,
+      data: {
+        projects: sanitizedProjects,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      }
+    })
+  } catch (error) {
+    console.error('获取公开项目列表错误:', error)
     res.status(500).json({
       success: false,
       message: '服务器内部错误'
