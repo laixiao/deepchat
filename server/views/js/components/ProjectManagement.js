@@ -363,21 +363,19 @@ const ProjectManagement = {
                 </el-form>
                 
                 <template #footer>
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%; gap: 10px;">
                         <el-button
                             type="warning"
-                            @click="aiAutoFillProject"
+                            @click="aiAutoFill"
                             :icon="Magic"
                             :loading="aiAutoFillLoading"
                         >
                             AI智能填写
                         </el-button>
-                        <div style="display: flex; gap: 10px;">
-                            <el-button @click="projectDialog.visible = false">取消</el-button>
-                            <el-button type="primary" @click="saveProject" :loading="projectDialog.saving">
-                                保存
-                            </el-button>
-                        </div>
+                        <el-button @click="projectDialog.visible = false">取消</el-button>
+                        <el-button type="primary" @click="saveProject" :loading="projectDialog.saving">
+                            保存
+                        </el-button>
                     </div>
                 </template>
             </el-dialog>
@@ -779,14 +777,15 @@ const ProjectManagement = {
           return
         }
 
-        if (projectDialog.form.workflows.length === 0) {
-          ElMessage.warning('请先添加至少一个工作流')
-          return
-        }
-
         aiAutoFillLoading.value = true
 
-        // 构建提示词
+        // 构建项目信息
+        const projectInfo = `项目名称: ${projectDialog.form.name || '未填写'}
+项目描述: ${projectDialog.form.description || '未填写'}
+服务器地址: ${projectDialog.form.serverAddress || '未填写'}
+端口: ${projectDialog.form.port || '未填写'}`
+
+        // 构建工作流信息
         const workflowsInfo = projectDialog.form.workflows
           .map((workflow, index) => {
             return `工作流 ${index + 1}:
@@ -796,12 +795,19 @@ API配置: ${workflow.apiConfigText || '未填写'}`
           })
           .join('\n\n')
 
-        const prompt = `请分析以下工作流配置，并为每个工作流自动填写或优化名称和描述字段。请根据API配置的内容来推断工作流的用途和功能。
+        const prompt = `请分析以下项目信息和工作流配置，并为项目和每个工作流自动填写或优化名称和描述字段。请根据API配置的内容来推断工作流的用途和功能。
 
-${workflowsInfo}
+项目信息:
+${projectInfo}
 
-请返回JSON格式的结果，包含每个工作流的建议名称和描述：
+${workflowsInfo ? '工作流信息:' + workflowsInfo : '暂无工作流'}
+
+请返回JSON格式的结果，包含项目建议和每个工作流的建议名称和描述：
 {
+  "project": {
+    "name": "建议的项目名称",
+    "description": "详细的项目描述，说明项目的主要功能和用途"
+  },
   "workflows": [
     {
       "name": "建议的工作流名称",
@@ -811,11 +817,14 @@ ${workflowsInfo}
 }
 
 要求：
-1. 名称要简洁明了，体现工作流的核心功能
-2. 描述要详细说明工作流的作用、输入输出和使用场景
-3. 如果API配置包含URL，请根据URL推断服务类型
-4. 如果已有名称和描述，请优化使其更准确和专业
-5. 返回的工作流数量必须与输入的工作流数量一致`
+1. 项目名称要简洁明了，体现项目的核心功能
+2. 项目描述要详细说明项目的主要功能、目标用户和使用场景
+3. 工作流名称要简洁明了，体现工作流的核心功能
+4. 工作流描述要详细说明工作流的作用、输入输出和使用场景
+5. 如果API配置包含URL，请根据URL推断服务类型
+6. 如果已有名称和描述，请优化使其更准确和专业
+7. 如果没有工作流，返回空数组
+8. 返回的工作流数量必须与输入的工作流数量一致`
 
         // 调用OpenAI API
         const response = await fetch(`${openaiConfig.baseURL}/chat/completions`, {
@@ -850,8 +859,32 @@ ${workflowsInfo}
 
         // 解析AI响应
         try {
-          const result = JSON.parse(aiResponse)
+          // 提取JSON内容，去除markdown代码块标记
+          let cleanResponse = aiResponse.trim()
+          if (cleanResponse.startsWith('```json')) {
+            cleanResponse = cleanResponse.substring(7)
+          }
+          if (cleanResponse.startsWith('```')) {
+            cleanResponse = cleanResponse.substring(3)
+          }
+          if (cleanResponse.endsWith('```')) {
+            cleanResponse = cleanResponse.slice(0, -3)
+          }
+          cleanResponse = cleanResponse.trim()
 
+          const result = JSON.parse(cleanResponse)
+
+          // 应用项目建议
+          if (result.project) {
+            if (result.project.name && !projectDialog.form.name) {
+              projectDialog.form.name = result.project.name
+            }
+            if (result.project.description && !projectDialog.form.description) {
+              projectDialog.form.description = result.project.description
+            }
+          }
+
+          // 应用工作流建议
           if (result.workflows && Array.isArray(result.workflows)) {
             // 应用AI建议
             result.workflows.forEach((suggestion, index) => {
@@ -864,8 +897,9 @@ ${workflowsInfo}
                 }
               }
             })
-
-            ElMessage.success('AI 自动填写完成！已优化工作流名称和描述')
+            ElMessage.success('AI 自动填写完成！已优化项目和工作流信息')
+          } else if (result.project) {
+            ElMessage.success('AI 自动填写完成！已优化项目信息')
           } else {
             throw new Error('AI 响应格式不正确')
           }
