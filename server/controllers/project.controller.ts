@@ -204,7 +204,8 @@ export const getProjectInfo = async (req: Request, res: Response): Promise<void>
  */
 export const createProject = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, description, userId, serverAddress, port, workflows, status } = req.body
+    const { name, description, userId, serverAddress, port, workflows, downloadLinks, status } =
+      req.body
 
     // 验证必填字段
     if (!name || !userId || !serverAddress || !port) {
@@ -254,6 +255,25 @@ export const createProject = async (req: Request, res: Response): Promise<void> 
       }
     }
 
+    // 验证下载链接格式
+    let validatedDownloadLinks = []
+    if (downloadLinks && Array.isArray(downloadLinks)) {
+      for (const link of downloadLinks) {
+        if (!link.filename || !link.hash || !link.url) {
+          res.status(400).json({
+            success: false,
+            message: '下载链接必须包含文件名、哈希值和URL地址'
+          })
+          return
+        }
+        validatedDownloadLinks.push({
+          filename: link.filename,
+          hash: link.hash,
+          url: link.url
+        })
+      }
+    }
+
     // 创建新项目
     const project = new Project({
       name,
@@ -262,6 +282,7 @@ export const createProject = async (req: Request, res: Response): Promise<void> 
       serverAddress,
       port,
       workflows: validatedWorkflows,
+      downloadLinks: validatedDownloadLinks,
       status: status || ProjectStatus.DRAFT
     })
 
@@ -342,7 +363,7 @@ export const createProject = async (req: Request, res: Response): Promise<void> 
 export const updateProjectInfo = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params
-    const { name, description, serverAddress, port, workflows, status } = req.body
+    const { name, description, serverAddress, port, workflows, downloadLinks, status } = req.body
 
     const project = await Project.findById(id)
     if (!project) {
@@ -393,6 +414,34 @@ export const updateProjectInfo = async (req: Request, res: Response): Promise<vo
       }
     }
 
+    // 验证下载链接格式
+    let validatedDownloadLinks
+    if (downloadLinks !== undefined) {
+      if (!Array.isArray(downloadLinks)) {
+        res.status(400).json({
+          success: false,
+          message: '下载链接必须是数组格式'
+        })
+        return
+      }
+
+      validatedDownloadLinks = []
+      for (const link of downloadLinks) {
+        if (!link.filename || !link.hash || !link.url) {
+          res.status(400).json({
+            success: false,
+            message: '下载链接必须包含文件名、哈希值和URL地址'
+          })
+          return
+        }
+        validatedDownloadLinks.push({
+          filename: link.filename,
+          hash: link.hash,
+          url: link.url
+        })
+      }
+    }
+
     // 更新项目信息
     const updateData: any = {}
     if (name !== undefined) updateData.name = name
@@ -400,6 +449,7 @@ export const updateProjectInfo = async (req: Request, res: Response): Promise<vo
     if (serverAddress !== undefined) updateData.serverAddress = serverAddress
     if (port !== undefined) updateData.port = port
     if (validatedWorkflows !== undefined) updateData.workflows = validatedWorkflows
+    if (validatedDownloadLinks !== undefined) updateData.downloadLinks = validatedDownloadLinks
     if (status !== undefined) updateData.status = status
 
     const updatedProject = await Project.findByIdAndUpdate(id, updateData, {

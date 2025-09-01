@@ -6,7 +6,7 @@ const { ElMessage, ElMessageBox } = ElementPlus
 const app = createApp({
   setup() {
     // 响应式数据
-    const activeTab = ref('users')
+    const activeTab = ref(localStorage.getItem('admin-active-tab') || 'users')
     const globalLoading = ref(false)
     const isDarkTheme = ref(false)
     const settingsFormRef = ref(null)
@@ -56,6 +56,8 @@ const app = createApp({
     // 处理标签页切换
     const handleTabChange = (tabName) => {
       activeTab.value = tabName
+      // 保存当前选项卡到本地存储
+      localStorage.setItem('admin-active-tab', tabName)
 
       // 刷新对应组件的数据
       switch (tabName) {

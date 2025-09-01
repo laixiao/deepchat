@@ -95,11 +95,29 @@ const ProjectManagement = {
                     </template>
                 </el-table-column>
                 
-                <el-table-column prop="status" label="状态" width="100">
+                <el-table-column prop="downloadLinks" label="下载链接" width="100">
                     <template #default="{ row }">
-                        <el-tag :type="getStatusType(row.status)" size="small">
-                            {{ getStatusText(row.status) }}
+                        <el-tag v-if="row.downloadLinks && row.downloadLinks.length > 0" type="success" size="small">
+                            {{ row.downloadLinks.length }} 个
                         </el-tag>
+                        <span v-else style="color: #909399;">无</span>
+                    </template>
+                </el-table-column>
+                
+                <el-table-column prop="status" label="状态" width="120">
+                    <template #default="{ row }">
+                        <el-select
+                            v-model="row.status"
+                            size="small"
+                            @change="updateProjectStatus(row)"
+                            style="width: 100%"
+                        >
+                            <el-option label="草稿" value="draft" />
+                            <el-option label="审核中" value="reviewing" />
+                            <el-option label="已驳回" value="rejected" />
+                            <el-option label="已上线" value="online" />
+                            <el-option label="已下架" value="offline" />
+                        </el-select>
                     </template>
                 </el-table-column>
                 
@@ -362,6 +380,45 @@ const ProjectManagement = {
                             </el-button>
                         </div>
                     </el-form-item>
+                    
+                    <el-form-item label="下载链接">
+                        <div style="width: 100%;">
+                            <div v-for="(link, index) in projectDialog.form.downloadLinks" :key="index" class="workflow-container theme-workflow">
+                                <div class="workflow-header">
+                                    <span class="workflow-title">下载链接 {{ index + 1 }}</span>
+                                    <el-button
+                                        type="danger"
+                                        size="small"
+                                        @click="removeDownloadLink(index)"
+                                        :icon="Delete"
+                                    >
+                                        删除
+                                    </el-button>
+                                </div>
+
+                                <el-form-item label="文件名" :prop="'downloadLinks.' + index + '.filename'" style="margin-bottom: 10px;">
+                                    <el-input v-model="link.filename" placeholder="文件名" />
+                                </el-form-item>
+
+                                <el-form-item label="哈希值" :prop="'downloadLinks.' + index + '.hash'" style="margin-bottom: 10px;">
+                                    <el-input v-model="link.hash" placeholder="文件哈希值" />
+                                </el-form-item>
+
+                                <el-form-item label="URL地址" :prop="'downloadLinks.' + index + '.url'" style="margin-bottom: 0;">
+                                    <el-input v-model="link.url" placeholder="下载链接URL" />
+                                </el-form-item>
+                            </div>
+
+                            <el-button
+                                type="success"
+                                @click="addDownloadLink"
+                                :icon="Plus"
+                                style="width: 100%; margin-top: 10px;"
+                            >
+                                添加下载链接
+                            </el-button>
+                        </div>
+                    </el-form-item>
                 </el-form>
                 
                 <template #footer>
@@ -420,7 +477,8 @@ const ProjectManagement = {
         serverAddress: '',
         port: 3000,
         status: 'draft',
-        workflows: []
+        workflows: [],
+        downloadLinks: []
       },
       rules: {
         name: [
@@ -593,7 +651,8 @@ const ProjectManagement = {
         serverAddress: '',
         port: 3000,
         status: 'draft',
-        workflows: []
+        workflows: [],
+        downloadLinks: []
       }
       // 不清空用户选项，保持已加载的用户列表
       // userOptions.value = [];
@@ -616,6 +675,11 @@ const ProjectManagement = {
           description: w.description,
           apiConfig: w.apiConfig,
           apiConfigText: JSON.stringify(w.apiConfig, null, 2)
+        })),
+        downloadLinks: (project.downloadLinks || []).map((link) => ({
+          filename: link.filename,
+          hash: link.hash,
+          url: link.url
         }))
       }
 
@@ -635,6 +699,20 @@ const ProjectManagement = {
         apiConfig: {},
         apiConfigText: ''
       })
+    }
+
+    // 添加下载链接
+    const addDownloadLink = () => {
+      projectDialog.form.downloadLinks.push({
+        filename: '',
+        hash: '',
+        url: ''
+      })
+    }
+
+    // 删除下载链接
+    const removeDownloadLink = (index) => {
+      projectDialog.form.downloadLinks.splice(index, 1)
     }
 
     // 删除工作流
@@ -937,7 +1015,7 @@ ${workflowsInfo ? '工作流信息:' + workflowsInfo : '暂无工作流'}
 
         projectDialog.saving = true
 
-        const { id, workflows, ...formData } = projectDialog.form
+        const { id, workflows, downloadLinks, ...formData } = projectDialog.form
 
         // 处理工作流数据
         const processedWorkflows = workflows
@@ -948,9 +1026,19 @@ ${workflowsInfo ? '工作流信息:' + workflowsInfo : '暂无工作流'}
           }))
           .filter((w) => w.name && w.description)
 
+        // 处理下载链接数据
+        const processedDownloadLinks = downloadLinks
+          .map((link) => ({
+            filename: link.filename,
+            hash: link.hash,
+            url: link.url
+          }))
+          .filter((link) => link.filename && link.hash && link.url)
+
         const requestData = {
           ...formData,
-          workflows: processedWorkflows
+          workflows: processedWorkflows,
+          downloadLinks: processedDownloadLinks
         }
 
         let response
@@ -974,6 +1062,29 @@ ${workflowsInfo ? '工作流信息:' + workflowsInfo : '暂无工作流'}
         }
       } finally {
         projectDialog.saving = false
+      }
+    }
+
+    // 更新项目状态
+    const updateProjectStatus = async (project) => {
+      try {
+        const response = await window.apiClient.projects.update(project._id, {
+          status: project.status
+        })
+
+        if (response.success) {
+          ElMessage.success('项目状态更新成功')
+          fetchProjects()
+        } else {
+          ElMessage.error(response.message || '状态更新失败')
+          // 恢复原来的状态
+          fetchProjects()
+        }
+      } catch (error) {
+        console.error('更新项目状态失败:', error)
+        ElMessage.error('更新项目状态失败: ' + error.message)
+        // 恢复原来的状态
+        fetchProjects()
       }
     }
 
@@ -1070,10 +1181,13 @@ ${workflowsInfo ? '工作流信息:' + workflowsInfo : '暂无工作流'}
       handleFileSelect,
       aiAutoFill,
       saveProject,
+      updateProjectStatus,
       deleteProject,
       resetProjectForm,
       formatDate,
       refresh,
+      addDownloadLink,
+      removeDownloadLink,
       // Element Plus Icons
       Search: ElementPlusIconsVue.Search,
       Refresh: ElementPlusIconsVue.Refresh,

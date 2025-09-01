@@ -7,6 +7,13 @@ export interface IWorkflow {
   apiConfig: object
 }
 
+// 下载链接接口定义
+export interface IDownloadLink {
+  filename: string
+  hash: string
+  url: string
+}
+
 // 项目状态枚举
 export enum ProjectStatus {
   DRAFT = 'draft', // 草稿
@@ -24,6 +31,7 @@ export interface IProject extends Document {
   serverAddress: string
   port: number
   workflows: IWorkflow[] // 多个工作流配置
+  downloadLinks: IDownloadLink[] // 多个下载链接
   status: ProjectStatus
   createdAt: Date
   updatedAt: Date
@@ -63,6 +71,31 @@ const WorkflowSchema: Schema = new Schema(
         },
         message: 'API配置必须是有效的JSON格式'
       }
+    }
+  },
+  { _id: true }
+)
+
+// 下载链接Schema定义
+const DownloadLinkSchema: Schema = new Schema(
+  {
+    filename: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 255
+    },
+    hash: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 255
+    },
+    url: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 1000
     }
   },
   { _id: true }
@@ -126,6 +159,10 @@ const ProjectSchema: Schema = new Schema(
         },
         message: '工作流必须是数组格式'
       }
+    },
+    downloadLinks: {
+      type: [DownloadLinkSchema],
+      default: []
     },
     status: {
       type: String,
