@@ -282,6 +282,50 @@ const ProjectManagement = {
                     
                     <el-form-item label="工作流配置">
                         <div style="width: 100%;">
+                            
+
+                            <div v-for="(workflow, index) in projectDialog.form.workflows" :key="index" class="workflow-container theme-workflow">
+                                <div class="workflow-header">
+                                    <span class="workflow-title">工作流 {{ index + 1 }}</span>
+                                    <el-button
+                                        type="danger"
+                                        size="small"
+                                        @click="removeWorkflow(index)"
+                                        :icon="Delete"
+                                    >
+                                        删除
+                                    </el-button>
+                                </div>
+
+                                <el-form-item label="名称" :prop="'workflows.' + index + '.name'" style="margin-bottom: 10px;">
+                                    <el-input v-model="workflow.name" placeholder="工作流名称" />
+                                </el-form-item>
+
+                                <el-form-item label="描述" :prop="'workflows.' + index + '.description'" style="margin-bottom: 10px;">
+                                    <el-input
+                                        v-model="workflow.description"
+                                        type="textarea"
+                                        :rows="4"
+                                        placeholder="工作流作用描述"
+                                    />
+                                </el-form-item>
+
+                                <el-form-item label="API配置" :prop="'workflows.' + index + '.apiConfig'" style="margin-bottom: 0;">
+                                    <el-input
+                                        v-model="workflow.apiConfigText"
+                                        type="textarea"
+                                        :autosize="{ minRows: 4, maxRows: 12 }"
+                                        placeholder='例如: {"url": "https://api.example.com", "method": "POST", "headers": {"Content-Type": "application/json"}}'
+                                        class="json-editor"
+                                        @blur="validateWorkflowJson(workflow, index)"
+                                        @input="formatJsonInput(workflow)"
+                                    />
+                                    <div style="font-size: 12px; color: #909399; margin-top: 5px;">
+                                        支持JSON格式，输入框会自动调整高度
+                                    </div>
+                                </el-form-item>
+                            </div>
+
                             <!-- 拖拽上传区域 -->
                             <div
                                 class="workflow-upload-area"
@@ -306,48 +350,6 @@ const ProjectManagement = {
                                 <div style="color: #909399; font-size: 12px;">
                                     支持 JSON 格式的工作流配置文件
                                 </div>
-                            </div>
-
-                            <div v-for="(workflow, index) in projectDialog.form.workflows" :key="index" class="workflow-container theme-workflow">
-                                <div class="workflow-header">
-                                    <span class="workflow-title">工作流 {{ index + 1 }}</span>
-                                    <el-button
-                                        type="danger"
-                                        size="small"
-                                        @click="removeWorkflow(index)"
-                                        :icon="Delete"
-                                    >
-                                        删除
-                                    </el-button>
-                                </div>
-
-                                <el-form-item label="名称" :prop="'workflows.' + index + '.name'" style="margin-bottom: 10px;">
-                                    <el-input v-model="workflow.name" placeholder="工作流名称" />
-                                </el-form-item>
-
-                                <el-form-item label="描述" :prop="'workflows.' + index + '.description'" style="margin-bottom: 10px;">
-                                    <el-input
-                                        v-model="workflow.description"
-                                        type="textarea"
-                                        :rows="2"
-                                        placeholder="工作流作用描述"
-                                    />
-                                </el-form-item>
-
-                                <el-form-item label="API配置" :prop="'workflows.' + index + '.apiConfig'" style="margin-bottom: 0;">
-                                    <el-input
-                                        v-model="workflow.apiConfigText"
-                                        type="textarea"
-                                        :autosize="{ minRows: 4, maxRows: 12 }"
-                                        placeholder='例如: {"url": "https://api.example.com", "method": "POST", "headers": {"Content-Type": "application/json"}}'
-                                        class="json-editor"
-                                        @blur="validateWorkflowJson(workflow, index)"
-                                        @input="formatJsonInput(workflow)"
-                                    />
-                                    <div style="font-size: 12px; color: #909399; margin-top: 5px;">
-                                        支持JSON格式，输入框会自动调整高度
-                                    </div>
-                                </el-form-item>
                             </div>
 
                             <el-button
