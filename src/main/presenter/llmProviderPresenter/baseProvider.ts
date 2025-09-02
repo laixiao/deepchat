@@ -14,6 +14,7 @@ import { DevicePresenter } from '../devicePresenter'
 import { jsonrepair } from 'jsonrepair'
 import { eventBus, SendTarget } from '@/eventbus'
 import { CONFIG_EVENTS } from '@/events'
+import { MainI18n } from '@/utils/i18n'
 
 /**
  * 基础LLM提供商抽象类
@@ -74,10 +75,10 @@ export abstract class BaseLLMProvider {
   protected checkInitialization(): void {
     if (!this.isInitialized) {
       const locale = this.configPresenter.getLanguage?.() || 'en-US'
-      const errorMessage =
-        locale === 'zh-CN'
-          ? '模型提供商未初始化，请检查API配置'
-          : 'Model provider not initialized, please check API configuration'
+      // 使用主进程国际化工具获取翻译
+      const i18n = MainI18n.getInstance()
+      i18n.setLocale(locale)
+      const errorMessage = i18n.t('providerNotInitialized')
       throw new Error(errorMessage)
     }
   }

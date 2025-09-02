@@ -278,7 +278,7 @@
       "description": "请点击「启用模型」按钮手动选择需要使用的模型。"
     },
     "verifyLink": "验证链接",
-    "syncModelsFailed": "同步模型失败...",
+    "syncModelsFailed": "模型加载中...",
     "addCustomProvider": "添加自定义服务商",
     "delete": "删除",
     "stopModel": "停止模型",
