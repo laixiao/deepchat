@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Language
-chinese
+Think in English but reply in Chinese.
 
 ## Project Overview
 
@@ -160,12 +160,11 @@ The LLM system follows a sophisticated two-layer architecture:
 
 ### MCP Integration Architecture
 
-- **Server Management**: Lifecycle management of MCP servers with automatic npm registry optimization
-- **Tool Execution**: Seamless integration with LLM providers via format conversion layer
-- **Transport Support**: Stdio, SSE, HTTP, and InMemory transport protocols
-- **Built-in Services**: 15+ in-memory servers for code execution, web search, file operations, meeting analysis
-- **Permission System**: Granular tool permission management with user prompts
-- **Tool Conflict Resolution**: Automatic name deduplication and namespacing
+- **Server Management**: Lifecycle management of MCP servers
+- **Tool Execution**: Seamless integration with LLM providers
+- **Format Conversion**: Bridges MCP tools with various LLM provider formats
+- **Built-in Services**: In-memory servers for code execution, web access, file operations
+- **Data Source Decoupling**: Custom prompts work independently of MCP through config data source
 
 ### Data Persistence Architecture
 
@@ -237,6 +236,15 @@ The LLM system follows a sophisticated two-layer architecture:
 1. Implement tool in `src/main/presenter/mcpPresenter/inMemoryServers/`
 2. Register in `mcpPresenter/index.ts`
 3. Add tool configuration UI if needed
+
+### Managing Custom Prompts
+
+Custom prompts are managed independently of MCP through the config data source:
+
+1. **Config Storage**: Prompts stored via `configPresenter.getCustomPrompts()`
+2. **UI Management**: Use `promptsStore` for CRUD operations in settings
+3. **@ Operations**: Mention system loads from both config and MCP sources
+4. **MCP Independence**: @ prompt functionality works even when MCP is disabled
 
 ### Creating New UI Components
 

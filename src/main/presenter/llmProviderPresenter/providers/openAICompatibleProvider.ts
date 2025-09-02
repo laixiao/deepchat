@@ -7,7 +7,8 @@ import {
   LLMCoreStreamEvent,
   ModelConfig,
   ChatMessage,
-  LLM_EMBEDDING_ATTRS
+  LLM_EMBEDDING_ATTRS,
+  IConfigPresenter
 } from '@shared/presenter'
 import { BaseLLMProvider, SUMMARY_TITLES_PROMPT } from '../baseProvider'
 import OpenAI, { AzureOpenAI } from 'openai'
@@ -19,7 +20,6 @@ import {
   ChatCompletionMessageParam,
   ChatCompletionToolMessageParam
 } from 'openai/resources'
-import { ConfigPresenter } from '../../configPresenter'
 import { presenter } from '@/presenter'
 import { eventBus, SendTarget } from '@/eventbus'
 import { NOTIFICATION_EVENTS } from '@/events'
@@ -71,7 +71,7 @@ export class OpenAICompatibleProvider extends BaseLLMProvider {
   // 添加不支持 OpenAI 标准接口的供应商黑名单
   private static readonly NO_MODELS_API_LIST: string[] = []
 
-  constructor(provider: LLM_PROVIDER, configPresenter: ConfigPresenter) {
+  constructor(provider: LLM_PROVIDER, configPresenter: IConfigPresenter) {
     super(provider, configPresenter)
     this.createOpenAIClient()
     if (OpenAICompatibleProvider.NO_MODELS_API_LIST.includes(this.provider.id.toLowerCase())) {
@@ -91,30 +91,123 @@ export class OpenAICompatibleProvider extends BaseLLMProvider {
       fetchOptions.dispatcher = proxyAgent
     }
 
-    if (this.provider.id === 'azure-openai') {
+    // Check if this is official OpenAI or Azure OpenAI
+    const isOfficialOpenAI = this.isOfficialOpenAIService()
+    const isAzureOpenAI = this.provider.id === 'azure-openai'
+
+    // Only use custom fetch for third-party services to avoid triggering 403
+    // Keep original behavior for official OpenAI and Azure OpenAI for best compatibility
+    const shouldUseCleanFetch = !isOfficialOpenAI && !isAzureOpenAI
+    const customFetch = shouldUseCleanFetch ? this.createCleanFetch() : undefined
+
+    if (isAzureOpenAI) {
       try {
         const apiVersion = this.configPresenter.getSetting<string>('azureApiVersion')
-        this.openai = new AzureOpenAI({
+        const azureConfig: any = {
           apiKey: this.provider.apiKey,
           baseURL: this.provider.baseUrl,
           apiVersion: apiVersion || '2024-02-01',
           defaultHeaders: {
             ...this.defaultHeaders
-          },
-          fetchOptions
-        })
+          }
+        }
+
+        // Use fetchOptions for proxy (original behavior for Azure)
+        if (fetchOptions.dispatcher) {
+          azureConfig.fetchOptions = fetchOptions
+        }
+
+        this.openai = new AzureOpenAI(azureConfig)
       } catch (e) {
         console.warn('create azure openai failed', e)
       }
     } else {
-      this.openai = new OpenAI({
+      const openaiConfig: any = {
         apiKey: this.provider.apiKey,
         baseURL: this.provider.baseUrl,
         defaultHeaders: {
           ...this.defaultHeaders
-        },
-        fetchOptions
-      })
+        }
+      }
+
+      if (customFetch) {
+        // Third-party service: use custom fetch to avoid 403
+        openaiConfig.fetch = customFetch
+        // Also apply proxy via fetchOptions for third-party services
+        if (fetchOptions.dispatcher) {
+          openaiConfig.fetchOptions = fetchOptions
+        }
+        console.log(
+          `[OpenAI Compatible Provider] Using custom fetch for third-party service: ${this.provider.baseUrl}`
+        )
+      } else {
+        // Official OpenAI: use original behavior with fetchOptions
+        if (fetchOptions.dispatcher) {
+          openaiConfig.fetchOptions = fetchOptions
+        }
+        console.log(`[OpenAI Compatible Provider] Using original fetch for official OpenAI`)
+      }
+
+      this.openai = new OpenAI(openaiConfig)
+    }
+  }
+
+  /**
+   * Check if this is the official OpenAI service by provider ID
+   */
+  private isOfficialOpenAIService(): boolean {
+    return this.provider.id === 'openai'
+  }
+
+  /**
+   * Creates a custom fetch function that removes OpenAI SDK headers that may trigger 403
+   * This ensures all OpenAI SDK requests (including streaming) use clean headers
+   */
+  private createCleanFetch() {
+    return async (url: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+      // Create a copy of init to avoid modifying the original
+      const cleanInit = { ...init }
+
+      if (cleanInit.headers) {
+        // Convert headers to a plain object for easier manipulation
+        const headers = new Headers(cleanInit.headers)
+        const cleanHeaders: Record<string, string> = {}
+
+        // Only keep essential headers, remove SDK-specific ones that trigger 403
+        const allowedHeaders = [
+          'authorization',
+          'content-type',
+          'accept',
+          'http-referer',
+          'x-title'
+        ]
+
+        headers.forEach((value, key) => {
+          const lowerKey = key.toLowerCase()
+          // Keep only allowed headers and avoid X-Stainless-* headers
+          if (
+            allowedHeaders.includes(lowerKey) ||
+            (!lowerKey.startsWith('x-stainless-') &&
+              !lowerKey.includes('user-agent') &&
+              !lowerKey.includes('openai-'))
+          ) {
+            cleanHeaders[key] = value
+          }
+        })
+
+        // Ensure we have Authorization header
+        if (!cleanHeaders['Authorization'] && !cleanHeaders['authorization']) {
+          cleanHeaders['Authorization'] = `Bearer ${this.provider.apiKey}`
+        }
+
+        // Add our default headers
+        Object.assign(cleanHeaders, this.defaultHeaders)
+
+        cleanInit.headers = cleanHeaders
+      }
+
+      // Use regular fetch - proxy is already handled by OpenAI SDK's fetchOptions
+      return fetch(url, cleanInit)
     }
   }
 
@@ -133,6 +226,7 @@ export class OpenAICompatibleProvider extends BaseLLMProvider {
   }
 
   protected async fetchOpenAIModels(options?: { timeout: number }): Promise<MODEL_META[]> {
+    // Now using the clean fetch function via OpenAI SDK
     const response = await this.openai.models.list(options)
     return response.data.map((model) => ({
       id: model.id,
@@ -642,6 +736,105 @@ export class OpenAICompatibleProvider extends BaseLLMProvider {
         continue
       }
 
+      // 处理图片数据（OpenRouter Gemini 格式）
+      if (delta?.images && Array.isArray(delta.images)) {
+        for (const image of delta.images) {
+          if (image.type === 'image_url' && image.image_url?.url) {
+            try {
+              const cachedUrl = await presenter.devicePresenter.cacheImage(image.image_url.url)
+              yield {
+                type: 'image_data',
+                image_data: {
+                  data: cachedUrl,
+                  mimeType: 'deepchat/image-url'
+                }
+              }
+            } catch (cacheError) {
+              console.warn('[handleChatCompletion] Failed to cache image:', cacheError)
+              yield {
+                type: 'image_data',
+                image_data: {
+                  data: image.image_url.url,
+                  mimeType: 'deepchat/image-url'
+                }
+              }
+            }
+          }
+        }
+        continue
+      }
+
+      // 处理 Gemini 原生格式的图片数据（inlineData）
+      if (delta?.content?.parts && Array.isArray(delta.content.parts)) {
+        for (const part of delta.content.parts) {
+          if (part.inlineData && part.inlineData.data) {
+            yield {
+              type: 'image_data',
+              image_data: {
+                data: part.inlineData.data,
+                mimeType: part.inlineData.mimeType || 'image/png'
+              }
+            }
+          }
+        }
+        continue
+      }
+
+      // 处理 content 中直接包含 base64 图片的情况
+      let processedCurrentContent = currentContent
+      if (currentContent && currentContent.includes('![image](data:image/')) {
+        try {
+          // 使用正则表达式匹配 markdown 格式的 base64 图片
+          const base64ImageRegex = /!\[image\]\((data:image\/[^;]+;base64,[^)]+)\)/g
+          let hasImages = false
+
+          let match
+          while ((match = base64ImageRegex.exec(currentContent)) !== null) {
+            const base64Data = match[1] // 完整的 data:image/...;base64,... 格式
+
+            try {
+              // 缓存图片并获取URL
+              const cachedUrl = await presenter.devicePresenter.cacheImage(base64Data)
+
+              // 发送图片数据事件
+              yield {
+                type: 'image_data',
+                image_data: {
+                  data: cachedUrl,
+                  mimeType: 'deepchat/image-url'
+                }
+              }
+
+              // 从内容中完全移除图片部分，避免重复显示（image_data事件已经处理了图片显示）
+              processedCurrentContent = processedCurrentContent.replace(match[0], '')
+              hasImages = true
+
+              console.log(
+                `[handleChatCompletion] Successfully cached base64 image from content and removed from text`
+              )
+            } catch (cacheError) {
+              console.warn(
+                '[handleChatCompletion] Failed to cache base64 image from content:',
+                cacheError
+              )
+              // 缓存失败时保持原始内容不变
+            }
+          }
+
+          // 如果处理了图片，清理多余的空行并记录日志
+          if (hasImages) {
+            // 清理移除图片后可能留下的多余空行
+            processedCurrentContent = processedCurrentContent.replace(/\n\s*\n/g, '\n').trim()
+            console.log(
+              `[handleChatCompletion] Processed ${currentContent.length} chars -> ${processedCurrentContent.length} chars (images removed)`
+            )
+          }
+        } catch (error) {
+          console.error('[handleChatCompletion] Error processing base64 images in content:', error)
+          // 处理失败时继续正常流程
+        }
+      }
+
       // 原生 tool_calls 处理
       if (supportsFunctionCall && delta?.tool_calls?.length > 0) {
         toolUseDetected = true
@@ -733,10 +926,10 @@ export class OpenAICompatibleProvider extends BaseLLMProvider {
       }
 
       // 如果没有内容，则继续下一个 chunk
-      if (!currentContent) continue
+      if (!processedCurrentContent) continue
 
       // 2. 字符级流式处理内容
-      for (const char of currentContent) {
+      for (const char of processedCurrentContent) {
         pendingBuffer += char
 
         // 循环处理 pendingBuffer 直到它为空，或者不足以继续匹配

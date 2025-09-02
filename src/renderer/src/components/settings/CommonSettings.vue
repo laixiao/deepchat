@@ -95,6 +95,60 @@
         </div>
       </div>
       
+      <!-- 网页内容长度限制 -->
+      <div class="flex flex-row p-2 items-center gap-2 px-2">
+        <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+          <Icon icon="lucide:globe" class="w-4 h-4 text-muted-foreground" />
+          <span class="text-sm font-medium">{{ t('settings.common.webContentLengthLimit') }}</span>
+          <div class="text-xs text-muted-foreground ml-1">
+            {{ t('settings.common.webContentLengthLimitHint') }}
+          </div>
+        </span>
+        <div class="flex-shrink-0 flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="icon"
+            class="h-8 w-8 rounded-full"
+            @click="decreaseWebContentLimit"
+            :disabled="webContentLengthLimit <= 0"
+          >
+            <Icon icon="lucide:minus" class="h-3 w-3" />
+          </Button>
+          <div class="relative">
+            <div
+              v-if="!isEditingLimit"
+              @click="startEditingLimit"
+              class="min-w-16 h-8 flex items-center justify-center text-sm font-semibold cursor-pointer hover:bg-accent rounded px-2"
+            >
+              {{ webContentLengthLimit }}
+            </div>
+            <Input
+              v-else
+              ref="limitInputRef"
+              type="number"
+              :min="0"
+              :max="10000"
+              :model-value="webContentLengthLimit"
+              @update:model-value="handleWebContentLengthLimitChange"
+              @blur="stopEditingLimit"
+              @keydown.enter="stopEditingLimit"
+              @keydown.escape="stopEditingLimit"
+              class="min-w-16 h-8 text-center text-sm font-semibold"
+            />
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            class="h-8 w-8 rounded-full"
+            @click="increaseWebContentLimit"
+            :disabled="webContentLengthLimit >= 10000"
+          >
+            <Icon icon="lucide:plus" class="h-3 w-3" />
+          </Button>
+          <span class="text-xs text-muted-foreground ml-1">字符</span>
+        </div>
+      </div>
+
       <!-- 搜索设置组 -->
       <div class="space-y-4">
         <div class="flex items-center gap-2 text-sm font-semibold text-foreground border-b border-border pb-2">
@@ -160,6 +214,85 @@
         </div>
         
         <!-- 搜索预览开关 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:eye" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.searchPreview') }}</span>
+              </span>
+              <div class="flex-shrink-0">
+                <Switch
+                  id="search-preview-switch"
+                  :checked="searchPreviewEnabled"
+                  @update:checked="handleSearchPreviewChange"
+                />
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.searchPreviewDesc') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 网络设置组 -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-2 text-sm font-semibold text-foreground border-b border-border pb-2">
+          <Icon icon="lucide:globe" class="w-4 h-4" />
+          <span>{{ t('settings.common.networkSettings') || '网络设置' }}</span>
+        </div>
+        
+        <!-- 代理模式选择 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <span class="text-sm font-medium">{{ t('settings.common.proxyMode') }}</span>
+              </span>
+              <div class="flex-shrink-0 min-w-64 max-w-96">
+                <Select v-model="selectedProxyMode" class="">
+                  <SelectTrigger>
+                    <SelectValue :placeholder="t('settings.common.proxyModeSelect')" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem v-for="mode in proxyModes" :key="mode.value" :value="mode.value">
+                      {{ mode.label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.proxyModeDesc') }}
+            </div>
+          </div>
+        </div>
+        <!-- 自定义代理配置 -->
+        <div v-if="selectedProxyMode === 'custom'" class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:link" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.customProxyUrl') }}</span>
+              </span>
+              <div class="flex-shrink-0 min-w-64 max-w-96">
+                <Input
+                  v-model="customProxyUrl"
+                  :placeholder="t('settings.common.customProxyUrlPlaceholder')"
+                  :class="{ 'border-red-500': showUrlError }"
+                  @input="validateProxyUrl"
+                  @blur="validateProxyUrl"
+                />
+              </div>
+            </div>
+            <div v-if="showUrlError" class="text-xs text-red-500 ml-6">
+              {{ t('settings.common.invalidProxyUrl') }}
+            </div>
+          </div>
+        </div>
+      </div>
+        
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
           <div class="flex flex-col gap-2">
             <div class="flex flex-row items-center gap-2">
@@ -1006,6 +1139,11 @@ const selectedProxyMode = ref('system')
 const customProxyUrl = ref('')
 const showUrlError = ref(false)
 
+// 网页内容长度限制
+const webContentLengthLimit = ref(3000)
+const isEditingLimit = ref(false)
+const limitInputRef = ref<HTMLInputElement>()
+
 // 新增搜索引擎相关
 const isAddSearchEngineDialogOpen = ref(false)
 const newSearchEngine = ref({
@@ -1130,6 +1268,16 @@ onMounted(async () => {
   
   // 初始化视觉模型
   await initVisionModel()
+
+  // 加载网页内容长度限制设置
+  try {
+    const savedLimit = await configPresenter.getSetting<number>('webContentLengthLimit')
+    if (savedLimit !== undefined && savedLimit !== null) {
+      webContentLengthLimit.value = savedLimit
+    }
+  } catch (error) {
+    console.error('加载网页内容长度限制设置失败:', error)
+  }
 })
 
 watch(selectedSearchEngine, async (newValue) => {
@@ -1361,6 +1509,45 @@ const handleLoggingChange = (value: boolean) => {
   // 显示确认对话框
   newLoggingValue.value = value
   isLoggingDialogOpen.value = true
+}
+
+// 处理网页内容长度限制变更
+const handleWebContentLengthLimitChange = async (value: string | number) => {
+  const numValue = typeof value === 'string' ? parseInt(value, 10) : value
+  if (numValue >= 0 && numValue <= 10000 && !isNaN(numValue)) {
+    try {
+      const displayText = numValue === 0 ? '无限制' : `${numValue}字符`
+      console.log('设置网页内容长度限制:', displayText)
+      // 直接调用presenter设置，不依赖store
+      await configPresenter.setSetting('webContentLengthLimit', numValue)
+      // 更新响应式变量
+      webContentLengthLimit.value = numValue
+    } catch (error) {
+      console.error('设置网页内容长度限制失败:', error)
+    }
+  }
+}
+
+// 增加网页内容长度限制
+const increaseWebContentLimit = () => {
+  const newValue = Math.min(webContentLengthLimit.value + 100, 20000)
+  handleWebContentLengthLimitChange(newValue)
+}
+
+// 减少网页内容长度限制
+const decreaseWebContentLimit = () => {
+  const newValue = Math.max(webContentLengthLimit.value - 100, 0)
+  handleWebContentLengthLimitChange(newValue)
+}
+
+// 开始编辑限制值
+const startEditingLimit = () => {
+  isEditingLimit.value = true
+}
+
+// 结束编辑限制值
+const stopEditingLimit = () => {
+  isEditingLimit.value = false
 }
 
 const cancelLoggingChange = () => {
