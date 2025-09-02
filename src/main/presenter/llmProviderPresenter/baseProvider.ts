@@ -69,6 +69,20 @@ export abstract class BaseLLMProvider {
   }
 
   /**
+   * 检查提供商是否已初始化，如果未初始化则抛出多语言错误
+   */
+  protected checkInitialization(): void {
+    if (!this.isInitialized) {
+      const locale = this.configPresenter.getLanguage?.() || 'en-US'
+      const errorMessage =
+        locale === 'zh-CN'
+          ? '模型提供商未初始化，请检查API配置'
+          : 'Model provider not initialized, please check API configuration'
+      throw new Error(errorMessage)
+    }
+  }
+
+  /**
    * 从配置中加载缓存的模型数据
    * 在构造函数中调用，避免每次都需要重新获取模型列表
    */

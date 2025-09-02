@@ -296,9 +296,7 @@ export class OpenAICompatibleProvider extends BaseLLMProvider {
     temperature?: number,
     maxTokens?: number
   ): Promise<LLMResponse> {
-    if (!this.isInitialized) {
-      throw new Error('Provider not initialized')
-    }
+    this.checkInitialization()
 
     if (!modelId) {
       throw new Error('Model ID is required')
@@ -1163,7 +1161,7 @@ export class OpenAICompatibleProvider extends BaseLLMProvider {
     maxTokens: number,
     mcpTools: MCPToolDefinition[]
   ): AsyncGenerator<LLMCoreStreamEvent> {
-    if (!this.isInitialized) throw new Error('Provider not initialized')
+    this.checkInitialization()
     if (!modelId) throw new Error('Model ID is required')
 
     if (OPENAI_IMAGE_GENERATION_MODELS.includes(modelId)) {

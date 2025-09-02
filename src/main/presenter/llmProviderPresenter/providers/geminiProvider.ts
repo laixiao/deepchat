@@ -756,9 +756,7 @@ export class GeminiProvider extends BaseLLMProvider {
     temperature?: number,
     maxTokens?: number
   ): Promise<LLMResponse> {
-    if (!this.isInitialized) {
-      throw new Error('Provider not initialized')
-    }
+    this.checkInitialization()
 
     if (!modelId) {
       throw new Error('Model ID is required')
@@ -873,7 +871,7 @@ export class GeminiProvider extends BaseLLMProvider {
     maxTokens: number,
     mcpTools: MCPToolDefinition[]
   ): AsyncGenerator<LLMCoreStreamEvent> {
-    if (!this.isInitialized) throw new Error('Provider not initialized')
+    this.checkInitialization()
     if (!modelId) throw new Error('Model ID is required')
     console.log('modelConfig', modelConfig, modelId)
 

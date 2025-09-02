@@ -21,7 +21,8 @@
       "Bash(find:*)",
       "Read(C:\\Users\\Administrator\\Desktop\\deepchat\\**\\*)",
       "Write(C:\\Users\\Administrator\\Desktop\\deepchat\\**\\*)",
-      "Edit(C:\\Users\\Administrator\\Desktop\\deepchat\\**\\*)"
+      "Edit(C:\\Users\\Administrator\\Desktop\\deepchat\\**\\*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

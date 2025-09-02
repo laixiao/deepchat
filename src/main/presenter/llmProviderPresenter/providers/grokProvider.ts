@@ -79,9 +79,7 @@ export class GrokProvider extends OpenAICompatibleProvider {
   private async handleImageGeneration(
     messages: ChatMessage[]
   ): Promise<LLMResponse & { imageData?: string; mimeType?: string }> {
-    if (!this.isInitialized) {
-      throw new Error('Provider not initialized')
-    }
+    this.checkInitialization()
 
     // 提取提示词（使用最后一条用户消息）
     const userMessage = messages.findLast((msg) => msg.role === 'user')
