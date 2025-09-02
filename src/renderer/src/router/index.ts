@@ -26,6 +26,15 @@ const router = createRouter({
       }
     },
     {
+      path: '/projects',
+      name: 'projects',
+      component: () => import('@/views/ProjectsView.vue'),
+      meta: {
+        titleKey: 'routes.projects',
+        icon: 'lucide:folder'
+      }
+    },
+    {
       path: '/mcp',
       name: 'mcp',
       component: () => import('@/views/McpManagementView.vue'),

@@ -69,6 +69,14 @@
       <Button
         variant="ghost"
         class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        @click="openProjects"
+      >
+        <Icon icon="lucide:folder" class="w-4 h-4 mr-1" />
+        <span>{{ t('appbar.projects') }}</span>
+      </Button>
+      <Button
+        variant="ghost"
+        class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="openMcp"
       >
         <Icon icon="lucide:cpu" class="w-4 h-4 mr-1" />
@@ -657,6 +665,23 @@ const openGpuInfo = () => {
       name: t('routes.gpu'),
       icon: 'lucide:chip',
       viewType: 'gpu'
+    })
+  }
+}
+
+const openProjects = () => {
+  // 检查是否已经存在项目标签页
+  const existingProjectsTab = tabStore.tabs.find((tab) => tab.url.includes('#/projects'))
+
+  if (existingProjectsTab) {
+    // 如果已经存在项目标签页，切换到该标签页
+    tabStore.setCurrentTabId(existingProjectsTab.id)
+  } else {
+    // 如果不存在项目标签页，创建新的
+    tabStore.addTab({
+      name: t('routes.projects'),
+      icon: 'lucide:folder',
+      viewType: 'projects'
     })
   }
 }

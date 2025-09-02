@@ -18,6 +18,7 @@ import contextMenu from './contextMenu.json'
 import promptSetting from './promptSetting.json'
 import appbar from './appbar.json'
 import gpuInfo from './gpuInfo.json'
+import projects from './projects.json'
 
 // 单独的顶层键
 const others = {
@@ -55,5 +56,6 @@ export default {
   promptSetting,
   appbar,
   gpuInfo,
+  projects,
   ...others
 }

@@ -18,6 +18,7 @@ import contextMenu from './contextMenu.json'
 import promptSetting from './promptSetting.json'
 import appbar from './appbar.json'
 import gpuInfo from './gpuInfo.json'
+import projects from './projects.json'
 
 // Individual top-level keys
 const others = {
@@ -54,5 +55,6 @@ export default {
   promptSetting,
   appbar,
   gpuInfo,
+  projects,
   ...others
 }
