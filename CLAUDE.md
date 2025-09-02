@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Language
-chinese
+Think in English but reply in Chinese.
 
 ## Project Overview
 
