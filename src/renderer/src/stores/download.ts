@@ -4,7 +4,6 @@ import { nanoid } from 'nanoid'
 import { usePresenter } from '@/composables/usePresenter'
 import { useRouter } from 'vue-router'
 import { useToast } from '@/components/ui/toast/use-toast'
-import { useI18n } from 'vue-i18n'
 
 // 下载状态类型
 export type DownloadStatus = 'pending' | 'downloading' | 'paused' | 'completed' | 'failed'
@@ -35,7 +34,7 @@ export const useDownloadStore = defineStore('download', () => {
 
   // 获取全局实例
   const { toast } = useToast()
-  const { t } = useI18n()
+  // const { t } = useI18n()
 
   // 操作方法
   const setVisible = (visible: boolean) => {

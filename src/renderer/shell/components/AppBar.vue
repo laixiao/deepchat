@@ -242,10 +242,10 @@ const systemAlert = ref(false)
 const systemAlertInterval = ref<number | null>(null)
 
 // 下载相关状态
-const hasDownloads = vueComputed(() => {
-  console.log('Download store downloads length:', downloadStore.downloads.length)
-  return downloadStore.downloads.length > 0
-})
+// const hasDownloads = vueComputed(() => {
+//   console.log('Download store downloads length:', downloadStore.downloads.length)
+//   return downloadStore.downloads.length > 0
+// })
 
 const hasActiveDownloads = vueComputed(() => {
   const active = downloadStore.downloads.some(d => d.status === 'downloading' || d.status === 'pending' || d.status === 'paused')

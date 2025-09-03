@@ -203,9 +203,9 @@ const clearCompleted = () => {
   downloadStore.clearCompleted()
 }
 
-const openDownloadLocation = (filePath: string) => {
+const openDownloadLocation = (filePath?: string) => {
   if (filePath) {
-    window.electronAPI?.showItemInFolder?.(filePath)
+    window.electron?.ipcRenderer.invoke('show-item-in-folder', filePath)
   }
 }
 
@@ -232,7 +232,8 @@ const formatTime = (seconds: number): string => {
   }
 }
 
-const formatDate = (timestamp: number): string => {
+const formatDate = (timestamp?: number): string => {
+  if (!timestamp) return ''
   return new Date(timestamp).toLocaleString()
 }
 </script>

@@ -24,7 +24,7 @@ export interface DownloadTask {
   createdAt: number
   startedAt?: number
   completedAt?: number
-  request?: http.ClientRequest | https.RequestOptions
+  request?: http.ClientRequest
   writeStream?: fs.WriteStream
 }
 
