@@ -9,6 +9,7 @@ import {
   IDeeplinkPresenter,
   IDevicePresenter,
   IDialogPresenter,
+  IDownloadPresenter,
   IFilePresenter,
   ILifecycleManager,
   ILlmProviderPresenter,
@@ -40,6 +41,7 @@ import { FloatingButtonPresenter } from './floatingButtonPresenter'
 import { CONFIG_EVENTS, WINDOW_EVENTS } from '@/events'
 import { KnowledgePresenter } from './knowledgePresenter'
 import { GpuPresenter } from './gpuPresenter'
+import { DownloadPresenter } from './downloadPresenter'
 
 // IPC调用上下文接口
 interface IPCCallContext {
@@ -78,6 +80,7 @@ export class Presenter implements IPresenter {
   floatingButtonPresenter: FloatingButtonPresenter
   knowledgePresenter: KnowledgePresenter
   gpuPresenter: GpuPresenter
+  downloadPresenter: IDownloadPresenter
   // llamaCppPresenter: LlamaCppPresenter // 保留原始注释
   dialogPresenter: IDialogPresenter
   lifecycleManager: ILifecycleManager
@@ -120,6 +123,7 @@ export class Presenter implements IPresenter {
       this.filePresenter
     )
     this.gpuPresenter = new GpuPresenter()
+    this.downloadPresenter = new DownloadPresenter()
 
     // this.llamaCppPresenter = new LlamaCppPresenter() // 保留原始注释
     this.setupEventBus() // 设置事件总线监听

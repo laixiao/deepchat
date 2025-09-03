@@ -1,0 +1,24 @@
+{
+  "title": "Download Manager",
+  "description": "Manage all download tasks, view download progress and status",
+  "empty": "No download tasks",
+  "activeDownloads": "{count} active downloads",
+  "clearCompleted": "Clear Completed",
+  "close": "Close",
+  "completedAt": "Completed at",
+  "configRequired": "Configuration Required",
+  "status": {
+    "pending": "Pending",
+    "downloading": "Downloading",
+    "paused": "Paused",
+    "completed": "Completed",
+    "failed": "Failed"
+  },
+  "actions": {
+    "pause": "Pause",
+    "resume": "Resume",
+    "retry": "Retry",
+    "remove": "Remove",
+    "openFolder": "Open Folder"
+  }
+}

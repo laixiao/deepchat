@@ -1,7 +1,8 @@
-import { app, dialog } from 'electron'
+import { app, dialog, shell } from 'electron'
 import { LifecycleManager, registerCoreHooks } from './presenter/lifecyclePresenter'
 import { getInstance, Presenter } from './presenter'
 import { electronApp } from '@electron-toolkit/utils'
+import { ipcMain } from 'electron'
 
 // Set application command line arguments
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required') // Allow video autoplay
@@ -19,6 +20,15 @@ if (process.platform === 'darwin') {
   // macOS platform specific parameters
   app.commandLine.appendSwitch('disable-features', 'DesktopCaptureMacV2,IOSurfaceCapturer')
 }
+
+// Register IPC handlers
+ipcMain.handle('show-open-dialog', async (_event, options) => {
+  return await dialog.showOpenDialog(options)
+})
+
+ipcMain.handle('show-item-in-folder', async (_event, path) => {
+  return shell.showItemInFolder(path)
+})
 
 // Initialize lifecycle manager and register core hooks
 const lifecycleManager = new LifecycleManager()

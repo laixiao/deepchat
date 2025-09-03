@@ -1,6 +1,6 @@
 <template>
   <Dialog :open="open" @update:open="$emit('update:open', $event)">
-    <DialogContent class="w-[90vw] h-[90vh] max-w-[90vw] max-h-[90vh] p-0 flex flex-col">
+    <DialogContent class="w-[90vw] h-[90vh] max-w-[90vw] max-h-[90vh] p-0 flex flex-col z-[100]">
       <!-- 弹窗头部 -->
       <DialogHeader class="flex-shrink-0 px-6 py-4 border-b">
         <DialogTitle class="text-xl font-bold flex items-center gap-2">
@@ -120,6 +120,15 @@
                     <Icon icon="lucide:external-link" class="w-4 h-4 mr-1" />
                     {{ t('projects.detail.open') }}
                   </Button>
+                  <Button
+                    @click="downloadFile(link)"
+                    variant="default"
+                    size="sm"
+                    class="ml-2 flex-shrink-0"
+                  >
+                    <Icon icon="lucide:download" class="w-4 h-4 mr-1" />
+                    {{ t('projects.detail.download') }}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -196,6 +205,7 @@ import {
 } from '@/components/ui/dialog'
 import type { Project } from '@/lib/projects'
 import { getProjectById } from '@/lib/projects'
+import { useDownloadStore } from '@/stores/download'
 
 interface Props {
   open: boolean
@@ -208,6 +218,7 @@ defineEmits<{
 
 const props = defineProps<Props>()
 const { t } = useI18n()
+const downloadStore = useDownloadStore()
 
 // 响应式数据
 const loading = ref(false)
@@ -246,6 +257,16 @@ const refreshDetail = () => {
 // 打开下载链接
 const openDownloadLink = (url: string) => {
   window.open(url, '_blank', 'noopener,noreferrer')
+}
+
+// 下载文件
+const downloadFile = (link: { filename: string; url: string; hash: string }) => {
+  // 使用下载 store 添加下载任务
+  downloadStore.addDownload({
+    filename: link.filename,
+    url: link.url,
+    hash: link.hash
+  })
 }
 
 // 格式化日期

@@ -42,6 +42,15 @@
             box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
         }
 
+        .header-bar a,
+        .header-bar .el-button {
+            color: white !important;
+        }
+
+        .header-bar .el-button:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
         .header-content {
             display: flex;
             justify-content: space-between;
@@ -225,7 +234,7 @@
             --text-regular: #cfcfcf;
             --text-secondary: #a8abb2;
             --border-color: #4c4d4f;
-            --header-bg: linear-gradient(90deg, #337ecc 0%, #529b2e 100%);
+            --header-bg: linear-gradient(90deg, #409eff 0%, #67c23a 100%);
             --table-header-bg: #363636;
             --table-row-hover: #404040;
             --table-stripe-bg: #333333;
@@ -260,6 +269,16 @@
         }
 
         /* Element Plus 组件主题适配 */
+        [data-theme="dark"] .header-bar a,
+        [data-theme="dark"] .header-bar .el-button,
+        [data-theme="dark"] .header-bar .el-dropdown-link {
+            color: white !important;
+        }
+
+        [data-theme="dark"] .header-bar .el-button:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
         [data-theme="dark"] .el-table {
             --el-table-bg-color: var(--card-bg);
             --el-table-tr-bg-color: var(--card-bg);

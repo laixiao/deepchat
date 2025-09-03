@@ -350,6 +350,7 @@ export interface IPresenter {
   dialogPresenter: IDialogPresenter
   knowledgePresenter: IKnowledgePresenter
   gpuPresenter: IGpuPresenter
+  downloadPresenter: IDownloadPresenter
   init(): void
   destroy(): void
 }
@@ -357,6 +358,23 @@ export interface IPresenter {
 export interface IGpuPresenter {
   getNvidiaGpuInfo(): Promise<GpuInfo[]>
   isGpuMonitoringSupported(): Promise<boolean>
+}
+
+export interface IDownloadPresenter {
+  downloadFile(params: {
+    id: string
+    url: string
+    filename: string
+    downloadDir: string
+    hash?: string
+  }): Promise<{ success: boolean; filePath?: string; error?: string }>
+  pauseDownload(id: string): boolean
+  resumeDownload(id: string): boolean
+  cancelDownload(id: string): boolean
+  getDownloadStatus(id: string): any | null
+  getAllDownloads(): any[]
+  clearCompleted(): void
+  clearAll(): void
 }
 
 export interface INotificationPresenter {
@@ -508,6 +526,13 @@ export interface IConfigPresenter {
   removeProviderAtomic(providerId: string): void
   reorderProvidersAtomic(providers: LLM_PROVIDER[]): void
   updateProvidersBatch(batchUpdate: ProviderBatchUpdate): void
+  // 下载和安装目录设置
+  getDownloadDirectory(): string
+  setDownloadDirectory(directory: string): void
+  getInstallationDirectory(): string
+  setInstallationDirectory(directory: string): void
+  validatePathNotContainsChinese(path: string): boolean
+  ensureDirectoryExists(directory: string): Promise<boolean>
 }
 export type RENDERER_MODEL_META = {
   id: string

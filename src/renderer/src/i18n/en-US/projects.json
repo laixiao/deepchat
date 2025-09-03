@@ -36,6 +36,9 @@
     "version": "Version",
     "projectId": "Project ID",
     "hash": "Hash",
+    "download": "Download",
+    "downloadFile": "Download File",
+    "open": "Open Link",
     "open": "Open Link"
   }
 }

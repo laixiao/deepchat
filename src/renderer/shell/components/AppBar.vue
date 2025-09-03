@@ -110,6 +110,50 @@
         <Icon icon="lucide:settings" class="w-4 h-4 mr-1" />
         <span>{{ t('appbar.settings') }}</span>
       </Button>
+      
+      <!-- 下载按钮 -->
+      <Button
+        variant="ghost"
+        class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20 relative"
+        @click="openDownloadManager"
+      >
+        <Icon 
+          icon="lucide:download" 
+          class="w-4 h-4"
+          :class="{ 'animate-bounce': hasActiveDownloads }"
+        />
+        <span class="ml-1">{{ hasActiveDownloads ? activeDownloadsCount : completedDownloadsCount }}</span>
+        <!-- 活动下载进度指示器 -->
+        <div 
+          v-if="hasActiveDownloads" 
+          class="absolute -top-1 -right-1 w-3 h-3"
+        >
+          <svg class="w-3 h-3" viewBox="0 0 12 12">
+            <circle
+              class="text-zinc-300"
+              stroke-width="1"
+              stroke="currentColor"
+              fill="transparent"
+              r="5"
+              cx="6"
+              cy="6"
+            />
+            <circle
+              class="text-primary"
+              stroke-width="1"
+              :stroke-dasharray="`${circumference} ${circumference}`"
+              :stroke-dashoffset="strokeDashoffset"
+              stroke-linecap="round"
+              fill="transparent"
+              r="5"
+              cx="6"
+              cy="6"
+              transform="rotate(-90 6 6)"
+            />
+          </svg>
+        </div>
+      </Button>
+      
       <!-- <Button
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center"
         @click="openNewWindow"
@@ -144,7 +188,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed, onUnmounted } from 'vue'
+import { ref, onMounted, nextTick, computed as vueComputed, onUnmounted } from 'vue'
 import { MinusIcon, XIcon } from 'lucide-vue-next'
 import MaximizeIcon from './icons/MaximizeIcon.vue'
 import RestoreIcon from './icons/RestoreIcon.vue'
@@ -157,6 +201,7 @@ import { useThemeStore } from '@/stores/theme'
 import { useElementSize } from '@vueuse/core'
 import { useLanguageStore } from '@/stores/language'
 import { useI18n } from 'vue-i18n'
+import { useDownloadStore } from '@/stores/download'
 const tabStore = useTabStore()
 const langStore = useLanguageStore()
 const { t } = useI18n()
@@ -174,6 +219,9 @@ const { ipcRenderer } = window.electron
 const themeStore = useThemeStore()
 const tabContainerWrapper = ref<HTMLElement | null>(null)
 const tabContainer = ref<HTMLElement | null>(null)
+const downloadStore = useDownloadStore()
+console.log('Download store initialized:', downloadStore)
+console.log('Download store downloads:', downloadStore.downloads)
 
 let draggedTabId: number | null = null
 const dragInsertIndex = ref(-1)
@@ -193,6 +241,46 @@ import {
 const systemAlert = ref(false)
 const systemAlertInterval = ref<number | null>(null)
 
+// 下载相关状态
+const hasDownloads = vueComputed(() => {
+  console.log('Download store downloads length:', downloadStore.downloads.length)
+  return downloadStore.downloads.length > 0
+})
+
+const hasActiveDownloads = vueComputed(() => {
+  const active = downloadStore.downloads.some(d => d.status === 'downloading' || d.status === 'pending' || d.status === 'paused')
+  console.log('Has active downloads:', active)
+  return active
+})
+
+const activeDownloadsCount = vueComputed(() => {
+  const count = downloadStore.downloads.filter(d => d.status === 'downloading' || d.status === 'pending' || d.status === 'paused').length
+  console.log('Active downloads count:', count)
+  return count
+})
+
+const completedDownloadsCount = vueComputed(() => {
+  const count = downloadStore.downloads.filter(d => d.status === 'completed').length
+  console.log('Completed downloads count:', count)
+  return count
+})
+
+// 进度环计算
+const circumference = vueComputed(() => 2 * Math.PI * 5)
+const totalProgress = vueComputed(() => {
+  if (downloadStore.downloads.length === 0) return 0
+  
+  const activeDownloads = downloadStore.downloads.filter(d => d.status === 'downloading' || d.status === 'pending' || d.status === 'paused')
+  if (activeDownloads.length === 0) return 100
+  
+  const totalProgress = activeDownloads.reduce((sum, download) => sum + download.progress, 0)
+  return totalProgress / activeDownloads.length
+})
+
+const strokeDashoffset = vueComputed(() => {
+  return circumference.value - (totalProgress.value / 100) * circumference.value
+})
+
 const tabContainerWrapperSize = useElementSize(tabContainerWrapper)
 const tabContainerSize = useElementSize(tabContainer)
 const tabContainerWrapperScrollLeft = ref(0)
@@ -203,14 +291,14 @@ const onTabContainerWrapperScroll = () => {
   })
 }
 
-const isTabContainerOverflowingLeft = computed(() => {
+const isTabContainerOverflowingLeft = vueComputed(() => {
   return (
     tabContainerWrapperSize.width.value < tabContainerSize.width.value &&
     tabContainerWrapperScrollLeft.value > 0
   )
 })
 
-const isTabContainerOverflowingRight = computed(() => {
+const isTabContainerOverflowingRight = vueComputed(() => {
   return (
     tabContainerWrapperSize.width.value < tabContainerSize.width.value &&
     tabContainerWrapperScrollLeft.value <
@@ -586,6 +674,9 @@ onMounted(() => {
   window.addEventListener('dragover', handleDragOver)
   window.addEventListener('dragend', handleDragEnd)
   
+  // 初始化下载监听器
+  downloadStore.initDownloadListeners()
+  
   // 启动系统监控
   startSystemMonitoring()
 })
@@ -718,6 +809,11 @@ const openSettings = () => {
       viewType: 'settings'
     })
   }
+}
+
+// 打开下载管理器
+const openDownloadManager = () => {
+  downloadStore.setVisible(true)
 }
 </script>
 

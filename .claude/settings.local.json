@@ -19,10 +19,13 @@
       "Bash(timeout:*)",
       "Bash(curl:*)",
       "Bash(find:*)",
-      "Read(C:\\Users\\Administrator\\Desktop\\deepchat\\**\\*)",
-      "Write(C:\\Users\\Administrator\\Desktop\\deepchat\\**\\*)",
-      "Edit(C:\\Users\\Administrator\\Desktop\\deepchat\\**\\*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Read(c:\\Users\\admin\\Desktop\\deepchat/**)",
+      "Write(C:\\Users\\Administrator\\Desktop\\deepchat/**)",
+      "Edit(C:\\Users\\Administrator\\Desktop\\deepchat/**)",
+      "Read(c:\\Users\\admin\\Desktop\\deepchat\\src\\renderer\\shell\\components/**)",
+      "Read(c:\\Users\\admin\\Desktop\\deepchat\\src\\renderer\\shell\\components/**)",
+      "Read(c:\\Users\\admin\\Desktop\\deepchat\\src\\renderer\\shell\\components/**)"
     ],
     "deny": [],
     "ask": []

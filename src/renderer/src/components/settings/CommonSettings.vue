@@ -614,6 +614,93 @@
           </div>
         </div>
 
+        <!-- 下载目录设置 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:download" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.downloadDirectory') }}</span>
+              </span>
+              <div class="flex-shrink-0 w-96 flex gap-2">
+                <Input
+                  v-model="downloadDirectory"
+                  class="cursor-pointer"
+                  :placeholder="t('settings.common.downloadDirectoryPlaceholder')"
+                  @click="selectDownloadDirectory"
+                  readonly
+                />
+                <Button
+                  size="icon"
+                  variant="outline"
+                  :title="t('settings.common.selectDirectory')"
+                  @click="selectDownloadDirectory"
+                >
+                  <Icon icon="lucide:folder-open" class="w-4 h-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  :title="t('settings.common.openDirectory')"
+                  @click="openDownloadDirectory"
+                >
+                  <Icon icon="lucide:external-link" class="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.downloadDirectoryDesc') }}
+            </div>
+          </div>
+        </div>
+
+        <!-- 安装目录设置 -->
+        <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
+          <div class="flex flex-col gap-3">
+            <div class="flex flex-row items-center gap-2">
+              <span class="flex flex-row items-center gap-2 flex-grow w-full" :dir="langStore.dir">
+                <Icon icon="lucide:hard-drive" class="w-4 h-4 text-muted-foreground" />
+                <span class="text-sm font-medium">{{ t('settings.common.installationDirectory') }}</span>
+              </span>
+              <div class="flex-shrink-0 w-96 flex gap-2">
+                <Input
+                  v-model="installationDirectory"
+                  class="cursor-pointer"
+                  :placeholder="t('settings.common.installationDirectoryPlaceholder')"
+                  @click="selectInstallationDirectory"
+                  readonly
+                  :class="{
+                    'border-destructive': installationDirectory && !isInstallationPathValid
+                  }"
+                />
+                <Button
+                  size="icon"
+                  variant="outline"
+                  :title="t('settings.common.selectDirectory')"
+                  @click="selectInstallationDirectory"
+                >
+                  <Icon icon="lucide:folder-open" class="w-4 h-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  :title="t('settings.common.openDirectory')"
+                  @click="openInstallationDirectory"
+                >
+                  <Icon icon="lucide:external-link" class="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div class="text-xs text-muted-foreground pl-0">
+              {{ t('settings.common.installationDirectoryDesc') }}
+            </div>
+            <div v-if="installationDirectory && !isInstallationPathValid" class="text-xs text-destructive pl-0">
+              <Icon icon="lucide:alert-triangle" class="w-3 h-3 inline mr-1" />
+              {{ t('settings.common.installationDirectoryChineseWarning') }}
+            </div>
+          </div>
+        </div>
+
         <!-- 上次同步时间 -->
         <div class="bg-muted/30 rounded-lg p-4 border border-border/50">
           <div class="flex items-center gap-2" :dir="langStore.dir">
@@ -992,6 +1079,7 @@
 </template>
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { useToast } from '@/components/ui/toast/use-toast'
 import { Icon } from '@iconify/vue'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { usePresenter } from '@/composables/usePresenter'
@@ -1053,6 +1141,7 @@ const langStore = useLanguageStore()
 const floatingButtonStore = useFloatingButtonStore()
 const syncStore = useSyncStore()
 const { t } = useI18n()
+const { toast } = useToast()
 const themeStore = useThemeStore()
 const selectedSearchEngine = ref(settingsStore.activeSearchEngine?.id ?? 'google')
 const selectedSearchModel = computed(() => settingsStore.searchAssistantModel)
@@ -1065,6 +1154,16 @@ const showUrlError = ref(false)
 const webContentLengthLimit = ref(3000)
 const isEditingLimit = ref(false)
 const limitInputRef = ref<HTMLInputElement>()
+
+// 下载和安装目录设置
+const downloadDirectory = ref('')
+const installationDirectory = ref('')
+
+// 安装目录路径验证
+const isInstallationPathValid = computed(() => {
+  if (!installationDirectory.value) return true
+  return configPresenter.validatePathNotContainsChinese(installationDirectory.value)
+})
 
 // 新增搜索引擎相关
 const isAddSearchEngineDialogOpen = ref(false)
@@ -1199,6 +1298,14 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('加载网页内容长度限制设置失败:', error)
+  }
+  
+  // 初始化下载和安装目录
+  try {
+    downloadDirectory.value = configPresenter.getDownloadDirectory()
+    installationDirectory.value = configPresenter.getInstallationDirectory()
+  } catch (error) {
+    console.error('初始化目录设置失败:', error)
   }
 })
 
@@ -1630,5 +1737,87 @@ const closeToQuitEnabled = computed({
 
 const handleCloseToQuitChange = (value: boolean) => {
   settingsStore.setCloseToQuitEnabled(value)
+}
+
+// --- 下载和安装目录设置 ---
+// 选择下载目录
+const selectDownloadDirectory = async () => {
+  try {
+    const result = await window.electron.ipcRenderer.invoke('show-open-dialog', {
+      properties: ['openDirectory'],
+      title: t('settings.common.selectDownloadDirectory')
+    })
+    
+    if (!result.canceled && result.filePaths?.length > 0) {
+      const selectedPath = result.filePaths[0]
+      downloadDirectory.value = selectedPath
+      configPresenter.setDownloadDirectory(selectedPath)
+      
+      // 确保目录存在
+      await configPresenter.ensureDirectoryExists(selectedPath)
+    }
+  } catch (error) {
+    console.error('选择下载目录失败:', error)
+  }
+}
+
+// 打开下载目录
+const openDownloadDirectory = async () => {
+  try {
+    if (downloadDirectory.value) {
+      await window.electron.ipcRenderer.invoke('show-item-in-folder', downloadDirectory.value)
+    }
+  } catch (error) {
+    console.error('打开下载目录失败:', error)
+  }
+}
+
+// 选择安装目录
+const selectInstallationDirectory = async () => {
+  try {
+    const result = await window.electron.ipcRenderer.invoke('show-open-dialog', {
+      properties: ['openDirectory'],
+      title: t('settings.common.selectInstallationDirectory')
+    })
+    
+    if (!result.canceled && result.filePaths?.length > 0) {
+      const selectedPath = result.filePaths[0]
+      
+      // 验证路径不包含中文
+      if (!configPresenter.validatePathNotContainsChinese(selectedPath)) {
+        // 显示错误提示并阻止设置
+        toast({
+          title: t('settings.common.pathValidationError'),
+          description: t('settings.common.pathContainsChineseError'),
+          variant: 'destructive'
+        })
+        return
+      }
+      
+      installationDirectory.value = selectedPath
+      configPresenter.setInstallationDirectory(selectedPath)
+      
+      // 确保目录存在
+      await configPresenter.ensureDirectoryExists(selectedPath)
+    }
+  } catch (error) {
+    console.error('选择安装目录失败:', error)
+    toast({
+      title: t('settings.common.error'),
+      description: t('settings.common.selectDirectoryError'),
+      variant: 'destructive'
+    })
+  }
+}
+
+// 打开安装目录
+const openInstallationDirectory = async () => {
+  try {
+    if (installationDirectory.value) {
+      await window.electron.ipcRenderer.invoke('show-item-in-folder', installationDirectory.value)
+    }
+  } catch (error) {
+    console.error('打开安装目录失败:', error)
+  }
 }
 </script>

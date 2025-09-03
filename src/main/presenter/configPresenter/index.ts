@@ -61,6 +61,8 @@ interface IAppSettings {
   default_system_prompt?: string // 默认系统提示词
   sidebarOpen?: boolean // 侧边栏展开状态
   webContentLengthLimit?: number // 网页内容截断长度限制，默认3000字符
+  downloadDirectory?: string // 下载目录路径
+  installationDirectory?: string // 安装目录路径
   [key: string]: unknown // 允许任意键，使用unknown类型替代any
 }
 
@@ -126,6 +128,8 @@ export class ConfigPresenter implements IConfigPresenter {
         default_system_prompt: '',
         sidebarOpen: true,
         webContentLengthLimit: 3000,
+        downloadDirectory: path.join(app.getPath('downloads'), 'deepchat'),
+        installationDirectory: path.join(app.getPath('home'), 'deepchat-installs'),
         appVersion: this.currentAppVersion
       }
     })
@@ -1362,6 +1366,60 @@ export class ConfigPresenter implements IConfigPresenter {
   // 根据包名查找服务器
   async findMcpServerByPackage(packageName: string): Promise<string | null> {
     return this.mcpConfHelper.findServerByPackage(packageName)
+  }
+
+  // 获取下载目录
+  getDownloadDirectory(): string {
+    return (
+      this.getSetting<string>('downloadDirectory') ||
+      path.join(app.getPath('downloads'), 'deepchat')
+    )
+  }
+
+  // 设置下载目录
+  setDownloadDirectory(directory: string): void {
+    this.setSetting('downloadDirectory', directory)
+    eventBus.send(CONFIG_EVENTS.SETTING_CHANGED, SendTarget.ALL_WINDOWS, {
+      key: 'downloadDirectory',
+      value: directory
+    })
+  }
+
+  // 获取安装目录
+  getInstallationDirectory(): string {
+    return (
+      this.getSetting<string>('installationDirectory') ||
+      path.join(app.getPath('home'), 'deepchat-installs')
+    )
+  }
+
+  // 设置安装目录
+  setInstallationDirectory(directory: string): void {
+    this.setSetting('installationDirectory', directory)
+    eventBus.send(CONFIG_EVENTS.SETTING_CHANGED, SendTarget.ALL_WINDOWS, {
+      key: 'installationDirectory',
+      value: directory
+    })
+  }
+
+  // 验证路径是否包含中文字符
+  validatePathNotContainsChinese(path: string): boolean {
+    // 使用正则表达式检测中文字符
+    const chineseRegex = /[一-鿿]/
+    return !chineseRegex.test(path)
+  }
+
+  // 创建目录（如果不存在）
+  async ensureDirectoryExists(directory: string): Promise<boolean> {
+    try {
+      if (!fs.existsSync(directory)) {
+        fs.mkdirSync(directory, { recursive: true })
+      }
+      return true
+    } catch (error) {
+      console.error('Failed to create directory:', error)
+      return false
+    }
   }
 }
 

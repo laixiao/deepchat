@@ -19,6 +19,7 @@ import promptSetting from './promptSetting.json'
 import appbar from './appbar.json'
 import gpuInfo from './gpuInfo.json'
 import projects from './projects.json'
+import download from './download.json'
 
 // Individual top-level keys
 const others = {
@@ -56,5 +57,6 @@ export default {
   appbar,
   gpuInfo,
   projects,
+  download,
   ...others
 }
