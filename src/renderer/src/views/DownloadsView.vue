@@ -184,7 +184,7 @@ const syncDownloadsFromGlobalStore = () => {
   window.electron.ipcRenderer.send('download-global-store', { action: 'get' })
 
   // 监听全局数据响应
-  window.electron.ipcRenderer.once('download-global-data', (event, allDownloads) => {
+  window.electron.ipcRenderer.once('download-global-data', (_event, allDownloads) => {
     if (allDownloads && Array.isArray(allDownloads)) {
       // 清空当前任务列表
       downloadStore.downloads.splice(0)

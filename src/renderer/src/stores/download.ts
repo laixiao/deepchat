@@ -30,10 +30,10 @@ export interface DownloadItem {
 export const useDownloadStore = defineStore('download', () => {
   // 状态
   const downloads = ref<DownloadItem[]>([])
+  const isVisible = ref(false)
 
   // 获取全局实例
   const { toast } = useToast()
-  // const { t } = useI18n()
 
   const updateDownload = (id: string, updates: Partial<DownloadItem>) => {
     const index = downloads.value.findIndex((d) => d.id === id)
@@ -64,9 +64,6 @@ export const useDownloadStore = defineStore('download', () => {
 
     // 跨标签页同步：通知其他标签页
     syncToOtherTabs('add', downloadItem)
-
-    // 使用 presenter 调用主进程开始下载
-    const downloadPresenter = usePresenter('downloadPresenter')
 
     // 异步开始下载
     setTimeout(() => {
@@ -335,8 +332,15 @@ export const useDownloadStore = defineStore('download', () => {
   // 初始化监听器
   initDownloadListeners()
 
+  // 控制下载管理器显示状态的方法
+  const setVisible = (visible: boolean) => {
+    isVisible.value = visible
+  }
+
   return {
     downloads,
+    isVisible,
+    setVisible,
     addDownload,
     updateDownload,
     removeDownload,

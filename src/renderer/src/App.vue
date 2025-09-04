@@ -12,13 +12,10 @@ import TranslatePopup from '@/components/popup/TranslatePopup.vue'
 import ModelCheckDialog from '@/components/settings/ModelCheckDialog.vue'
 import { useModelCheckStore } from '@/stores/modelCheck'
 import MessageDialog from './components/ui/MessageDialog.vue'
-import { useDownloadStore } from '@/stores/download'
-
 const { toast } = useToast()
 const settingsStore = useSettingsStore()
 const themeStore = useThemeStore()
 const modelCheckStore = useModelCheckStore()
-const downloadStore = useDownloadStore()
 // 错误通知队列及当前正在显示的错误
 const errorQueue = ref<Array<{ id: string; title: string; message: string; type: string }>>([])
 const currentErrorId = ref<string | null>(null)

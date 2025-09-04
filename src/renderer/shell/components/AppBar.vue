@@ -257,17 +257,7 @@ const hasActiveDownloads = vueComputed(() => {
   return active
 })
 
-const activeDownloadsCount = vueComputed(() => {
-  const count = downloadStore.downloads.filter(d => d.status === 'downloading' || d.status === 'pending' || d.status === 'paused').length
-  console.log('Active downloads count:', count)
-  return count
-})
 
-const completedDownloadsCount = vueComputed(() => {
-  const count = downloadStore.downloads.filter(d => d.status === 'completed').length
-  console.log('Completed downloads count:', count)
-  return count
-})
 
 // 进度环计算
 const circumference = vueComputed(() => 2 * Math.PI * 5)

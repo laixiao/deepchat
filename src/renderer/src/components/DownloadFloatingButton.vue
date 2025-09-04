@@ -68,13 +68,7 @@ const hasActiveDownloads = computed(() => {
   return downloadStore.downloads.some(d => d.status === 'downloading' || d.status === 'pending' || d.status === 'paused')
 })
 
-const activeDownloadsCount = computed(() => {
-  return downloadStore.downloads.filter(d => d.status === 'downloading' || d.status === 'pending' || d.status === 'paused').length
-})
 
-const completedDownloadsCount = computed(() => {
-  return downloadStore.downloads.filter(d => d.status === 'completed').length
-})
 
 const totalProgress = computed(() => {
   if (downloadStore.downloads.length === 0) return 0
