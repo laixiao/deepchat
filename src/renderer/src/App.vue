@@ -12,7 +12,6 @@ import TranslatePopup from '@/components/popup/TranslatePopup.vue'
 import ModelCheckDialog from '@/components/settings/ModelCheckDialog.vue'
 import { useModelCheckStore } from '@/stores/modelCheck'
 import MessageDialog from './components/ui/MessageDialog.vue'
-import DownloadManager from '@/components/DownloadManager.vue'
 import { useDownloadStore } from '@/stores/download'
 
 const { toast } = useToast()
@@ -176,9 +175,6 @@ onMounted(() => {
   document.body.classList.add(settingsStore.fontSizeClass)
 
   window.addEventListener('keydown', handleEscKey)
-
-  // 初始化下载监听器
-  downloadStore.initDownloadListeners()
 })
 </script>
 
@@ -199,7 +195,5 @@ onMounted(() => {
         }
       "
     />
-    <!-- 全局下载管理器 -->
-    <DownloadManager />
-  </div>
+      </div>
 </template>

@@ -121,7 +121,7 @@
                     {{ t('projects.detail.open') }}
                   </Button>
                   <Button
-                    @click="downloadFile(link)"
+                    @click="() => downloadFile(link)"
                     variant="default"
                     size="sm"
                     class="ml-2 flex-shrink-0"
@@ -212,7 +212,7 @@ interface Props {
   projectId: string | null
 }
 
-defineEmits<{
+const emit = defineEmits<{
   'update:open': [value: boolean]
 }>()
 
@@ -261,12 +261,24 @@ const openDownloadLink = (url: string) => {
 
 // 下载文件
 const downloadFile = (link: { filename: string; url: string; hash: string }) => {
-  // 使用下载 store 添加下载任务
-  downloadStore.addDownload({
-    filename: link.filename,
-    url: link.url,
-    hash: link.hash
-  })
+  try {
+    // 使用下载 store 添加下载任务
+    const downloadId = downloadStore.addDownload({
+      filename: link.filename,
+      url: link.url,
+      hash: link.hash
+    })
+
+    if (!downloadId) return
+
+    // 关闭当前弹窗
+    emit('update:open', false)
+
+    // 跳转到下载管理页面
+    window.electron?.ipcRenderer.invoke('open-downloads-tab')
+  } catch (error) {
+    console.error('下载过程中发生错误:', error)
+  }
 }
 
 // 格式化日期

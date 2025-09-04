@@ -30,15 +30,16 @@ export interface DownloadItem {
 export const useDownloadStore = defineStore('download', () => {
   // 状态
   const downloads = ref<DownloadItem[]>([])
-  const isVisible = ref(false)
 
   // 获取全局实例
   const { toast } = useToast()
   // const { t } = useI18n()
 
-  // 操作方法
-  const setVisible = (visible: boolean) => {
-    isVisible.value = visible
+  const updateDownload = (id: string, updates: Partial<DownloadItem>) => {
+    const index = downloads.value.findIndex((d) => d.id === id)
+    if (index !== -1) {
+      downloads.value[index] = { ...downloads.value[index], ...updates }
+    }
   }
 
   const addDownload = (params: { filename: string; url: string; hash?: string }): string => {
@@ -58,8 +59,14 @@ export const useDownloadStore = defineStore('download', () => {
 
     downloads.value.push(downloadItem)
 
-    // 显示下载管理器
-    isVisible.value = true
+    // 同步到全局存储
+    syncToGlobalStore('add', downloadItem)
+
+    // 跨标签页同步：通知其他标签页
+    syncToOtherTabs('add', downloadItem)
+
+    // 使用 presenter 调用主进程开始下载
+    const downloadPresenter = usePresenter('downloadPresenter')
 
     // 异步开始下载
     setTimeout(() => {
@@ -67,13 +74,6 @@ export const useDownloadStore = defineStore('download', () => {
     }, 100)
 
     return downloadId
-  }
-
-  const updateDownload = (id: string, updates: Partial<DownloadItem>) => {
-    const index = downloads.value.findIndex((d) => d.id === id)
-    if (index !== -1) {
-      downloads.value[index] = { ...downloads.value[index], ...updates }
-    }
   }
 
   const removeDownload = (id: string) => {
@@ -133,9 +133,6 @@ export const useDownloadStore = defineStore('download', () => {
           // 用户点击了toast，引导到设置页面
           const router = useRouter()
           router.push('/settings')
-
-          // 关闭下载管理器弹窗
-          isVisible.value = false
         }
       }
     })
@@ -258,12 +255,88 @@ export const useDownloadStore = defineStore('download', () => {
         }
       }
     )
+
+    // 监听跨标签页的数据同步事件
+    window.electron.ipcRenderer.on(
+      'download-sync',
+      (
+        _event,
+        data: {
+          action: 'add' | 'update' | 'remove' | 'clear'
+          downloadItem?: DownloadItem
+          downloadId?: string
+        }
+      ) => {
+        switch (data.action) {
+          case 'add':
+            if (data.downloadItem) {
+              // 检查是否已经存在相同的任务
+              const existingIndex = downloads.value.findIndex((d) => d.id === data.downloadItem!.id)
+              if (existingIndex === -1) {
+                downloads.value.push(data.downloadItem)
+              }
+            }
+            break
+          case 'update':
+            if (data.downloadItem) {
+              updateDownload(data.downloadItem.id, data.downloadItem)
+            }
+            break
+          case 'remove':
+            if (data.downloadId) {
+              const index = downloads.value.findIndex((d) => d.id === data.downloadId)
+              if (index !== -1) {
+                downloads.value.splice(index, 1)
+              }
+            }
+            break
+          case 'clear':
+            downloads.value = []
+            break
+        }
+      }
+    )
+
+    // 监听其他标签页的数据请求
+    window.electron.ipcRenderer.on('download-sync-data-request', () => {
+      // 发送当前所有的下载任务数据
+      window.electron.ipcRenderer.send('download-sync-data-response', downloads.value)
+    })
   }
+
+  // 全局存储同步函数
+  const syncToGlobalStore = (
+    action: 'add' | 'update' | 'remove' | 'clear',
+    downloadItem?: DownloadItem,
+    downloadId?: string
+  ) => {
+    // 通过 IPC 发送到主进程的全局存储
+    window.electron.ipcRenderer.send('download-global-store', {
+      action,
+      downloadItem,
+      downloadId
+    })
+  }
+
+  // 跨标签页同步函数
+  const syncToOtherTabs = (
+    action: 'add' | 'update' | 'remove' | 'clear',
+    downloadItem?: DownloadItem,
+    downloadId?: string
+  ) => {
+    // 通过 IPC 发送同步事件到主进程，主进程会转发给其他标签页
+    window.electron.ipcRenderer.send('download-sync-broadcast', {
+      action,
+      downloadItem,
+      downloadId
+    })
+  }
+
+  // 初始化监听器
+  initDownloadListeners()
 
   return {
     downloads,
-    isVisible,
-    setVisible,
     addDownload,
     updateDownload,
     removeDownload,

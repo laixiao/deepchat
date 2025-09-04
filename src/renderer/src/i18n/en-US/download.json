@@ -1,11 +1,12 @@
 {
-  "title": "Download Manager",
+  "title": "Downloads",
   "description": "Manage all download tasks, view download progress and status",
   "empty": "No download tasks",
   "activeDownloads": "{count} active downloads",
   "clearCompleted": "Clear Completed",
   "close": "Close",
   "completedAt": "Completed at",
+  "createdAt": "Created at",
   "configRequired": "Configuration Required",
   "status": {
     "pending": "Pending",

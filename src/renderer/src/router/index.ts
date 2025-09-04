@@ -118,6 +118,15 @@ const router = createRouter({
         titleKey: 'routes.gpu',
         icon: 'lucide:chip'
       }
+    },
+    {
+      path: '/downloads',
+      name: 'downloads',
+      component: () => import('@/views/DownloadsView.vue'),
+      meta: {
+        titleKey: 'routes.downloads',
+        icon: 'lucide:download'
+      }
     }
   ]
 })

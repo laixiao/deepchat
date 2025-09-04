@@ -68,7 +68,7 @@
 
       <Button
         variant="ghost"
-        class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="openProjects"
       >
         <Icon icon="lucide:folder" class="w-4 h-4 mr-1" />
@@ -76,7 +76,7 @@
       </Button>
       <Button
         variant="ghost"
-        class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="openMcp"
       >
         <Icon icon="lucide:cpu" class="w-4 h-4 mr-1" />
@@ -84,7 +84,7 @@
       </Button>
       <Button
         variant="ghost"
-        class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         :class="{ 'animate-pulse bg-red-500/20': systemAlert }"
         @click="openGpuInfo"
       >
@@ -94,7 +94,7 @@
       
       <Button
         variant="ghost"
-        class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
         @click="onThemeClick"
       >
         <Icon v-if="themeStore.themeMode === 'dark'" icon="lucide:moon" class="w-4 h-4 mr-1" />
@@ -102,19 +102,12 @@
         <Icon v-else icon="lucide:monitor" class="w-4 h-4 mr-1" />
         <span>{{ t('appbar.theme') }}</span>
       </Button>
-      <Button
-        variant="ghost"
-        class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
-        @click="openSettings"
-      >
-        <Icon icon="lucide:settings" class="w-4 h-4 mr-1" />
-        <span>{{ t('appbar.settings') }}</span>
-      </Button>
-      
+
+
       <!-- 下载按钮 -->
       <Button
         variant="ghost"
-        class="text-xs font-medium px-3 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20 relative"
+        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20 relative"
         @click="openDownloadManager"
       >
         <Icon 
@@ -122,7 +115,7 @@
           class="w-4 h-4"
           :class="{ 'animate-bounce': hasActiveDownloads }"
         />
-        <span class="ml-1">{{ hasActiveDownloads ? activeDownloadsCount : completedDownloadsCount }}</span>
+        <span class="ml-1">{{ t('routes.downloads') }}</span>
         <!-- 活动下载进度指示器 -->
         <div 
           v-if="hasActiveDownloads" 
@@ -153,6 +146,17 @@
           </svg>
         </div>
       </Button>
+
+      <Button
+        variant="ghost"
+        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        @click="openSettings"
+      >
+        <Icon icon="lucide:settings" class="w-4 h-4 mr-1" />
+        <span>{{ t('appbar.settings') }}</span>
+      </Button>
+      
+      
       
       <!-- <Button
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center"
@@ -673,10 +677,7 @@ onMounted(() => {
 
   window.addEventListener('dragover', handleDragOver)
   window.addEventListener('dragend', handleDragEnd)
-  
-  // 初始化下载监听器
-  downloadStore.initDownloadListeners()
-  
+
   // 启动系统监控
   startSystemMonitoring()
 })
@@ -813,7 +814,20 @@ const openSettings = () => {
 
 // 打开下载管理器
 const openDownloadManager = () => {
-  downloadStore.setVisible(true)
+  // 检查是否已经存在下载管理标签页
+  const existingDownloadsTab = tabStore.tabs.find((tab) => tab.url.includes('#/downloads'))
+  
+  if (existingDownloadsTab) {
+    // 如果已经存在下载管理标签页，切换到该标签页
+    tabStore.setCurrentTabId(existingDownloadsTab.id)
+  } else {
+    // 如果不存在下载管理标签页，创建新的
+    tabStore.addTab({
+      name: t('routes.downloads'),
+      icon: 'lucide:download',
+      viewType: 'downloads'
+    })
+  }
 }
 </script>
 

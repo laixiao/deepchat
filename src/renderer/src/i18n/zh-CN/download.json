@@ -1,11 +1,12 @@
 {
-  "title": "下载管理器",
+  "title": "下载管理",
   "description": "管理所有下载任务，查看下载进度和状态",
   "empty": "暂无下载任务",
   "activeDownloads": "{count} 个下载任务进行中",
   "clearCompleted": "清除已完成",
   "close": "关闭",
   "completedAt": "完成时间",
+  "createdAt": "创建时间",
   "configRequired": "需要配置",
   "status": {
     "pending": "等待中",

@@ -13,7 +13,7 @@
           :class="{ 'animate-bounce': hasActiveDownloads }"
         />
         <span class="font-medium">
-          {{ hasActiveDownloads ? `${activeDownloadsCount}` : `${completedDownloadsCount}` }}
+          {{ t('routes.downloads') }}
         </span>
       </div>
       
@@ -54,8 +54,10 @@
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useDownloadStore } from '@/stores/download'
+import { useI18n } from 'vue-i18n'
 
 const downloadStore = useDownloadStore()
+const { t } = useI18n()
 
 // 计算属性
 const hasDownloads = computed(() => {
@@ -92,6 +94,8 @@ const strokeDashoffset = computed(() => {
 
 // 方法
 const openDownloadManager = () => {
-  downloadStore.setVisible(true)
+  // 这里需要获取全局的 tabStore 实例来创建或切换到下载管理标签页
+  // 由于这是在 renderer 进程中，我们需要通过 IPC 调用主进程来处理标签页
+  window.electron?.ipcRenderer.invoke('open-downloads-tab')
 }
 </script>
