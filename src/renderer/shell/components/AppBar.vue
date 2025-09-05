@@ -100,7 +100,7 @@
         <Icon v-if="themeStore.themeMode === 'dark'" icon="lucide:moon" class="w-4 h-4 mr-1" />
         <Icon v-else-if="themeStore.themeMode === 'light'" icon="lucide:sun" class="w-4 h-4 mr-1" />
         <Icon v-else icon="lucide:monitor" class="w-4 h-4 mr-1" />
-        <span>{{ t('appbar.theme') }}</span>
+        <span>{{ getThemeDisplayName() }}</span>
       </Button>
 
 
@@ -639,6 +639,20 @@ const handleDragEnd = async (event: DragEvent) => {
     }
   }
   draggedTabId = null
+}
+
+const getThemeDisplayName = () => {
+  switch (themeStore.themeMode) {
+    case 'dark':
+      return t('appbar.themeDark') || '暗黑'
+    case 'light':
+      return t('appbar.themeLight') || '明亮'
+    case 'system':
+      return t('appbar.themeSystem') || '系统'
+    default:
+      // 默认返回系统主题
+      return t('appbar.theme') || '主题'
+  }
 }
 
 const onThemeClick = () => {

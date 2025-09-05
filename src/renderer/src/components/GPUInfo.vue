@@ -8,12 +8,12 @@
       </div>
 
       <!-- 错误状态 -->
-      <div v-else-if="error" class="bg-destructive/20 border border-destructive/30 rounded-lg p-4 mb-6">
+      <div v-else-if="error" class="bg-destructive/20 border border-destructive/30 rounded-lg p-4 mb-6 dark:bg-destructive/30 dark:border-destructive/50">
         <div class="flex items-center">
           <Icon icon="lucide:alert-circle" class="w-5 h-5 text-destructive mr-2" />
-          <span class="font-medium text-destructive">{{ t('gpuInfo.error') }}</span>
+          <span class="font-medium text-destructive dark:text-destructive-foreground">{{ t('gpuInfo.error') }}</span>
         </div>
-        <p class="mt-2 text-sm text-destructive/80">{{ error }}</p>
+        <p class="mt-2 text-sm text-destructive/80 dark:text-destructive-foreground/90">{{ error }}</p>
         <Button variant="outline" size="sm" class="mt-3" @click="refreshData">
           <Icon icon="lucide:refresh-cw" class="w-4 h-4 mr-2" />
           {{ t('gpuInfo.retry') }}

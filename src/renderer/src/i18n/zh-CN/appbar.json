@@ -3,5 +3,8 @@
   "projects": "项目",
   "mcp": "能力",
   "theme": "主题",
+  "themeDark": "暗黑",
+  "themeLight": "明亮",
+  "themeSystem": "系统",
   "settings": "设置"
 }

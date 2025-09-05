@@ -77,7 +77,7 @@ export class GpuPresenter {
     } catch (error) {
       // 如果nvidia-smi不可用，返回空数组
       if (error instanceof Error && error.message.includes('not found')) {
-        throw new Error('未检测到NVIDIA显卡或未安装NVIDIA驱动程序')
+        throw new Error('你的电脑没有NVIDIA显卡 或 未安装NVIDIA显卡驱动')
       }
       throw error
     }

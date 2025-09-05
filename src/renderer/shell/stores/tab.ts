@@ -76,8 +76,8 @@ export const useTabStore = defineStore('tab', () => {
     }
   }
 
-  const updateWindowTabs = (windowId: number, tabsData: TabData[]) => {
-    console.log('updateWindowTabs', windowId, tabsData)
+  const updateWindowTabs = (_windowId: number, tabsData: TabData[]) => {
+    // console.log('updateWindowTabs', windowId, tabsData)
     tabs.value = tabsData
     for (const tab of tabsData) {
       if (tab.isActive) {

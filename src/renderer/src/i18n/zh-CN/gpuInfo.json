@@ -20,7 +20,7 @@
   "memoryClock": "显存频率",
   "processes": "进程数",
   "refresh": "刷新",
-  "notSupported": "未检测到NVIDIA显卡或未安装NVIDIA驱动程序",
+  "notSupported": "你的电脑没有NVIDIA显卡 或 未安装NVIDIA显卡驱动",
   "gpuUsage": "显卡使用情况",
   "cpuAndMemoryUsage": "CPU和内存使用情况",
   "diskUsage": "硬盘使用情况",

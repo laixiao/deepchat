@@ -3,5 +3,8 @@
   "projects": "Projects",
   "mcp": "Capabilities",
   "theme": "Theme",
+  "themeDark": "Dark",
+  "themeLight": "Light",
+  "themeSystem": "System",
   "settings": "Settings"
 }
