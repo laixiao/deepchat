@@ -20,6 +20,9 @@
     "resume": "Resume",
     "retry": "Retry",
     "remove": "Remove",
-    "openFolder": "Open Folder"
+    "openFolder": "Open Folder",
+    "startAll": "Start All",
+    "pauseAll": "Pause All",
+    "deleteAll": "Delete All"
   }
 }

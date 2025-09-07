@@ -84,14 +84,29 @@ export const useDownloadStore = defineStore('download', () => {
     }
   }
 
-  const pauseDownload = (id: string) => {
-    updateDownload(id, { status: 'paused' })
-    pauseDownloadProcess(id)
+  const pauseDownload = async (id: string) => {
+    try {
+      const downloadPresenter = usePresenter('downloadPresenter')
+      const result = await downloadPresenter.pauseDownload(id)
+
+      if (result) {
+        // 状态会通过IPC事件更新，不需要手动设置
+      }
+    } catch (error) {
+      console.error('暂停下载失败:', error)
+    }
   }
 
-  const resumeDownload = (id: string) => {
-    updateDownload(id, { status: 'downloading' })
-    resumeDownloadProcess(id)
+  const resumeDownload = async (id: string) => {
+    try {
+      const downloadPresenter = usePresenter('downloadPresenter')
+      const result = await downloadPresenter.resumeDownload(id)
+      if (result) {
+        // 状态会通过IPC事件更新，不需要手动设置
+      }
+    } catch (error) {
+      console.error('恢复下载失败:', error)
+    }
   }
 
   const retryDownload = (id: string) => {
@@ -116,6 +131,40 @@ export const useDownloadStore = defineStore('download', () => {
       }
     })
     downloads.value = []
+  }
+
+  // 批量操作：全部开始
+  const startAll = () => {
+    downloads.value.forEach((d) => {
+      if (d.status === 'pending') {
+        // 未开始的直接启动
+        startDownloadProcess(d.id)
+      } else if (d.status === 'paused') {
+        // 暂停的恢复
+        resumeDownloadProcess(d.id)
+      } else if (d.status === 'failed') {
+        // 失败的重试
+        retryDownload(d.id)
+      }
+      // 已完成与下载中不处理
+    })
+  }
+
+  // 批量操作：全部暂停
+  const pauseAll = () => {
+    downloads.value.forEach((d) => {
+      if (d.status === 'downloading') {
+        pauseDownloadProcess(d.id)
+      }
+    })
+  }
+
+  // 批量操作：全部删除（等价于清空）
+  const deleteAll = () => {
+    clearAll()
+    // 同步到全局存储与其他标签页
+    syncToGlobalStore('clear')
+    syncToOtherTabs('clear')
   }
 
   // 显示配置提示并引导用户到设置页面
@@ -190,7 +239,6 @@ export const useDownloadStore = defineStore('download', () => {
         throw new Error(result?.error || '下载失败')
       }
     } catch (error) {
-      console.error('下载失败:', error)
       updateDownload(id, {
         status: 'failed',
         error: error instanceof Error ? error.message : '下载失败'
@@ -349,6 +397,9 @@ export const useDownloadStore = defineStore('download', () => {
     retryDownload,
     clearCompleted,
     clearAll,
+    startAll,
+    pauseAll,
+    deleteAll,
     initDownloadListeners
   }
 })

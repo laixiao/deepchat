@@ -20,6 +20,9 @@
     "resume": "继续",
     "retry": "重试",
     "remove": "删除",
-    "openFolder": "打开文件夹"
+    "openFolder": "打开文件夹",
+    "startAll": "全部开始",
+    "pauseAll": "全部暂停",
+    "deleteAll": "全部删除"
   }
 }

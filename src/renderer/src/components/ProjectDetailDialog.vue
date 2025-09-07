@@ -101,7 +101,7 @@
                 :key="link._id"
                 class="border rounded-lg p-4 bg-muted/30"
               >
-                <div class="flex items-start justify-between">
+                <div class="flex items-start">
                   <div class="flex-1">
                     <h3 class="font-medium text-foreground mb-1">{{ link.filename }}</h3>
                     <p class="text-xs text-muted-foreground mb-2">
@@ -111,24 +111,6 @@
                       {{ link.url }}
                     </div>
                   </div>
-                  <Button
-                    @click="openDownloadLink(link.url)"
-                    variant="outline"
-                    size="sm"
-                    class="ml-4 flex-shrink-0"
-                  >
-                    <Icon icon="lucide:external-link" class="w-4 h-4 mr-1" />
-                    {{ t('projects.detail.open') }}
-                  </Button>
-                  <Button
-                    @click="() => downloadFile(link)"
-                    variant="default"
-                    size="sm"
-                    class="ml-2 flex-shrink-0"
-                  >
-                    <Icon icon="lucide:download" class="w-4 h-4 mr-1" />
-                    {{ t('projects.detail.download') }}
-                  </Button>
                 </div>
               </div>
             </div>
@@ -168,22 +150,17 @@
       </div>
 
       <!-- 弹窗底部 -->
-      <div class="flex-shrink-0 flex justify-end gap-2 px-6 py-4 border-t bg-muted/30">
+      <div class="flex-shrink-0 flex justify-between gap-2 px-6 py-4 border-t bg-muted/30">
+        <Button 
+          v-if="projectDetail && projectDetail.downloadLinks?.length"
+          @click="downloadAllFiles"
+          variant="default"
+        >
+          <Icon icon="lucide:download" class="w-4 h-4 mr-2" />
+          {{ t('projects.detail.download') }}
+        </Button>
         <Button @click="$emit('update:open', false)" variant="outline">
           {{ t('projects.detail.close') }}
-        </Button>
-        <Button 
-          v-if="projectDetail"
-          @click="refreshDetail"
-          variant="default"
-          :disabled="loading"
-        >
-          <Icon 
-            icon="lucide:refresh-cw" 
-            class="w-4 h-4 mr-2" 
-            :class="{ 'animate-spin': loading }"
-          />
-          {{ t('projects.detail.refresh') }}
         </Button>
       </div>
     </DialogContent>
@@ -249,27 +226,20 @@ const loadProjectDetail = async () => {
   }
 }
 
-// 刷新详情
-const refreshDetail = () => {
-  loadProjectDetail()
-}
 
-// 打开下载链接
-const openDownloadLink = (url: string) => {
-  window.open(url, '_blank', 'noopener,noreferrer')
-}
-
-// 下载文件
-const downloadFile = (link: { filename: string; url: string; hash: string }) => {
+// 下载所有文件
+const downloadAllFiles = () => {
+  if (!projectDetail.value?.downloadLinks?.length) return
+  
   try {
-    // 使用下载 store 添加下载任务
-    const downloadId = downloadStore.addDownload({
-      filename: link.filename,
-      url: link.url,
-      hash: link.hash
+    // 为每个下载链接添加下载任务
+    projectDetail.value.downloadLinks.forEach((link) => {
+      downloadStore.addDownload({
+        filename: link.filename,
+        url: link.url,
+        hash: link.hash
+      })
     })
-
-    if (!downloadId) return
 
     // 关闭当前弹窗
     emit('update:open', false)
@@ -277,7 +247,7 @@ const downloadFile = (link: { filename: string; url: string; hash: string }) => 
     // 跳转到下载管理页面
     window.electron?.ipcRenderer.invoke('open-downloads-tab')
   } catch (error) {
-    console.error('下载过程中发生错误:', error)
+    console.error('批量下载过程中发生错误:', error)
   }
 }
 
