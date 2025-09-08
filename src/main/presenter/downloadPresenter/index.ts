@@ -3,8 +3,8 @@ import fs from 'fs'
 import path from 'path'
 import https from 'https'
 import http from 'http'
-import crypto from 'crypto'
 import { URL } from 'url'
+import { HashUtil } from '@/utils/hashUtil'
 
 // 下载项目接口
 export interface DownloadTask {
@@ -20,7 +20,7 @@ export interface DownloadTask {
   totalBytes: number
   speed: number
   remainingTime?: number
-  status: 'pending' | 'downloading' | 'paused' | 'completed' | 'failed'
+  status: 'pending' | 'downloading' | 'paused' | 'verifying' | 'completed' | 'failed'
   error?: string
   createdAt: number
   startedAt?: number
@@ -63,23 +63,8 @@ export class DownloadPresenter {
       // 每个任务独立的临时文件，避免同名任务之间共享进度
       const tempFilePath = path.join(downloadDir, `${filename}.part.${id}`)
 
-      // 如果最终文件已存在，检查哈希值
-      if (fs.existsSync(filePath) && hash) {
-        const existingHash = await this.calculateFileHash(filePath)
-        if (existingHash === hash) {
-          // 文件已存在且哈希匹配，直接返回成功
-          this.updateDownloadStatus(id, {
-            status: 'completed',
-            progress: 100,
-            filePath,
-            completedAt: Date.now()
-          })
-          return { success: true, filePath }
-        }
-      }
-
-      // 创建下载任务
-      const task: DownloadTask = {
+      // 预先创建下载任务，以便在校验阶段也能向前端汇报状态
+      const preTask: DownloadTask = {
         id,
         filename,
         url,
@@ -91,12 +76,30 @@ export class DownloadPresenter {
         downloadedBytes: 0,
         totalBytes: 0,
         speed: 0,
-        status: 'downloading',
-        createdAt: Date.now(),
-        startedAt: Date.now()
+        status: 'pending',
+        createdAt: Date.now()
+      }
+      this.downloads.set(id, preTask)
+
+      // 如果最终文件已存在，检查哈希值（SHA-256），并在校验过程中显示校验进度
+      if (fs.existsSync(filePath) && hash) {
+        const matched = await this.verifyFileWithProgress(id, filePath, hash)
+        if (matched) {
+          // 文件已存在且哈希匹配，直接返回成功
+          this.updateDownloadStatus(id, {
+            status: 'completed',
+            progress: 100,
+            filePath,
+            completedAt: Date.now()
+          })
+          return { success: true, filePath }
+        }
       }
 
-      this.downloads.set(id, task)
+      // 切换任务为下载中并记录开始时间
+      const task = this.downloads.get(id)!
+      task.status = 'downloading'
+      task.startedAt = Date.now()
 
       // 开始下载
       return await this.startDownload(task)
@@ -325,10 +328,10 @@ export class DownloadPresenter {
       writeStream.end()
 
       try {
-        // 验证哈希值（如果提供）
+        // 验证哈希值（如果提供，使用SHA-256），展示校验过程
         if (task.hash) {
-          const fileHash = await this.calculateFileHash(task.tempFilePath!)
-          if (fileHash !== task.hash) {
+          const ok = await this.verifyFileWithProgress(task.id, task.tempFilePath!, task.hash)
+          if (!ok) {
             throw new Error('文件哈希验证失败')
           }
         }
@@ -712,10 +715,10 @@ export class DownloadPresenter {
       writeStream.end()
 
       try {
-        // 验证哈希值（如果提供）
+        // 验证哈希值（如果提供），展示校验过程
         if (task.hash) {
-          const fileHash = await this.calculateFileHash(task.tempFilePath!)
-          if (fileHash !== task.hash) {
+          const ok = await this.verifyFileWithProgress(task.id, task.tempFilePath!, task.hash)
+          if (!ok) {
             throw new Error('文件哈希验证失败')
           }
         }
@@ -825,7 +828,7 @@ export class DownloadPresenter {
     }
 
     // 直接发送IPC事件到所有渲染进程
-    console.log(`发送状态更新到前端: ID=${id}, status=${task.status}`)
+    // console.log(`发送状态更新到前端: ID=${id}, status=${task.status}`)
     eventBus.sendToRenderer('download-progress', SendTarget.ALL_WINDOWS, {
       id,
       progress: task.progress,
@@ -839,24 +842,28 @@ export class DownloadPresenter {
     })
   }
 
-  // 计算文件哈希值
-  private async calculateFileHash(filePath: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const hash = crypto.createHash('sha256')
-      const stream = fs.createReadStream(filePath)
-
-      stream.on('data', (data) => {
-        hash.update(data)
+  // 使用SHA-256校验文件并显示进度到前端
+  private async verifyFileWithProgress(id: string, filePath: string, expectedSha256: string) {
+    // 切换到校验状态
+    this.updateDownloadStatus(id, { status: 'verifying', speed: 0 })
+    try {
+      const sha256 = await HashUtil.sha256(filePath, (readBytes, totalBytes, percent) => {
+        // 复用 progress 字段显示校验进度
+        this.updateDownloadStatus(id, {
+          status: 'verifying',
+          progress: percent,
+          downloadedBytes: readBytes,
+          totalBytes
+        })
       })
-
-      stream.on('end', () => {
-        resolve(hash.digest('hex'))
-      })
-
-      stream.on('error', (error) => {
-        reject(error)
-      })
-    })
+      console.log(
+        `本地文件sha256: ${sha256.toLowerCase()} 远程文件sha256: ${expectedSha256.toLowerCase()}`
+      )
+      return sha256.toLowerCase() === expectedSha256.toLowerCase()
+    } catch (e) {
+      // 校验失败同样视为不匹配，由调用方决定后续行为
+      return false
+    }
   }
 
   // 清理已完成的下载

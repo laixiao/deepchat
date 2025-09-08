@@ -106,6 +106,7 @@
 
       <!-- 下载按钮 -->
       <Button
+        v-if="hasAnyDownloads"
         variant="ghost"
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20 relative"
         @click="openDownloadManager"
@@ -193,6 +194,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick, computed as vueComputed, onUnmounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { MinusIcon, XIcon } from 'lucide-vue-next'
 import MaximizeIcon from './icons/MaximizeIcon.vue'
 import RestoreIcon from './icons/RestoreIcon.vue'
@@ -224,8 +226,7 @@ const themeStore = useThemeStore()
 const tabContainerWrapper = ref<HTMLElement | null>(null)
 const tabContainer = ref<HTMLElement | null>(null)
 const downloadStore = useDownloadStore()
-console.log('Download store initialized:', downloadStore)
-console.log('Download store downloads:', downloadStore.downloads)
+const { downloads } = storeToRefs(downloadStore)
 
 let draggedTabId: number | null = null
 const dragInsertIndex = ref(-1)
@@ -246,15 +247,12 @@ const systemAlert = ref(false)
 const systemAlertInterval = ref<number | null>(null)
 
 // 下载相关状态
-// const hasDownloads = vueComputed(() => {
-//   console.log('Download store downloads length:', downloadStore.downloads.length)
-//   return downloadStore.downloads.length > 0
-// })
+const hasAnyDownloads = vueComputed(() => {
+  return downloads.value.length > 0
+})
 
 const hasActiveDownloads = vueComputed(() => {
-  const active = downloadStore.downloads.some(d => d.status === 'downloading' || d.status === 'pending' || d.status === 'paused')
-  console.log('Has active downloads:', active)
-  return active
+  return downloads.value.some(d => d.status === 'downloading' || d.status === 'pending' || d.status === 'paused')
 })
 
 
@@ -262,9 +260,9 @@ const hasActiveDownloads = vueComputed(() => {
 // 进度环计算
 const circumference = vueComputed(() => 2 * Math.PI * 5)
 const totalProgress = vueComputed(() => {
-  if (downloadStore.downloads.length === 0) return 0
+  if (downloads.value.length === 0) return 0
   
-  const activeDownloads = downloadStore.downloads.filter(d => d.status === 'downloading' || d.status === 'pending' || d.status === 'paused')
+  const activeDownloads = downloads.value.filter(d => d.status === 'downloading' || d.status === 'pending' || d.status === 'paused')
   if (activeDownloads.length === 0) return 100
   
   const totalProgress = activeDownloads.reduce((sum, download) => sum + download.progress, 0)

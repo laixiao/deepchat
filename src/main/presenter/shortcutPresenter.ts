@@ -265,7 +265,7 @@ export class ShortcutPresenter implements IShortcutPresenter {
   }
 
   unregisterShortcuts(): void {
-    console.log('unreg shortcuts')
+    // console.log('unreg shortcuts')
     globalShortcut.unregisterAll()
 
     this.showHideWindow()

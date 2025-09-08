@@ -7,7 +7,13 @@ import { useRouter } from 'vue-router'
 import { useToast } from '@/components/ui/toast/use-toast'
 
 // 下载状态类型
-export type DownloadStatus = 'pending' | 'downloading' | 'paused' | 'completed' | 'failed'
+export type DownloadStatus =
+  | 'pending'
+  | 'downloading'
+  | 'paused'
+  | 'verifying'
+  | 'completed'
+  | 'failed'
 
 // 下载项目接口
 export interface DownloadItem {
@@ -128,6 +134,9 @@ export const useDownloadStore = defineStore('download', () => {
         cancelDownloadProcess(id)
       }
       downloads.value.splice(index, 1)
+      // 同步到全局存储与其他标签页
+      syncToGlobalStore('remove', undefined, id)
+      syncToOtherTabs('remove', undefined, id)
     }
   }
 
@@ -167,7 +176,16 @@ export const useDownloadStore = defineStore('download', () => {
   }
 
   const clearCompleted = () => {
-    downloads.value = downloads.value.filter((d) => d.status !== 'completed')
+    const toRemove = downloads.value.filter((d) => d.status === 'completed')
+    // 本地删除并同步每条记录到全局与其他标签页
+    for (const item of toRemove) {
+      const idx = downloads.value.findIndex((d) => d.id === item.id)
+      if (idx !== -1) {
+        downloads.value.splice(idx, 1)
+      }
+      syncToGlobalStore('remove', undefined, item.id)
+      syncToOtherTabs('remove', undefined, item.id)
+    }
   }
 
   const clearAll = () => {
@@ -178,6 +196,9 @@ export const useDownloadStore = defineStore('download', () => {
       }
     })
     downloads.value = []
+    // 同步到全局存储与其他标签页
+    syncToGlobalStore('clear')
+    syncToOtherTabs('clear')
   }
 
   // 批量操作：全部开始
@@ -345,6 +366,13 @@ export const useDownloadStore = defineStore('download', () => {
         if (data.status === 'completed') {
           updateDownload(data.id, { completedAt: Date.now() })
         }
+
+        // 将最新状态同步到全局存储与其他标签页
+        const updated = downloads.value.find((d) => d.id === data.id)
+        if (updated) {
+          syncToGlobalStore('update', { ...updated })
+          syncToOtherTabs('update', { ...updated })
+        }
       }
     )
 
@@ -394,6 +422,22 @@ export const useDownloadStore = defineStore('download', () => {
       // 发送当前所有的下载任务数据
       window.electron.ipcRenderer.send('download-sync-data-response', downloads.value)
     })
+
+    // 监听主进程的全局下载数据返回，用于窗口初始化时的任务同步
+    window.electron.ipcRenderer.on('download-global-data', (_event, tasks: DownloadItem[]) => {
+      // 合并全局任务到本地，避免重复
+      for (const task of tasks) {
+        const idx = downloads.value.findIndex((d) => d.id === task.id)
+        if (idx === -1) {
+          downloads.value.push(task)
+        } else {
+          downloads.value[idx] = { ...downloads.value[idx], ...task }
+        }
+      }
+    })
+
+    // 初始化时向主进程请求当前全局下载任务，用于新窗口/新标签页首屏同步
+    window.electron.ipcRenderer.send('download-global-store', { action: 'get' })
   }
 
   // 全局存储同步函数

@@ -25,7 +25,10 @@
       "Edit(C:\\Users\\Administrator\\Desktop\\deepchat/**)",
       "Read(c:\\Users\\admin\\Desktop\\deepchat\\src\\renderer\\shell\\components/**)",
       "Read(c:\\Users\\admin\\Desktop\\deepchat\\src\\renderer\\shell\\components/**)",
-      "Read(c:\\Users\\admin\\Desktop\\deepchat\\src\\renderer\\shell\\components/**)"
+      "Read(c:\\Users\\admin\\Desktop\\deepchat\\src\\renderer\\shell\\components/**)",
+      "WebSearch",
+      "WebFetch(domain:www.electronjs.org)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []

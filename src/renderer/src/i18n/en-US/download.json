@@ -12,6 +12,7 @@
     "pending": "Pending",
     "downloading": "Downloading",
     "paused": "Paused",
+    "verifying": "Verifying",
     "completed": "Completed",
     "failed": "Failed"
   },
