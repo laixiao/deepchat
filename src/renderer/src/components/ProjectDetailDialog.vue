@@ -228,24 +228,27 @@ const loadProjectDetail = async () => {
 
 
 // 下载所有文件
-const downloadAllFiles = () => {
+const downloadAllFiles = async () => {
   if (!projectDetail.value?.downloadLinks?.length) return
   
   try {
-    // 为每个下载链接添加下载任务
-    projectDetail.value.downloadLinks.forEach((link) => {
-      downloadStore.addDownload({
-        filename: link.filename,
-        url: link.url,
-        hash: link.hash
-      })
-    })
+    const results = await Promise.all(
+      projectDetail.value.downloadLinks.map((link) =>
+        downloadStore.addDownload({
+          filename: link.filename,
+          url: link.url,
+          hash: link.hash
+        })
+      )
+    )
 
-    // 关闭当前弹窗
-    emit('update:open', false)
-
-    // 跳转到下载管理页面
-    window.electron?.ipcRenderer.invoke('open-downloads-tab')
+    const addedCount = results.filter((id) => !!id).length
+    if (addedCount > 0) {
+      // 关闭当前弹窗
+      emit('update:open', false)
+      // 跳转到下载管理页面
+      window.electron?.ipcRenderer.invoke('open-downloads-tab')
+    }
   } catch (error) {
     console.error('批量下载过程中发生错误:', error)
   }

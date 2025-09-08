@@ -375,20 +375,39 @@ export class DevicePresenter implements IDevicePresenter {
       if (response === 0) {
         try {
           const dbPath = path.join(app.getPath('userData'), 'app_db')
-          const removeDirectory = (dirPath: string): void => {
-            if (fs.existsSync(dirPath)) {
-              fs.readdirSync(dirPath).forEach((file) => {
-                const currentPath = path.join(dirPath, file)
-                if (fs.lstatSync(currentPath).isDirectory()) {
-                  removeDirectory(currentPath)
-                } else {
-                  fs.unlinkSync(currentPath)
+          const safeRemoveDirectory = (dirPath: string): void => {
+            try {
+              if (fs.existsSync(dirPath)) {
+                // Node 14+: rmSync 支持递归、强制删除
+                // 对于被占用文件（EBUSY）使用 force=true 忽略错误
+                // 若仍抛错，则降级为手动递归删除
+                fs.rmSync(dirPath, { recursive: true, force: true })
+              }
+            } catch (err) {
+              // 降级：逐个子项尝试删除
+              try {
+                if (fs.existsSync(dirPath)) {
+                  fs.readdirSync(dirPath).forEach((file) => {
+                    const currentPath = path.join(dirPath, file)
+                    try {
+                      const stat = fs.lstatSync(currentPath)
+                      if (stat.isDirectory()) {
+                        safeRemoveDirectory(currentPath)
+                      } else {
+                        try {
+                          fs.rmSync(currentPath, { force: true })
+                        } catch {}
+                      }
+                    } catch {}
+                  })
+                  try {
+                    fs.rmdirSync(dirPath)
+                  } catch {}
                 }
-              })
-              fs.rmdirSync(dirPath)
+              } catch {}
             }
           }
-          removeDirectory(dbPath)
+          safeRemoveDirectory(dbPath)
 
           app.relaunch()
           app.exit()
@@ -411,24 +430,42 @@ export class DevicePresenter implements IDevicePresenter {
       const userDataPath = app.getPath('userData')
       const { presenter } = await import('../index')
 
-      const removeDirectory = (dirPath: string): void => {
-        if (fs.existsSync(dirPath)) {
-          fs.readdirSync(dirPath).forEach((file) => {
-            const currentPath = path.join(dirPath, file)
-            if (fs.lstatSync(currentPath).isDirectory()) {
-              removeDirectory(currentPath)
-            } else {
-              fs.unlinkSync(currentPath)
+      const safeRemoveDirectory = (dirPath: string): void => {
+        try {
+          if (fs.existsSync(dirPath)) {
+            fs.rmSync(dirPath, { recursive: true, force: true })
+          }
+        } catch (err) {
+          // 降级处理
+          try {
+            if (fs.existsSync(dirPath)) {
+              fs.readdirSync(dirPath).forEach((file) => {
+                const currentPath = path.join(dirPath, file)
+                try {
+                  const stat = fs.lstatSync(currentPath)
+                  if (stat.isDirectory()) {
+                    safeRemoveDirectory(currentPath)
+                  } else {
+                    try {
+                      fs.rmSync(currentPath, { force: true })
+                    } catch {}
+                  }
+                } catch {}
+              })
+              try {
+                fs.rmdirSync(dirPath)
+              } catch {}
             }
-          })
-          fs.rmdirSync(dirPath)
+          } catch {}
         }
       }
 
-      const removeFile = (filePath: string): void => {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath)
-        }
+      const safeRemoveFile = (filePath: string): void => {
+        try {
+          if (fs.existsSync(filePath)) {
+            fs.rmSync(filePath, { force: true })
+          }
+        } catch {}
       }
 
       switch (resetType) {
@@ -447,7 +484,7 @@ export class DevicePresenter implements IDevicePresenter {
           const appDbPath = path.join(userDataPath, 'app_db')
           const mainDbFile = path.join(appDbPath, 'chat.db')
           try {
-            removeFile(mainDbFile)
+            safeRemoveFile(mainDbFile)
             console.log('Removed chat database file')
           } catch (error) {
             console.warn('Failed to remove chat database file:', error)
@@ -457,7 +494,7 @@ export class DevicePresenter implements IDevicePresenter {
             const filePath = path.join(appDbPath, fileName)
             if (fs.existsSync(filePath)) {
               try {
-                removeFile(filePath)
+                safeRemoveFile(filePath)
                 console.log('Cleaned up auxiliary file:', fileName)
               } catch (error) {
                 console.warn('Failed to clean auxiliary file:', fileName, error)
@@ -481,7 +518,7 @@ export class DevicePresenter implements IDevicePresenter {
           }
           const knowledgeDbPath = path.join(userDataPath, 'app_db', 'KnowledgeBase')
           console.log('Removing knowledge base directory:', knowledgeDbPath)
-          removeDirectory(knowledgeDbPath)
+          safeRemoveDirectory(knowledgeDbPath)
           break
         }
 
@@ -497,7 +534,7 @@ export class DevicePresenter implements IDevicePresenter {
 
           configFiles.forEach((filePath) => {
             try {
-              removeFile(filePath)
+              safeRemoveFile(filePath)
               console.log('Removed config file:', filePath)
             } catch (error) {
               console.warn('Failed to remove config file:', filePath, error)
@@ -505,7 +542,7 @@ export class DevicePresenter implements IDevicePresenter {
           })
 
           try {
-            removeDirectory(path.join(userDataPath, 'provider_models'))
+            safeRemoveDirectory(path.join(userDataPath, 'provider_models'))
             console.log('Removed provider_models directory')
           } catch (error) {
             console.warn('Failed to remove provider_models directory:', error)
@@ -530,7 +567,7 @@ export class DevicePresenter implements IDevicePresenter {
             console.warn('Error closing database connections:', closeError)
           }
           console.log('Removing user data directory:', userDataPath)
-          removeDirectory(userDataPath)
+          safeRemoveDirectory(userDataPath)
           break
         }
 

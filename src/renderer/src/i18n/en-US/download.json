@@ -24,5 +24,9 @@
     "startAll": "Start All",
     "pauseAll": "Pause All",
     "deleteAll": "Delete All"
+  },
+  "toast": {
+    "needConfigTitle": "Action required",
+    "navigateToSettings": "{message}. Opening Settings..."
   }
 }

@@ -24,5 +24,9 @@
     "startAll": "全部开始",
     "pauseAll": "全部暂停",
     "deleteAll": "全部删除"
+  },
+  "toast": {
+    "needConfigTitle": "需要配置",
+    "navigateToSettings": "{message}。即将打开设置页面"
   }
 }

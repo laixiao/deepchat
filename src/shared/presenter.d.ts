@@ -528,8 +528,12 @@ export interface IConfigPresenter {
   updateProvidersBatch(batchUpdate: ProviderBatchUpdate): void
   // 下载和安装目录设置
   getDownloadDirectory(): string
+  // 是否已经显式设置过下载目录（区别于默认值）
+  isDownloadDirectoryConfigured(): boolean
   setDownloadDirectory(directory: string): void
   getInstallationDirectory(): string
+  // 是否已经显式设置过安装目录（区别于默认值）
+  isInstallationDirectoryConfigured(): boolean
   setInstallationDirectory(directory: string): void
   validatePathNotContainsChinese(path: string): boolean
   ensureDirectoryExists(directory: string): Promise<boolean>

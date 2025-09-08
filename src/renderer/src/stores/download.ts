@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { nanoid } from 'nanoid'
 import { usePresenter } from '@/composables/usePresenter'
 import { useRouter } from 'vue-router'
@@ -34,6 +35,13 @@ export const useDownloadStore = defineStore('download', () => {
 
   // 获取全局实例
   const { toast } = useToast()
+  const { t } = useI18n()
+
+  // 安全翻译（当 key 不存在时回退到指定文案）
+  const tt = (key: string, fallback: string, params?: Record<string, unknown>) => {
+    const translated = params ? (t(key, params) as string) : (t(key) as string)
+    return translated === key ? fallback : translated
+  }
 
   const updateDownload = (id: string, updates: Partial<DownloadItem>) => {
     const index = downloads.value.findIndex((d) => d.id === id)
@@ -42,7 +50,46 @@ export const useDownloadStore = defineStore('download', () => {
     }
   }
 
-  const addDownload = (params: { filename: string; url: string; hash?: string }): string => {
+  const addDownload = async (params: {
+    filename: string
+    url: string
+    hash?: string
+  }): Promise<string | null> => {
+    // 在添加任务前进行配置校验
+    try {
+      const configPresenter = usePresenter('configPresenter')
+
+      // 获取（可能为默认）下载/安装目录
+      const downloadDir = await configPresenter.getDownloadDirectory()
+      const installDir = await configPresenter.getInstallationDirectory()
+
+      if (!downloadDir || !installDir) {
+        showConfigPrompt('无法获取下载或安装目录，请前往设置页面检查')
+        return null
+      }
+
+      // 确保目录存在
+      try {
+        await configPresenter.ensureDirectoryExists(downloadDir)
+        await configPresenter.ensureDirectoryExists(installDir)
+      } catch (e) {
+        console.error('确保目录存在失败:', e)
+        showConfigPrompt('创建下载或安装目录失败，请前往设置页面检查')
+        return null
+      }
+
+      // 校验安装目录（不能包含中文）
+      const isValidPath = await configPresenter.validatePathNotContainsChinese(installDir)
+      if (!isValidPath) {
+        showConfigPrompt('安装目录路径不能包含中文字符，请重新设置')
+        return null
+      }
+    } catch (error) {
+      console.error('配置校验失败:', error)
+      showConfigPrompt('获取配置失败，请前往设置页面检查')
+      return null
+    }
+
     const downloadId = nanoid()
     const downloadItem: DownloadItem = {
       id: downloadId,
@@ -167,21 +214,21 @@ export const useDownloadStore = defineStore('download', () => {
     syncToOtherTabs('clear')
   }
 
-  // 显示配置提示并引导用户到设置页面
+  // 显示配置提示并引导用户到设置页面（使用 i18n）
   const showConfigPrompt = (message: string) => {
-    toast({
-      title: '需要配置',
-      description: `${message}。点击这里去设置`,
-      variant: 'destructive',
-      duration: 5000,
-      onOpenChange: (open) => {
-        if (!open) {
-          // 用户点击了toast，引导到设置页面
-          const router = useRouter()
-          router.push('/settings')
-        }
-      }
+    const title = tt('download.toast.needConfigTitle', '需要配置')
+    const description = tt('download.toast.navigateToSettings', `${message}。即将打开设置页面`, {
+      message
     })
+    toast({
+      title,
+      description,
+      variant: 'destructive',
+      duration: 4000
+    })
+    // 直接导航到设置页面，避免依赖 toast 的 onOpenChange（该回调会被内部覆盖）
+    const router = useRouter()
+    router.push('/settings')
   }
 
   // 下载处理函数

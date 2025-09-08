@@ -1300,10 +1300,10 @@ onMounted(async () => {
     console.error('加载网页内容长度限制设置失败:', error)
   }
   
-  // 初始化下载和安装目录
+  // 初始化下载和安装目录（通过 IPC 暴露的方法为异步，需 await）
   try {
-    downloadDirectory.value = configPresenter.getDownloadDirectory()
-    installationDirectory.value = configPresenter.getInstallationDirectory()
+    downloadDirectory.value = await configPresenter.getDownloadDirectory()
+    installationDirectory.value = await configPresenter.getInstallationDirectory()
   } catch (error) {
     console.error('初始化目录设置失败:', error)
   }

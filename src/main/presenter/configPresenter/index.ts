@@ -20,6 +20,7 @@ import { ModelType } from '@shared/model'
 import ElectronStore from 'electron-store'
 import { DEFAULT_PROVIDERS } from './providers'
 import path from 'path'
+import { execSync } from 'child_process'
 import { app, nativeTheme, shell } from 'electron'
 import fs from 'fs'
 import { CONFIG_EVENTS, SYSTEM_EVENTS, FLOATING_BUTTON_EVENTS } from '@/events'
@@ -128,8 +129,11 @@ export class ConfigPresenter implements IConfigPresenter {
         default_system_prompt: '',
         sidebarOpen: true,
         webContentLengthLimit: 3000,
-        downloadDirectory: path.join(app.getPath('downloads'), 'deepchat'),
-        installationDirectory: path.join(app.getPath('home'), 'deepchat-installs'),
+        downloadDirectory: path.join(app.getPath('downloads'), 'qincore'),
+        installationDirectory: path.join(app.getPath('home'), 'qincore-installs'),
+        // 配置标记：用户是否显式设置过目录
+        downloadDirectoryConfigured: false,
+        installationDirectoryConfigured: false,
         appVersion: this.currentAppVersion
       }
     })
@@ -1376,9 +1380,20 @@ export class ConfigPresenter implements IConfigPresenter {
     )
   }
 
+  // 是否已显式设置过下载目录
+  isDownloadDirectoryConfigured(): boolean {
+    try {
+      return Boolean(this.getSetting<boolean>('downloadDirectoryConfigured'))
+    } catch (e) {
+      return false
+    }
+  }
+
   // 设置下载目录
   setDownloadDirectory(directory: string): void {
     this.setSetting('downloadDirectory', directory)
+    // 标记为已配置
+    this.setSetting('downloadDirectoryConfigured', true)
     eventBus.send(CONFIG_EVENTS.SETTING_CHANGED, SendTarget.ALL_WINDOWS, {
       key: 'downloadDirectory',
       value: directory
@@ -1387,15 +1402,97 @@ export class ConfigPresenter implements IConfigPresenter {
 
   // 获取安装目录
   getInstallationDirectory(): string {
-    return (
-      this.getSetting<string>('installationDirectory') ||
-      path.join(app.getPath('home'), 'deepchat-installs')
-    )
+    // 如果用户已显式设置，优先返回用户设置
+    const configured = this.getSetting<boolean>('installationDirectoryConfigured')
+    const configuredPath = this.getSetting<string>('installationDirectory')
+    if (configured && configuredPath) {
+      return configuredPath
+    }
+
+    // 未显式设置时，根据规则返回默认安装目录
+    // 规则：Windows下优先使用非C盘中剩余空间最大的本地磁盘，目录为 <盘符>:\ai
+    // 其他平台回退到用户主目录下 qincore-installs
+    try {
+      if (process.platform === 'win32') {
+        const drive = this.getLargestNonSystemDriveLetter()
+        if (drive) {
+          const autoPath = `${drive}\\ai`
+          // 首次计算到默认路径时，写入设置并标记为已配置，后续保持稳定
+          this.setInstallationDirectory(autoPath)
+          return autoPath
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to compute default installation directory, fallback to home:', error)
+    }
+    const fallback = path.join(app.getPath('home'), 'qincore-installs')
+    // 同样将回退路径写入设置，避免每次调用都不同步
+    this.setInstallationDirectory(fallback)
+    return fallback
+  }
+
+  // 获取非系统盘（非C:）中剩余空间最大的本地磁盘盘符（如 'D:'）
+  private getLargestNonSystemDriveLetter(): string | null {
+    // 优先使用 PowerShell（更现代且在新系统上更可靠），WMIC 作为回退
+    try {
+      const psCmd = `powershell -NoProfile -Command "$d = Get-CimInstance Win32_LogicalDisk | Where-Object { $_.DriveType -eq 3 -and $_.DeviceID -ne 'C:' } | Sort-Object FreeSpace -Descending | Select-Object -First 1 -ExpandProperty DeviceID; if ($d) { [Console]::Out.Write($d) }"`
+      // 上面字符串对 JS / PowerShell / 引号做了转义，等价逻辑：
+      // Get-CimInstance Win32_LogicalDisk | Where { $_.DriveType -eq 3 -and $_.DeviceID -ne 'C:' } |
+      //   Sort-Object FreeSpace -Descending | Select -First 1 -ExpandProperty DeviceID
+      const out = execSync(psCmd, { encoding: 'utf8' }).trim()
+      if (out && /^[A-Za-z]:$/.test(out)) {
+        const dev = out.toUpperCase()
+        if (dev !== 'C:') return dev
+      }
+    } catch (psErr) {
+      console.warn('PowerShell drive detection failed, will try WMIC:', psErr)
+    }
+
+    // WMIC 回退
+    try {
+      const stdout = execSync(
+        'wmic logicaldisk where "DriveType=3" get DeviceID,FreeSpace /format:csv',
+        { encoding: 'utf8' }
+      )
+      const lines = stdout
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter((l) => l)
+      type Entry = { device: string; free: number }
+      const entries: Entry[] = []
+      for (const line of lines) {
+        // CSV: Node,DeviceID,FreeSpace
+        const m = line.match(/^[^,]+,([A-Za-z]:),(\d+)$/)
+        if (m) {
+          const device = m[1].toUpperCase()
+          const free = Number(m[2]) || 0
+          if (device !== 'C:' && free >= 0) entries.push({ device, free })
+        }
+      }
+      if (entries.length > 0) {
+        entries.sort((a, b) => b.free - a.free)
+        return entries[0].device
+      }
+    } catch (werr) {
+      console.warn('WMIC drive detection failed:', werr)
+    }
+    return null
+  }
+
+  // 是否已显式设置过安装目录
+  isInstallationDirectoryConfigured(): boolean {
+    try {
+      return Boolean(this.getSetting<boolean>('installationDirectoryConfigured'))
+    } catch (e) {
+      return false
+    }
   }
 
   // 设置安装目录
   setInstallationDirectory(directory: string): void {
     this.setSetting('installationDirectory', directory)
+    // 标记为已配置
+    this.setSetting('installationDirectoryConfigured', true)
     eventBus.send(CONFIG_EVENTS.SETTING_CHANGED, SendTarget.ALL_WINDOWS, {
       key: 'installationDirectory',
       value: directory
