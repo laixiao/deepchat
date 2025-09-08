@@ -3,6 +3,7 @@ import { LifecycleManager, registerCoreHooks } from './presenter/lifecyclePresen
 import { getInstance, Presenter } from './presenter'
 import { electronApp } from '@electron-toolkit/utils'
 import { ipcMain } from 'electron'
+import ElectronStore from 'electron-store'
 import { TabPresenter } from './presenter/tabPresenter'
 
 // Set application command line arguments
@@ -72,7 +73,7 @@ ipcMain.handle('open-downloads-tab', async (event) => {
 // 处理跨标签页下载数据同步
 ipcMain.on('download-sync-broadcast', async (event, data) => {
   try {
-    console.log('主进程收到下载同步广播:', data)
+    // console.log('主进程收到下载同步广播:', data)
 
     // 获取发送请求的标签页信息
     const senderWebContentsId = event.sender.id
@@ -83,7 +84,7 @@ ipcMain.on('download-sync-broadcast', async (event, data) => {
       return
     }
 
-    console.log(`同步请求来自 Tab:${senderTabId}`)
+    // console.log(`同步请求来自 Tab:${senderTabId}`)
 
     // 获取所有窗口
     const allWindows = presenter.windowPresenter.getAllWindows()
@@ -105,27 +106,60 @@ ipcMain.on('download-sync-broadcast', async (event, data) => {
           // 获取标签页的 WebContents
           const tabView = await presenter.tabPresenter.getTab(tab.id)
           if (tabView && !tabView.webContents.isDestroyed()) {
-            console.log(`转发同步事件到 Tab:${tab.id} Window:${windowId}`)
+            // console.log(`转发同步事件到 Tab:${tab.id} Window:${windowId}`)
             tabView.webContents.send('download-sync', data)
           }
         }
       }
     }
 
-    console.log('下载同步广播完成')
+    // console.log('下载同步广播完成')
   } catch (error) {
     console.error('处理下载同步广播时出错:', error)
   }
 })
 
-// 全局下载任务存储
-const globalDownloadTasks: any[] = []
+// 全局下载任务存储（持久化）
+type GlobalDownloadItem = {
+  id: string
+  filename: string
+  url: string
+  hash?: string
+  status: string
+  progress: number
+  downloadedBytes: number
+  totalBytes: number
+  speed: number
+  remainingTime?: number
+  filePath?: string
+  error?: string
+  createdAt: number
+  startedAt?: number
+  completedAt?: number
+}
+
+const downloadsStore = new ElectronStore<{ tasks: GlobalDownloadItem[] }>({
+  name: 'download-tasks',
+  defaults: {
+    tasks: []
+  }
+})
+
+const globalDownloadTasks: GlobalDownloadItem[] = downloadsStore.get('tasks') || []
+
+function persistDownloads() {
+  try {
+    downloadsStore.set('tasks', globalDownloadTasks)
+  } catch (e) {
+    console.warn('持久化下载任务失败:', e)
+  }
+}
 
 // 处理下载任务的全局存储
 ipcMain.on('download-global-store', (event, data) => {
   const { action, downloadItem, downloadId } = data
 
-  console.log('主进程收到全局下载存储请求:', action)
+  // console.log('主进程收到全局下载存储请求:', action)
 
   switch (action) {
     case 'add':
@@ -135,6 +169,7 @@ ipcMain.on('download-global-store', (event, data) => {
         if (existingIndex === -1) {
           globalDownloadTasks.push(downloadItem)
           console.log('全局存储添加下载任务:', downloadItem.id)
+          persistDownloads()
         }
       }
       break
@@ -143,7 +178,8 @@ ipcMain.on('download-global-store', (event, data) => {
         const index = globalDownloadTasks.findIndex((d) => d.id === downloadItem.id)
         if (index !== -1) {
           globalDownloadTasks[index] = downloadItem
-          console.log('全局存储更新下载任务:', downloadItem.id)
+          // console.log('全局存储更新下载任务:', downloadItem.id)
+          persistDownloads()
         }
       }
       break
@@ -153,12 +189,14 @@ ipcMain.on('download-global-store', (event, data) => {
         if (index !== -1) {
           globalDownloadTasks.splice(index, 1)
           console.log('全局存储删除下载任务:', downloadId)
+          persistDownloads()
         }
       }
       break
     case 'clear':
       globalDownloadTasks.length = 0
       console.log('全局存储清空下载任务')
+      persistDownloads()
       break
     case 'get':
       // 返回所有下载任务
@@ -189,6 +227,32 @@ app.whenReady().then(async () => {
     await lifecycleManager.start()
     presenter = getInstance(lifecycleManager)
     console.log('main: Application lifecycle startup completed successfully')
+
+    // 应用启动后自动恢复未完成的下载（pending / downloading / paused）
+    try {
+      const configPresenter = presenter.configPresenter
+      const downloadPresenter = presenter.downloadPresenter
+      const downloadDir = configPresenter.getDownloadDirectory()
+
+      for (const task of globalDownloadTasks) {
+        if (!task) continue
+        if (['completed', 'failed'].includes(task.status)) continue
+        // 避免重复同时启动：让已经在进行中的由主进程自身管理
+        try {
+          await downloadPresenter.downloadFile({
+            id: task.id,
+            url: task.url,
+            filename: task.filename,
+            downloadDir,
+            hash: task.hash
+          })
+        } catch (e) {
+          console.warn('自动恢复下载失败:', task.id, e)
+        }
+      }
+    } catch (e) {
+      console.warn('自动恢复下载初始化失败:', e)
+    }
   } catch (error) {
     console.error('main: Application lifecycle startup failed:', error)
     dialog.showErrorBox(

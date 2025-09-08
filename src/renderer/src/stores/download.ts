@@ -349,6 +349,7 @@ export const useDownloadStore = defineStore('download', () => {
           status: DownloadStatus
           error?: string
           filePath?: string
+          filename?: string
         }
       ) => {
         updateDownload(data.id, {

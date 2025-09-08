@@ -4,6 +4,7 @@ import path from 'path'
 import https from 'https'
 import http from 'http'
 import { URL } from 'url'
+import crypto from 'crypto'
 import { HashUtil } from '@/utils/hashUtil'
 
 // 下载项目接口
@@ -28,6 +29,7 @@ export interface DownloadTask {
   request?: http.ClientRequest
   writeStream?: fs.WriteStream
   isPausing?: boolean // 标记是否正在暂停，避免错误处理
+  retryAttempt?: number // 失败后的干净重试次数
 }
 
 export class DownloadPresenter {
@@ -36,6 +38,66 @@ export class DownloadPresenter {
   constructor() {
     // 监听下载相关事件
     this.setupEventListeners()
+  }
+
+  // 判断是否全部下载任务均已完成
+  private areAllDownloadsCompleted(): boolean {
+    const tasks = Array.from(this.downloads.values())
+    if (tasks.length === 0) return false
+    return tasks.every((t) => t.status === 'completed')
+  }
+
+  // 清理孤立的断点临时文件（*.part.*），避免占用空间
+  private cleanupOrphanTempFiles(downloadDirs: string[]) {
+    try {
+      // 收集当前任务仍在使用的临时文件路径，避免误删
+      const activeTempSet = new Set(
+        Array.from(this.downloads.values())
+          .filter((t) => t.status !== 'completed')
+          .map((t) => t.tempFilePath)
+          .filter((p): p is string => !!p)
+      )
+
+      for (const dir of downloadDirs) {
+        if (!dir || !fs.existsSync(dir)) continue
+        const entries = fs.readdirSync(dir)
+        for (const name of entries) {
+          // 我们的命名规则为 `${filename}.part.${id}`，因此包含 `.part.` 的视为临时文件
+          if (name.includes('.part.')) {
+            const full = path.join(dir, name)
+            if (!activeTempSet.has(full)) {
+              try {
+                fs.unlinkSync(full)
+                console.log('清理断点临时文件:', full)
+              } catch (e) {
+                console.warn('清理断点临时文件失败:', full, e)
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('清理断点临时文件过程出现异常:', e)
+    }
+  }
+
+  // 生成基于URL的哈希文件名，保留可能的扩展名
+  private computeLinkHashFilename(urlStr: string, originalFilename?: string): string {
+    try {
+      const u = new URL(urlStr)
+      const raw = u.toString() // 包含完整查询参数，保证唯一性
+      const linkHash = crypto.createHash('sha256').update(raw).digest('hex')
+      // 优先从原始文件名获取扩展名，其次从URL路径推断扩展名
+      let ext = ''
+      const fromOriginal = originalFilename ? path.extname(originalFilename) : ''
+      const fromUrlPath = path.extname(u.pathname)
+      ext = fromOriginal || fromUrlPath || ''
+      return `${linkHash}${ext}`
+    } catch {
+      // 兜底：失败时仅返回哈希
+      const linkHash = crypto.createHash('sha256').update(urlStr).digest('hex')
+      return linkHash
+    }
   }
 
   private setupEventListeners() {
@@ -58,15 +120,17 @@ export class DownloadPresenter {
         fs.mkdirSync(downloadDir, { recursive: true })
       }
 
+      // 基于下载链接信息生成稳定且唯一的文件名（使用URL的SHA-256），并保留扩展名
+      const computedFilename = this.computeLinkHashFilename(url, filename)
       // 最终文件路径（下载完成后会落到此处）
-      const filePath = path.join(downloadDir, filename)
+      const filePath = path.join(downloadDir, computedFilename)
       // 每个任务独立的临时文件，避免同名任务之间共享进度
-      const tempFilePath = path.join(downloadDir, `${filename}.part.${id}`)
+      const tempFilePath = path.join(downloadDir, `${computedFilename}.part.${id}`)
 
       // 预先创建下载任务，以便在校验阶段也能向前端汇报状态
       const preTask: DownloadTask = {
         id,
-        filename,
+        filename: computedFilename,
         url,
         downloadDir,
         hash,
@@ -77,7 +141,8 @@ export class DownloadPresenter {
         totalBytes: 0,
         speed: 0,
         status: 'pending',
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        retryAttempt: 0
       }
       this.downloads.set(id, preTask)
 
@@ -101,7 +166,35 @@ export class DownloadPresenter {
       task.status = 'downloading'
       task.startedAt = Date.now()
 
-      // 开始下载
+      // 如果存在未完成的临时文件，优先尝试断点续传（应用安全回退）
+      try {
+        if (task.tempFilePath && fs.existsSync(task.tempFilePath)) {
+          const stats = fs.statSync(task.tempFilePath)
+          if (stats.size > 0) {
+            const SAFETY_BACKTRACK = 512 * 1024 // 512KB
+            const resumeOffset = Math.max(stats.size - SAFETY_BACKTRACK, 0)
+            if (resumeOffset < stats.size) {
+              try {
+                fs.truncateSync(task.tempFilePath, resumeOffset)
+                console.log(`Truncated temp file to ${resumeOffset} bytes for safe auto-resume`)
+              } catch (e) {
+                console.warn('Failed to truncate temp file for safe auto-resume:', e)
+              }
+            }
+            task.downloadedBytes = resumeOffset
+            task.progress = task.totalBytes > 0 ? (resumeOffset / task.totalBytes) * 100 : 0
+            return await (this.resumeDownloadFromBreakpoint(task) as unknown as Promise<{
+              success: boolean
+              filePath?: string
+              error?: string
+            }>)
+          }
+        }
+      } catch (e) {
+        console.warn('检查断点文件失败，回退为全量下载:', e)
+      }
+
+      // 开始全量下载
       return await this.startDownload(task)
     } catch (error) {
       console.error('下载初始化失败:', error)
@@ -128,7 +221,8 @@ export class DownloadPresenter {
               'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
-            'Accept-Encoding': 'gzip, deflate, br',
+            // 强制不使用压缩，避免校验值与服务器原文件不一致
+            'Accept-Encoding': 'identity',
             Connection: 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
             'Cache-Control': 'max-age=0'
@@ -332,6 +426,23 @@ export class DownloadPresenter {
         if (task.hash) {
           const ok = await this.verifyFileWithProgress(task.id, task.tempFilePath!, task.hash)
           if (!ok) {
+            // 一次性干净重试：删除临时文件并重新全量下载
+            if ((task.retryAttempt ?? 0) < 1) {
+              task.retryAttempt = (task.retryAttempt ?? 0) + 1
+              console.warn(
+                'Hash verify failed after full download, retrying once with clean download...'
+              )
+              try {
+                if (task.tempFilePath && fs.existsSync(task.tempFilePath)) {
+                  fs.unlinkSync(task.tempFilePath)
+                }
+              } catch (e) {
+                console.warn('Failed to remove temp file after hash fail:', e)
+              }
+              task.downloadedBytes = 0
+              task.progress = 0
+              return void this.startDownload(task).then(resolve)
+            }
             throw new Error('文件哈希验证失败')
           }
         }
@@ -461,9 +572,25 @@ export class DownloadPresenter {
 
       console.log(`File exists: size=${fileSize}, expected=${task.downloadedBytes}`)
 
-      // 如果文件大小与已下载字节数匹配，支持断点续传
-      if (fileSize === task.downloadedBytes && task.totalBytes > 0 && task.downloadedBytes > 0) {
-        console.log(`Resuming download from breakpoint: ${task.downloadedBytes} bytes`)
+      // 为了防止异常关机导致尾部不完整，回退一段安全窗口后续传
+      const SAFETY_BACKTRACK = 512 * 1024 // 512KB
+      if (fileSize > 0) {
+        const resumeOffset = Math.max(fileSize - SAFETY_BACKTRACK, 0)
+        if (resumeOffset < fileSize) {
+          try {
+            fs.truncateSync(task.tempFilePath, resumeOffset)
+            console.log(`Truncated temp file to ${resumeOffset} bytes for safe resume`)
+          } catch (e) {
+            console.warn('Failed to truncate temp file for safe resume:', e)
+          }
+        }
+        task.downloadedBytes = resumeOffset
+        task.progress = task.totalBytes > 0 ? (resumeOffset / task.totalBytes) * 100 : 0
+      }
+
+      // 现在继续断点续传
+      if (task.totalBytes > 0 && task.downloadedBytes > 0) {
+        console.log(`Resuming download from safe offset: ${task.downloadedBytes} bytes`)
         this.resumeDownloadFromBreakpoint(task)
       } else if (fileSize === 0) {
         // 文件为空，重新开始下载
@@ -522,7 +649,8 @@ export class DownloadPresenter {
               'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
-            'Accept-Encoding': 'gzip, deflate, br',
+            // 强制不使用压缩，避免校验值与服务器原文件不一致
+            'Accept-Encoding': 'identity',
             Connection: 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
             'Cache-Control': 'max-age=0',
@@ -660,8 +788,20 @@ export class DownloadPresenter {
         // 验证断点是否正确
         if (startByte !== task.downloadedBytes) {
           console.warn(
-            `Resume position mismatch: expected ${task.downloadedBytes}, got ${startByte}`
+            `Resume position mismatch: expected ${task.downloadedBytes}, got ${startByte}. Falling back to full download.`
           )
+          // 清理错误的临时文件并回退到全量下载，避免文件损坏
+          try {
+            if (task.tempFilePath && fs.existsSync(task.tempFilePath)) {
+              fs.unlinkSync(task.tempFilePath)
+            }
+          } catch (e) {
+            console.warn('Failed to remove temp file during fallback:', e)
+          }
+          task.downloadedBytes = 0
+          task.progress = 0
+          this.handleDownloadResponse(task, response, resolve)
+          return
         }
       }
     }
@@ -672,7 +812,7 @@ export class DownloadPresenter {
     let lastProgressTime = Date.now()
     let lastDownloadedBytes = task.downloadedBytes
 
-    // 以追加模式打开临时文件
+    // 以追加模式打开临时文件（我们已经在恢复前对文件进行了安全截断）
     const writeStream = fs.createWriteStream(task.tempFilePath!, { flags: 'a' })
     task.writeStream = writeStream
 
@@ -719,6 +859,23 @@ export class DownloadPresenter {
         if (task.hash) {
           const ok = await this.verifyFileWithProgress(task.id, task.tempFilePath!, task.hash)
           if (!ok) {
+            if ((task.retryAttempt ?? 0) < 1) {
+              task.retryAttempt = (task.retryAttempt ?? 0) + 1
+              // 一次性干净重试：删除临时文件并重新全量下载
+              console.warn(
+                'Hash verify failed after resume, retrying once with clean full download...'
+              )
+              try {
+                if (task.tempFilePath && fs.existsSync(task.tempFilePath)) {
+                  fs.unlinkSync(task.tempFilePath)
+                }
+              } catch (e) {
+                console.warn('Failed to remove temp file after hash fail:', e)
+              }
+              task.downloadedBytes = 0
+              task.progress = 0
+              return void this.startDownload(task).then(resolve)
+            }
             throw new Error('文件哈希验证失败')
           }
         }
@@ -838,8 +995,17 @@ export class DownloadPresenter {
       remainingTime: task.remainingTime,
       status: task.status,
       error: task.error,
-      filePath: task.filePath
+      filePath: task.filePath,
+      filename: task.filename
     })
+
+    // 如果全部任务都已完成（没有pending/downloading/paused/verifying），进行一次临时文件清理
+    if (this.areAllDownloadsCompleted()) {
+      const dirs = Array.from(
+        new Set(Array.from(this.downloads.values()).map((t) => t.downloadDir))
+      )
+      this.cleanupOrphanTempFiles(dirs)
+    }
   }
 
   // 使用SHA-256校验文件并显示进度到前端
